@@ -10,7 +10,7 @@ services:
       MYSQL_DATABASE: ${DB}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3304:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -20,7 +20,7 @@ services:
     depends_on:
       - mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${LOCAL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: ${lOCAL_DB}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
