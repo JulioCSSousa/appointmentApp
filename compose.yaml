@@ -11,7 +11,7 @@ services:
       MYSQL_DATABASE: dbappointment
       MYSQL_PASSWORD: AVNS_lGDbfDKbbczU5UPtRpC
     ports:
-      - "3304:3306"  # MySQL disponível na porta 3304 fora do container
+      - "3304:13331"  # MySQL disponível na porta 3304 fora do container
     volumes:
       - mysql_data:/var/lib/mysql
 
