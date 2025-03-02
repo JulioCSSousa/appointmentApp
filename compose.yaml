@@ -22,7 +22,7 @@ services:
       - mysql
     environment:
       DB_HOST: mysql  # Dentro do container, MySQL responde por "mysql"
-      DB_PORT: 3306   # Dentro do container, use a porta interna do MySQL
+      DB_PORT: 13331   # Dentro do container, use a porta interna do MySQL
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB}  # Nome do banco
