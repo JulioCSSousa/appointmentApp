@@ -4,13 +4,12 @@ services:
     container_name: mysql
     restart: always
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}  # Definindo senha para o root
       MYSQL_USER: ${DB_USER}
       MYSQL_DATABASE: ${DB}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3304:3306"
+      - "3304:3306"  # MySQL disponível na porta 3304 fora do container
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -20,11 +19,12 @@ services:
     depends_on:
       - mysql
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: ${lOCAL_DB}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: mysql  # Dentro do container, MySQL responde por "mysql"
+      DB_PORT: 3306   # Dentro do container, use a porta interna do MySQL
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB}  # Nome do banco
     ports:
-      - "13331:13331" 
+      - "13331:13331"  # Porta da aplicação .NET
 volumes:
   mysql_data:
