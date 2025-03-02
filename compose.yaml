@@ -1,32 +1,32 @@
 services:
-  mysql:
-    image: mysql:8
-    container_name: mysql
-    env_file:
-      - .env 
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: passoword  # Definindo senha para o root
-      MYSQL_USER: mysql-3c187995-menudigitaldb.k.aivencloud.com
-      MYSQL_DATABASE: dbappointment
-      MYSQL_PASSWORD: AVNS_lGDbfDKbbczU5UPtRpC
-    ports:
-      - "3304:3306"  # MySQL disponível na porta 3304 fora do container
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   app:
-    build: .
-    container_name: my-dotnet-app
-    depends_on:
-      - mysql
-    environment:
-      DB_HOST: mysql  # Dentro do container, MySQL responde por "mysql"
-      DB_PORT: 13331   # Dentro do container, use a porta interna do MySQL
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB}  # Nome do banco
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "13331:13331"  # Porta da aplicação .NET
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB=${DB_PASSWORD}
+
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0.37
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOCAL_PASSWORD}
+      MYSQL_DATABASE: ${DB}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORDS}  
+    ports:
+      - "13331:13331"
+    volumes:
+      - db_data:/var/lib/mysql
+
 volumes:
-  mysql_data:
+  db_data:
