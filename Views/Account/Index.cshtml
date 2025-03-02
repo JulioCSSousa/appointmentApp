@@ -1,0 +1,152 @@
+﻿@using appointmentApp.Models.ViewModels
+
+@model IEnumerable<UserWithRolesViewModel>
+@{
+    ViewData["Title"] = "Gerenciar Usuários";
+}
+
+
+
+<div class="container mt-4">
+    <a asp-action="IndexAdm" asp-controller="Home"
+       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
+        ⬅ Retornar
+    </a>
+    <div class="row">
+
+        <!-- Painel principal para gerenciar usuários -->
+        <div class="col-md-9">
+            <h2>Gerenciar Usuários</h2>
+            @if (User.Identity.IsAuthenticated) {<h2>@User.Identity.Name</h2> }
+
+            <!-- Botões de ações -->
+            <div class="d-flex justify-content-between mb-3">
+                <div>
+                    <a asp-action="Register" class="btn btn-primary me-2">Novo Usuário</a>
+                    <a asp-action="AddRole" class="btn btn-secondary">Adicionar Role</a>
+                </div>
+                <div>
+                    <form asp-action="GetUsers" method="get" class="d-flex">
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Pesquisar usuários...">
+                        <button type="submit" class="btn btn-outline-primary ms-2">Pesquisar</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de usuários -->
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Número</th>
+                        <th>Função</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.Name</td>
+                                <td>@user.Email</td>
+                                <td>@user.PhoneNumber</td>
+                                <td>@user.Role</td>
+                                
+
+                                <td>
+                                    <a href="@Url.Action("Update", "Account", new { id = user.Id })" class="btn btn-sm btn-secondary">Alterar</a>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger"
+                                            type="button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmDeleteModal-@user.Id">
+                                        Deletar
+                                    </button>
+                                </td>
+                                <!-- Modal de Confirmação -->
+                                <div class="modal fade" id="confirmDeleteModal-@user.Id" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Tem certeza de que deseja excluir este usuário?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <form method="post" action="@Url.Action("Delete", "Account", new { id = user.Id })">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-danger">Excluir</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">Nenhum usuário encontrado.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para adicionar Role -->
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRoleModalLabel">Adicionar Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddRole" method="post">
+                    <div class="mb-3">
+                        <label for="userId" class="form-label">Usuário</label>
+                        <select name="userId" id="userId" class="form-control">
+                            @if (Model != null)
+                            {
+                                foreach (var user in Model)
+                                {
+                                    <option value="@user.Id">@user.Email</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <input type="text" name="role" id="role" class="form-control" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showDeleteModal(userId) {
+            // Atualiza a URL do formulário de exclusão
+            const deleteForm = document.getElementById('deleteForm');
+            deleteForm.action = `/Account/Delete/${userId}`; // Atualize a rota de exclusão conforme seu projeto
+            // Exibe o modal
+            const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            modal.show();
+        }
+    </script>
+}
+

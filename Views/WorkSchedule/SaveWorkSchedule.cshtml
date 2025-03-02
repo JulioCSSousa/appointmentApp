@@ -1,0 +1,109 @@
+﻿@using appointmentApp.Models.Entities
+@using appointmentApp.Models.ViewModels
+@using appointmentApp.Services;
+@using appointmentApp.Services.Utilities
+
+@model IEnumerable<DayScheduleViewModel>
+
+<a asp-action="IndexAdm" asp-controller="Home"
+   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
+    ⬅ Retornar
+</a>
+<h2 class="text-center mb-4">Gerenciamento de Horários</h2>
+
+<form asp-action="SaveWorkSchedule" method="post" class="container">
+    <div class="alert alert-info mb-4">
+        <strong>Dica:</strong> Defina um horário padrão e aplique-o a todos os dias. Depois, ajuste individualmente os horários, se necessário.
+    </div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Horário Padrão</h5>
+        <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <label for="defaultStart" class="form-label">Horário Inicial</label>
+                <input type="time" id="defaultStart" class="form-control" placeholder="Horário Inicial" />
+            </div>
+            <div class="col-md-4">
+                <label for="defaultEnd" class="form-label">Horário Final</label>
+                <input type="time" id="defaultEnd" class="form-control" placeholder="Horário Final" />
+            </div>
+            <div class="col-md-4 d-flex pt-lg-4">
+                <div class="d-flex align-items-center "> <!-- Novo container -->
+                    <button type="button" id="applyDefault" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle me-2"></i>Aplicar a Todos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Dia da Semana</th>
+                            <th class="text-center">Trabalha neste dia?</th>
+                            <th class="text-center">Horário Inicial</th>
+                            <th class="text-center">Horário Final</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < Model.Count(); i++)
+                        {
+                            var schedule = Model.ElementAt(i);
+                            var isDisabled = !schedule.IsSelected;
+                            var rowClass = isDisabled ? "text-muted" : "";
+
+                            <tr class="@rowClass">
+                                <!-- Dia da semana -->
+                                <td class="text-center align-middle">
+                                    <input type="hidden" name="models[@i].Day" value="@schedule.Day" />
+                                    @DayOfWeekHelper.ToPortuguese(schedule.Day.DayOfWeek)
+                                </td>
+                                <!-- Trabalha neste dia -->
+                                <td class="text-center align-middle">
+                                    <div class="form-check form-switch d-flex justify-content-center">
+                                        <input type="checkbox" id="@schedule.Id" class="form-check-input individual-day"
+                                               name="models[@i].IsSelected"
+                                               value="true" @(schedule.IsSelected ? "checked" : "") />
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="time" class="form-control start-hour"
+                                           name="models[@i].Start"
+                                           value="@schedule.Start.ToString(@"hh\:mm")"
+                                    @(isDisabled ? "disabled" : "") />
+                                </td>
+                                <td>
+                                    <input type="time" class="form-control end-hour"
+                                           name="models[@i].End"
+                                           value="@schedule.End.ToString(@"hh\:mm")"
+                                    @(isDisabled ? "disabled" : "") />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão de Salvar -->
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" id="savebtn" class="btn btn-success">
+            <i class="bi bi-save me-2"></i>Salvar Alterações
+        </button>
+    </div>
+</form>
+
+<style>
+    .is-invalid {
+        border-color: red;
+        box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+    }
+</style>
+
+<script src="~/js/workSchedule.js" />

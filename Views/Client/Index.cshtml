@@ -1,0 +1,109 @@
+﻿@using appointmentApp.Models.ViewModels
+@using appointmentApp.Services.Utilities
+@model List<ClientIndexViewModel>
+@{
+    ViewData["Title"] = "Agendamentos";
+}
+
+<div class="container">
+    
+    <h2 class="my-4 text-center">Lista de Agendamentos</h2>
+    <!-- Tabela de Agendamentos -->
+    
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Data</th>
+                <th scope="col">Horário</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Email</th>
+                <th scope="col">Serviço</th>
+                <th scope="col">Duração</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                <!-- Mocked Data: Substitua pelos dados reais -->
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@DayOfWeekHelper.ToPortuguese(item.Appointment.Day.DayOfWeek)</td>
+                        <td>@item.Appointment.Day.TimeOfDay</td>
+                        <td>@item.User.Name</td>
+                        <td>@item.User.Email</td>
+                        <td>@item.Service.ServiceName</td>
+                        <td>@item.Service.Duration.ToString(@"hh\:mm")</td>
+                        <td>@item.Service.Price.ToString("C")</td>
+                        <td>
+                            <a asp-action="Delete" asp-controller="Appointment" asp-route-id="@item.Appointment.Id" class="row btn btn-danger" onclick="return confirm('Tem certeza que deseja cancelar este agendamento?');">
+                                Cancelar
+                            </a>
+                        </td>
+                        
+                    </tr>
+
+                }
+            } else{
+                <div>
+                    <p>Não há agendamentos</p>
+                </div>
+            }
+            
+            
+            
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Paginação (mockada) -->
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Anterior</a>
+            </li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">Próximo</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Adicionando um toque no estilo para destacar a view -->
+<style>
+    .container {
+        margin-top: 20px;
+    }
+
+    .thead-dark th {
+        background-color: #343a40;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .pagination {
+        margin-top: 20px;
+    }
+
+    .page-link {
+        background-color: #f8f9fa;
+        color: #495057;
+    }
+
+        .page-link:hover {
+            background-color: #e2e6ea;
+        }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+    }
+</style>

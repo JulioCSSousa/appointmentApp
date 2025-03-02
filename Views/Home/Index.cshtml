@@ -1,0 +1,75 @@
+﻿@using appointmentApp.Models.Entities
+@using appointmentApp.Models.ViewModels
+
+@model ClientIndexViewModel
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+
+<div class="container mt-5">
+    <h2 class="text-center">Bem-vindo à sua Página Inicial</h2>
+    <p class="text-center">Gerencie seu agendamento com facilidade.</p>
+
+    <div class="row mt-4">
+        <!-- Botão para agendar um horário -->
+        <div class="col-md-6">
+            <a asp-controller="Appointment" asp-action="Index" class="btn btn-primary w-100">
+                📅 Agendar Novo Horário
+            </a>
+        </div>
+
+        <!-- Botão para editar informações do usuário -->
+        <div class="col-md-6">
+            <a asp-controller="User" asp-action="EditProfile" class="btn btn-secondary w-100">
+                ✏️ Alterar Meus Dados
+            </a>
+        </div>
+    </div>
+
+    <!-- Espaço para mostrar o agendamento do usuário -->
+    <div class="card mt-4 shadow">
+        <div class="card-header bg-dark text-white">
+            <h5>📌 Meu Agendamento</h5>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Service != null)
+            {
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <th>Nome do Serviço:</th>
+                            <td>@Model.Service.ServiceName</td>
+                        </tr>
+                        <tr>
+                            <th>Preço:</th>
+                            <td>R$ @Model.Service.Price.ToString("F2")</td>
+                        </tr>
+                        <tr>
+                            <th>Duração:</th>
+                            <td>@Model.Service.Duration.ToString(@"hh\:mm") minutos</td>
+                        </tr>
+                        <tr>
+                            <th>Dia:</th>
+                            <td>@Model.Appointment.Day</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-controller="Appointment" asp-action="Edit" asp-route-id="@Model.Appointment.Id" class="btn btn-warning">
+                        ✏️ Editar
+                    </a>
+                    <a asp-controller="Appointment"  asp-action="Delete" asp-route-id="@Model.Appointment.Id" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja cancelar este agendamento?');">
+                        ❌ Cancelar
+                    </a>
+                </div>
+            }
+            else
+            {
+                <p class="text-center text-muted">📌 Você ainda não tem um agendamento.</p>
+            }
+        </div>
+    </div>
+</div>

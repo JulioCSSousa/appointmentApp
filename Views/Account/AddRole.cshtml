@@ -1,0 +1,50 @@
+﻿@using appointmentApp.Constants
+@using appointmentApp.Models.Entities
+
+@model List<User>
+
+@{
+    ViewData["Title"] = "Adicionar um role ao usuário";
+}
+<a asp-action="Index"
+   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
+    ⬅ Retornar
+</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Selecionar Role</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var user in Model)
+            {
+                <tr>     
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+
+                    <td>
+                        <form asp-action="AddRole" method="post">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <div class="form-group">
+                                <select id="role" name="role" class="form-control">
+                                    @foreach (var role in Roles.AllRoles)
+                                    {
+                                        <option value="@role">@role</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Atribuir Role</button>
+                        </form>
+                        
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

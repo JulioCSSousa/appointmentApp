@@ -1,0 +1,30 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_DATABASE: ${DB}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: my-dotnet-app
+    depends_on:
+      - mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOCAL_PASSWORD}
+      MYSQL_DATABASE: ${lOCAL_DB}
+      MYSQL_USER: ${DB_USER=}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "13331:13331" 
+volumes:
+  mysql_data:

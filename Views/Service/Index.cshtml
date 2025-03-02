@@ -1,0 +1,95 @@
+﻿@using appointmentApp.Models.ViewModels
+
+@{
+    ViewData["Title"] = "Controle de Agendamentos";
+}
+
+@model IEnumerable<Service>
+
+
+    @if (TempData["AppointmentExists"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["AppointmentExists"]
+        </div>
+    }
+<a asp-action="IndexAdm" asp-controller="Home"
+   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
+    ⬅ Retornar
+</a>
+<h1>Controle de Agendamentos</h1>
+
+<form method="get" asp-action="Index">
+        <div class="input-group mb-3">
+            <input type="text" name="txt" class="form-control" placeholder="Digite o nome do serviço..." 
+                   value="@Context.Request.Query["txt"]">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </form>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Nome do Serviço</th>
+                <th>Preço</th>
+                <th>Duração</th>
+                <th>Categoria</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var service in Model)
+            {
+                <tr>
+                    <td>@service.ServiceName</td>
+                    <td>@service.Price.ToString("C")</td>
+                    <td>@service.Duration</td>
+                    <td>@service.Category</td>
+
+                    
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@service.ServiceId" class="btn btn-warning btn-sm">Editar</a>
+                    <td>
+                        <button class="btn btn-sm btn-danger"
+                                type="button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal-@service.ServiceId">
+                            Deletar
+                        </button>
+                    </td>
+                    <!-- Modal de Confirmação -->
+                    <div class="modal fade" id="confirmDeleteModal-@service.ServiceId" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Tem certeza de que deseja excluir este serviço?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <form method="post" action="@Url.Action("Delete", "Service", new { id = service.ServiceId    })">
+                                            @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger">Excluir</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </td>
+                </tr>
+            }
+            
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="mt-4">Nenhum serviço encontrado.</p>
+}
+
+<a asp-controller="Service" asp-action="Create"> Criar novo serviço</a>
