@@ -22,7 +22,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${LOCAL_PASSWORD}
       MYSQL_DATABASE: ${lOCAL_DB}
-      MYSQL_USER: ${DB_USER=}
+      MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "13331:13331" 
