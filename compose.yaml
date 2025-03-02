@@ -2,9 +2,11 @@ services:
   mysql:
     image: mysql:8
     container_name: mysql
+    env_file:
+      - .env 
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${LOCAL_PASSWORD}  # Definindo senha para o root
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}  # Definindo senha para o root
       MYSQL_USER: ${DB_USER}
       MYSQL_DATABASE: ${DB}
       MYSQL_PASSWORD: ${DB_PASSWORD}
@@ -19,8 +21,8 @@ services:
     depends_on:
       - mysql
     environment:
-      DB_HOST: ${DB_HOST}  # Dentro do container, MySQL responde por "mysql"
-      DB_PORT: ${DB_PORT}   # Dentro do container, use a porta interna do MySQL
+      DB_HOST: mysql  # Dentro do container, MySQL responde por "mysql"
+      DB_PORT: 3306   # Dentro do container, use a porta interna do MySQL
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB}  # Nome do banco
