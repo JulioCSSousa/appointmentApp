@@ -6,12 +6,12 @@ services:
       - .env 
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: passowrd  # Definindo senha para o root
+      MYSQL_ROOT_PASSWORD: passoword  # Definindo senha para o root
       MYSQL_USER: mysql-3c187995-menudigitaldb.k.aivencloud.com
       MYSQL_DATABASE: dbappointment
       MYSQL_PASSWORD: AVNS_lGDbfDKbbczU5UPtRpC
     ports:
-      - "3304:13331"  # MySQL disponível na porta 3304 fora do container
+      - "3304:3306"  # MySQL disponível na porta 3304 fora do container
     volumes:
       - mysql_data:/var/lib/mysql
 
