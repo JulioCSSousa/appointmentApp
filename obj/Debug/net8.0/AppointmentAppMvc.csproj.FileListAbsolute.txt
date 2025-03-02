@@ -212,3 +212,5 @@ C:/Users/Julio/source/repos/AppointmentAppMvc/obj/Debug/net8.0/staticwebassets.u
 /home/ubuntudev/programming/AppointmentAppMvc/obj/Debug/net8.0/AppointmentAppMvc.genruntimeconfig.cache
 /home/ubuntudev/programming/AppointmentAppMvc/obj/Debug/net8.0/ref/AppointmentAppMvc.dll
 /home/ubuntudev/programming/AppointmentAppMvc/obj/Debug/net8.0/AppointmentAppMvc.sourcelink.json
+/home/ubuntudev/programming/AppointmentAppMvc/bin/Debug/net8.0/DotNetEnv.dll
+/home/ubuntudev/programming/AppointmentAppMvc/bin/Debug/net8.0/Sprache.dll

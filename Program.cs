@@ -7,6 +7,7 @@ using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
+using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -14,56 +15,49 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.ClearProviders(); // Remove provedores padr�o (opcional)
+// Carregar variáveis de ambiente do arquivo .env
+Env.Load();
+
+// Agora você pode acessar as variáveis de ambiente com `Environment.GetEnvironmentVariable`
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
+var dbUser = Environment.GetEnvironmentVariable("DB_USER");
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+var dbName = Environment.GetEnvironmentVariable("DB");
+
+// Criar a string de conexão
+var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword}";
+
+// Configuração de logging (opcional)
+builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-});
-
-builder.Logging.SetMinimumLevel(LogLevel.Information);
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-new MySqlServerVersion(new Version(8, 0, 40))));
-
-
-// Adicionar o ASP.NET Identity
+// Adicionar serviços de autenticação e identidade
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
-    // Configura��es de senha sem complexidade
-    options.Password.RequireDigit = false; // N�o exige n�mero
-    options.Password.RequireLowercase = false; // N�o exige letra min�scula
-    options.Password.RequireUppercase = false; // N�o exige letra mai�scula
-    options.Password.RequireNonAlphanumeric = false; // N�o exige caracteres especiais
-    options.Password.RequiredLength = 6; // Exige no m�nimo 6 caracteres
-    options.Password.RequiredUniqueChars = 1; // Exige no m�nimo 1 caractere �nico
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
 })
-       .AddEntityFrameworkStores<AppDbContext>()
-       .AddDefaultTokenProviders();
-
-// Configurar autentica��o por cookies
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
-        options.LoginPath = "/Account/Login"; // Redireciona para a tela de login
-        options.AccessDeniedPath = "/Account/AccessDenied"; // Redireciona para uma p�gina de acesso negado
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
     });
-builder.Services.Configure<EmailSettings>(
-builder.Configuration.GetSection("EmailSettings"));
 
-
+// Adicionar a configuração de e-mail
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IEmailSender>(provider =>
 {
-    // Obt�m os valores de configura��o de EmailSettings
     var emailSettings = provider.GetRequiredService<IOptions<EmailSettings>>().Value;
-
-    // Retorna uma inst�ncia de EmailSender configurada
     return new EmailSender(
         emailSettings.SmtpHost,
         emailSettings.SmtpPort,
@@ -72,6 +66,7 @@ builder.Services.AddTransient<IEmailSender>(provider =>
     );
 });
 
+// Adicionar repositórios e serviços
 builder.Services.AddScoped<IWorkScheduleRepository, WorkScheduleRepository>();
 builder.Services.AddScoped<IWorkScheduleService, WorkScheduleService>();
 builder.Services.AddScoped<IServiceManagerRepository, ServiceManagerRepository>();
@@ -79,33 +74,48 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
+// Configurar DbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 40))));
 
+builder.Services.AddControllersWithViews();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+});
 
+// Construir a aplicação
 var app = builder.Build();
 
+// Usar o middleware de exceção
 app.UseMiddleware<ExceptionMiddleware>();
-void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+
+// Configuração do pipeline HTTP
+if (app.Environment.IsDevelopment())
 {
-    // Outros c�digos de configura��o...
-
-
+    app.UseDeveloperExceptionPage();
 }
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-// Obter o contexto do banco e o logger
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+// Mapeamento de rotas
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Account}/{action=Login}/{id?}");
+
+// Inicialização dos dados (Seed)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     var logger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
-
     await SeedWorkSchedule.SeedWorkSchedules(context, logger);
 }
 
@@ -115,18 +125,5 @@ using (var scope = app.Services.CreateScope())
     await RoleInitializer.SeedRolesAsync(roleManager);
 }
 
-app.UseHttpsRedirection();
-app.UseRouting();
-
-builder.Services.AddAuthorization();
-
-app.UseAuthorization();
-
-app.UseStaticFiles();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
-
-
+// Executar a aplicação
 app.Run();
