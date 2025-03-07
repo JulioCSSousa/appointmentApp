@@ -129,12 +129,9 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     await RoleInitializer.SeedRolesAsync(roleManager);
 }
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
 
 
+app.UseHttpsRedirection();
 app.UseAuthorization();
 
 // Executar a aplicação
