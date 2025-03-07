@@ -110,7 +110,7 @@ public class AccountController : Controller
 
                 if(roles == null)
                 {
-                    return BadRequest("Role não encontrado");
+                    return BadRequest("Role nï¿½o encontrado");
                 }
 
                 if(roles.FirstOrDefault("Admin") == "Admin")
@@ -124,7 +124,7 @@ public class AccountController : Controller
                 }
             }
 
-            ModelState.AddModelError("", "Login inválido.");
+            ModelState.AddModelError("", "Login invï¿½lido.");
         }
 
         return View();
@@ -144,7 +144,7 @@ public class AccountController : Controller
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
         {
-            // Não expor se o e-mail está correto ou não por motivos de segurança
+            // Nï¿½o expor se o e-mail estï¿½ correto ou nï¿½o por motivos de seguranï¿½a
             return RedirectToAction("Login", "Account");
         }
 
@@ -155,10 +155,10 @@ public class AccountController : Controller
             new { token = token, email = user.Email },
             protocol: Request.Scheme);
 
-        // Envia o link de recuperação de senha para o e-mail do usuário
+        // Envia o link de recuperaï¿½ï¿½o de senha para o e-mail do usuï¿½rio
         await _emailSender.SendEmailAsync(
             email,
-            "Redefinição de Senha",
+            "Redefiniï¿½ï¿½o de Senha",
             $"Clique aqui para redefinir sua senha: <a href='{callbackUrl}'>Redefinir Senha</a>");
 
         return RedirectToAction("PasswordRecoveryConfirmation", "Account");
@@ -176,7 +176,7 @@ public class AccountController : Controller
     {
         if (token == null || email == null)
         {
-            return BadRequest("Token inválido.");
+            return BadRequest("Token invï¿½lido.");
         }
 
         var model = new PasswordResetViewModel { Token = token, Email = email };
@@ -246,7 +246,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetUsers(string? searchTerm = null)
     {
-        // Obter todos os usuários se o campo de buscar não for preenchido se não recuperar
+        // Obter todos os usuï¿½rios se o campo de buscar nï¿½o for preenchido se nï¿½o recuperar
         //de acordo com a consulta
 
         var users = string.IsNullOrEmpty(searchTerm)
@@ -286,7 +286,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
-            return NotFound("Usuário não encontrado.");
+            return NotFound("Usuï¿½rio nï¿½o encontrado.");
         }
 
         // Mapeia os dados para o ViewModel
@@ -298,7 +298,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
             PhoneNumber = user.PhoneNumber
         };
 
-        return View(model); // Exibe a página de atualização com os dados do usuário
+        return View(model); // Exibe a pï¿½gina de atualizaï¿½ï¿½o com os dados do usuï¿½rio
     }
 
 
@@ -308,13 +308,13 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
     {
         if (id != model.Id)
         {
-            return BadRequest("IDs não correspondem.");
+            return BadRequest("IDs nï¿½o correspondem.");
         }
-        // Localiza o usuário
+        // Localiza o usuï¿½rio
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
-            return NotFound("Usuário não encontrado.");
+            return NotFound("Usuï¿½rio nï¿½o encontrado.");
         }
 
         // Atualiza os campos
@@ -354,24 +354,24 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
     {
         if (string.IsNullOrEmpty(id))
         {
-            return BadRequest("ID do usuário não pode ser nulo ou vazio.");
+            return BadRequest("ID do usuï¿½rio nï¿½o pode ser nulo ou vazio.");
         }
         
         var userFind = await _userManager.FindByIdAsync(id);
         if (userFind == null)
         {
-            return NotFound($"Usuário não encontrado. {id}");
+            return NotFound($"Usuï¿½rio nï¿½o encontrado. {id}");
         }
 
         var result = await _userManager.DeleteAsync(userFind);
 
         if (result.Succeeded)
         {
-            TempData["SuccessMessage"] = "Usuário excluído com sucesso!";
+            TempData["SuccessMessage"] = "Usuï¿½rio excluï¿½do com sucesso!";
         }
         else
         {
-            TempData["ErrorMessage"] = "Erro ao excluir o usuário.";
+            TempData["ErrorMessage"] = "Erro ao excluir o usuï¿½rio.";
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError("", error.Description);
@@ -410,38 +410,38 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
     {
         if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(role))
         {
-            return BadRequest($"Usuário ou role inválidos.");
+            return BadRequest($"Usuï¿½rio ou role invï¿½lidos.");
         }
 
-        // Localiza o usuário pelo ID
+        // Localiza o usuï¿½rio pelo ID
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
-            return NotFound("Usuário não encontrado.");
+            return NotFound("Usuï¿½rio nï¿½o encontrado.");
         }
 
-        // Verifica se a role já existe
+        // Verifica se a role jï¿½ existe
         var roleExists = await _roleManager.RoleExistsAsync(role);
         if (!roleExists)
         {
-            return BadRequest("A role especificada não existe.");
+            return BadRequest("A role especificada nï¿½o existe.");
         }
         var currentRoles = await _userManager.GetRolesAsync(user);
         var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
         if (!removeResult.Succeeded)
         {
-            return BadRequest("Erro ao remover roles antigas do usuário.");
+            return BadRequest("Erro ao remover roles antigas do usuï¿½rio.");
         }
 
-        // Adiciona a role ao usuário
+        // Adiciona a role ao usuï¿½rio
         var result = await _userManager.AddToRoleAsync(user, role);
 
         if (!result.Succeeded)
         {
-            return BadRequest("Erro ao adicionar a role ao usuário.");
+            return BadRequest("Erro ao adicionar a role ao usuï¿½rio.");
         }
 
-        return RedirectToAction("Index"); // Retorna para a lista de usuários ou outra página
+        return RedirectToAction("Index"); // Retorna para a lista de usuï¿½rios ou outra pï¿½gina
     }
 
 }
