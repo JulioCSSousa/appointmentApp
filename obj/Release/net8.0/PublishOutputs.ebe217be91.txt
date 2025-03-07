@@ -1,0 +1,14 @@
+/home/ubuntudev/programming/AppointmentAppMvc/out/AppointmentAppMvc
+/home/ubuntudev/programming/AppointmentAppMvc/out/appsettings.json
+/home/ubuntudev/programming/AppointmentAppMvc/out/AppointmentAppMvc.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/AppointmentAppMvc.runtimeconfig.json
+/home/ubuntudev/programming/AppointmentAppMvc/out/AppointmentAppMvc.pdb
+/home/ubuntudev/programming/AppointmentAppMvc/out/DotNetEnv.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/Microsoft.EntityFrameworkCore.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/Microsoft.EntityFrameworkCore.Abstractions.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/Microsoft.EntityFrameworkCore.Relational.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/MySqlConnector.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/Pomelo.EntityFrameworkCore.MySql.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/Sprache.dll
+/home/ubuntudev/programming/AppointmentAppMvc/out/AppointmentAppMvc.deps.json

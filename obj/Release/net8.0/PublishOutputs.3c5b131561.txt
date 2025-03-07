@@ -1,0 +1,14 @@
+/var/www/mvcapp/out/AppointmentAppMvc
+/var/www/mvcapp/out/appsettings.json
+/var/www/mvcapp/out/AppointmentAppMvc.dll
+/var/www/mvcapp/out/AppointmentAppMvc.runtimeconfig.json
+/var/www/mvcapp/out/AppointmentAppMvc.pdb
+/var/www/mvcapp/out/DotNetEnv.dll
+/var/www/mvcapp/out/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+/var/www/mvcapp/out/Microsoft.EntityFrameworkCore.dll
+/var/www/mvcapp/out/Microsoft.EntityFrameworkCore.Abstractions.dll
+/var/www/mvcapp/out/Microsoft.EntityFrameworkCore.Relational.dll
+/var/www/mvcapp/out/MySqlConnector.dll
+/var/www/mvcapp/out/Pomelo.EntityFrameworkCore.MySql.dll
+/var/www/mvcapp/out/Sprache.dll
+/var/www/mvcapp/out/AppointmentAppMvc.deps.json

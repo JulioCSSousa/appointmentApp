@@ -129,9 +129,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("//home/ubuntudev/programming/AppointmentAppMvc"))
-    .SetApplicationName("AppointmentAppMvc");
+app.UseAuthorization();
 
 // Executar a aplicação
 app.Run();
