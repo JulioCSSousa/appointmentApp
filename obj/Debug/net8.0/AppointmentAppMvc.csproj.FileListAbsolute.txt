@@ -107,7 +107,6 @@ C:/Users/Julio/source/repos/AppointmentAppMvc/obj/Debug/net8.0/AppointmentAppMvc
 C:/Users/Julio/source/repos/AppointmentAppMvc/obj/Debug/net8.0/AppointmentAppMvc.genruntimeconfig.cache
 C:/Users/Julio/source/repos/AppointmentAppMvc/obj/Debug/net8.0/ref/AppointmentAppMvc.dll
 C:/Users/Julio/source/repos/AppointmentAppMvc/obj/Debug/net8.0/staticwebassets.upToDateCheck.txt
-/home/ubuntudev/programming/AppointmentAppMvc/bin/Debug/net8.0/appsettings.json
 /home/ubuntudev/programming/AppointmentAppMvc/bin/Debug/net8.0/AppointmentAppMvc.staticwebassets.runtime.json
 /home/ubuntudev/programming/AppointmentAppMvc/bin/Debug/net8.0/AppointmentAppMvc
 /home/ubuntudev/programming/AppointmentAppMvc/bin/Debug/net8.0/AppointmentAppMvc.deps.json

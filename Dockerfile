@@ -9,7 +9,7 @@ RUN dotnet build "AppointmentAppMvc.csproj" -c Release -o /app/build
 # Etapa de publicação
 FROM build AS publish
 RUN dotnet publish "AppointmentAppMvc.csproj" -c Release -o /app/publish
-EXPOSE 8000
+EXPOSE 5133
 # Etapa de runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
