@@ -46,11 +46,7 @@ namespace appointmentApp.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                if(appointment.ServiceId == null)
-                {
-                    var services = await _serviceManager.GetAsync("");
-                    var service = services.FirstOrDefault();
-                }
+
                 var serviceSelected = await _serviceManager.GetByIdAsync(appointment.ServiceId);
 
                 var newModel = new ClientIndexViewModel
@@ -59,6 +55,7 @@ namespace appointmentApp.Controllers
                     User = userInfo,
                     Service = serviceSelected
                 };
+                ViewData["AppointmentExists"] = "A appointment alread exists";
                 return View(newModel);
             }
         }

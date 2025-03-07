@@ -1,11 +1,9 @@
 ﻿using appointmentApp.Models.Entities;
-using appointmentApp.Models.Repository.AppointmentRepository;
 using appointmentApp.Models.ViewModels;
 using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace appointmentApp.Controllers
 { 

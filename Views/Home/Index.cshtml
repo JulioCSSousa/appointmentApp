@@ -15,9 +15,11 @@
     <div class="row mt-4">
         <!-- Botão para agendar um horário -->
         <div class="col-md-6">
+            @if(ViewData["AppointmentExists"] == null){
             <a asp-controller="Appointment" asp-action="Index" class="btn btn-primary w-100">
                 📅 Agendar Novo Horário
             </a>
+            }
         </div>
 
         <!-- Botão para editar informações do usuário -->
