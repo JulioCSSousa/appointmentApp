@@ -110,7 +110,7 @@ public class AccountController : Controller
 
                 if(roles == null)
                 {
-                    return BadRequest("Role n�o encontrado");
+                    return BadRequest("Role nao encontrado");
                 }
 
                 if(roles.FirstOrDefault("Admin") == "Admin")
@@ -124,7 +124,7 @@ public class AccountController : Controller
                 }
             }
 
-            ModelState.AddModelError("", "Login inv�lido.");
+            ModelState.AddModelError("", "Login invalido.");
         }
 
         return View();
@@ -286,7 +286,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
-            return NotFound("Usu�rio n�o encontrado.");
+            return NotFound("Usuario nao encontrado.");
         }
 
         // Mapeia os dados para o ViewModel
@@ -294,7 +294,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
         {
             Id = user.Id,
             Name = user.Name,
-            Email = user.Email,
+            Email = user.UserName,
             PhoneNumber = user.PhoneNumber
         };
 
@@ -326,7 +326,12 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
 
         if (!string.IsNullOrEmpty(model.Email))
         {
+            
+            user.UserName = model.Email;
+            user.NormalizedUserName = model.Email.ToUpper();
             user.Email = model.Email;
+            user.NormalizedEmail = model.Email.ToUpper();
+
         }
 
 
@@ -346,8 +351,6 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
     }
 
 
-    [HttpPost]
-    [Authorize(Roles = "Admin")]
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(string id)
