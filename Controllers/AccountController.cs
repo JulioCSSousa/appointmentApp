@@ -13,8 +13,8 @@ public class AccountController : Controller
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailSender _emailSender;
 
-    public AccountController(UserManager<User> userManager, 
-        SignInManager<User> signInManager, 
+    public AccountController(UserManager<User> userManager,
+        SignInManager<User> signInManager,
         RoleManager<IdentityRole> roleManager,
         IEmailSender emailSender)
     {
@@ -27,13 +27,13 @@ public class AccountController : Controller
     // GET: /Account/Register
     [HttpGet]
     public IActionResult Register() => View();
-    
+
     // POST: /Account/Register
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
-        
+
         if (ModelState.IsValid)
         {
             var users = await _userManager.Users.AnyAsync();
@@ -81,7 +81,7 @@ public class AccountController : Controller
             }
         }
 
-        return View(model); 
+        return View(model);
     }
 
     // GET: /Account/Login
@@ -101,22 +101,22 @@ public class AccountController : Controller
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if(user == null)
+                if (user == null)
                 {
                     return BadRequest();
                 }
                 var roles = await _userManager.GetRolesAsync(user);
                 var role = roles.ToList();
 
-                if(roles == null)
+                if (roles == null)
                 {
                     return BadRequest("Role nao encontrado");
                 }
 
-                if(roles.FirstOrDefault("Admin") == "Admin")
+                if (roles.FirstOrDefault("Admin") == "Admin")
                 {
                     return RedirectToAction("IndexAdm", "Home");
-      
+
                 }
                 else
                 {
@@ -183,35 +183,35 @@ public class AccountController : Controller
         return View(model);
     }
 
-[HttpPost]
-[AllowAnonymous]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
-{
-    if (!ModelState.IsValid)
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return RedirectToAction("PasswordResetConfirmation", "Account");
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+        if (result.Succeeded)
+        {
+            return RedirectToAction("PasswordResetConfirmation", "Account");
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
+
         return View(model);
     }
-
-    var user = await _userManager.FindByEmailAsync(model.Email);
-    if (user == null)
-    {
-        return RedirectToAction("PasswordResetConfirmation", "Account");
-    }
-
-    var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
-    if (result.Succeeded)
-    {
-        return RedirectToAction("PasswordResetConfirmation", "Account");
-    }
-
-    foreach (var error in result.Errors)
-    {
-        ModelState.AddModelError(string.Empty, error.Description);
-    }
-
-    return View(model);
-}
 
     public async Task<IActionResult> PasswordResetConfirmation()
     {
@@ -227,15 +227,15 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            
+
             userWithRoles.Add(new UserWithRolesViewModel
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    Role = roles.ToList().First()
-                }
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Role = roles.ToList().First()
+            }
             );
         }
 
@@ -250,14 +250,14 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
         //de acordo com a consulta
 
         var users = string.IsNullOrEmpty(searchTerm)
-           ? await _userManager.Users.ToListAsync() 
-           : await  _userManager.Users
+           ? await _userManager.Users.ToListAsync()
+           : await _userManager.Users
            .Where(u => u.Name.Contains(searchTerm) || u.Email.Contains(searchTerm))
            .ToListAsync();
 
 
         List<UserWithRolesViewModel> usersWithRoles = new List<UserWithRolesViewModel>();
-        foreach(var user in users)
+        foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
             roles.ToList();
@@ -326,7 +326,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
 
         if (!string.IsNullOrEmpty(model.Email))
         {
-            
+
             user.UserName = model.Email;
             user.NormalizedUserName = model.Email.ToUpper();
             user.Email = model.Email;
@@ -339,7 +339,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
         {
             user.PhoneNumber = model.PhoneNumber;
         }
-        
+
         // Atualiza no banco
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
@@ -347,7 +347,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
             return BadRequest(result.Errors);
         }
 
-        return RedirectToAction("Index"); 
+        return RedirectToAction("Index");
     }
 
 
@@ -359,7 +359,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
         {
             return BadRequest("ID do usu�rio n�o pode ser nulo ou vazio.");
         }
-        
+
         var userFind = await _userManager.FindByIdAsync(id);
         if (userFind == null)
         {
@@ -409,7 +409,7 @@ public async Task<IActionResult> PasswordReset(PasswordResetViewModel model)
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AddRole(string id , string role )
+    public async Task<IActionResult> AddRole(string id, string role)
     {
         if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(role))
         {
