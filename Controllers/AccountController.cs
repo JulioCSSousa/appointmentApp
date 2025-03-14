@@ -288,7 +288,11 @@ public class AccountController : Controller
         {
             return NotFound("Usuario nao encontrado.");
         }
-
+        var adm = isAdmin(user);
+        if (await adm)
+        {
+            return BadRequest("Não é possível alterar este usuario");
+        }
         // Mapeia os dados para o ViewModel
         var model = new UpdateUserViewModel
         {
@@ -364,6 +368,11 @@ public class AccountController : Controller
         if (userFind == null)
         {
             return NotFound($"Usu�rio n�o encontrado. {id}");
+        }
+        var adm = isAdmin(userFind);
+        if (await adm)
+        {
+            return BadRequest("Não é possível deleter este usuario");
         }
 
         var result = await _userManager.DeleteAsync(userFind);
@@ -445,6 +454,15 @@ public class AccountController : Controller
         }
 
         return RedirectToAction("Index"); // Retorna para a lista de usu�rios ou outra p�gina
+    }
+
+    public async Task<bool> isAdmin(User user){
+
+        var userrole = await _userManager.GetRolesAsync(user);
+         if(userrole.Contains("Admin")){
+            return true;
+         }
+         return false;
     }
 
 }
