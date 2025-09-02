@@ -124,6 +124,7 @@ public class AccountController : Controller
                 }
             }
 
+            ViewData["UnauthorizedMessage"] = "Invalid Login";
             ModelState.AddModelError("", "Login invalido.");
         }
 
