@@ -1,6 +1,5 @@
 using appointmentApp.Models.Entities;
 using appointmentApp.Models.ViewModels;
-using AppointmentAppMvc.ApplicationSeed;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
