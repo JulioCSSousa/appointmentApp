@@ -52,9 +52,21 @@ namespace appointmentApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit()
+        public async Task<IActionResult> Edit(int id)
         {
-            return View();
+            var dbService = await _serviceManager.GetByIdAsync(id);
+            if (dbService == null)
+                return View("Error");
+
+            var model = new UpdateServiceViewModel
+            {
+                ServiceId = dbService.ServiceId,
+                ServiceName = dbService.ServiceName,
+                Category = dbService.Category,
+                Duration = dbService.Duration
+            };
+
+            return View(model);
         }
         [HttpPost]
         public async Task<IActionResult> Edit(int id, UpdateServiceViewModel serviceView)

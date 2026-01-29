@@ -4,6 +4,8 @@ using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
+using AppointmentAppMvc.Models.ViewModels;
+using AppointmentAppMvc.Services.Utilities.Enum;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -15,8 +17,8 @@ namespace appointmentApp.Controllers
         private readonly IServiceManager _serviceManager;
         private readonly IWorkScheduleService _workSchedule;
 
-        public AppointmentController(IAppointmentService appservice, 
-            IServiceManager serviceManager, 
+        public AppointmentController(IAppointmentService appservice,
+            IServiceManager serviceManager,
             IWorkScheduleService workschedule)
         {
             _appService = appservice;
@@ -39,7 +41,7 @@ namespace appointmentApp.Controllers
 
                 var servicesInAppointment = await _serviceManager.GetByIdAsync(serviceId);
                 servicesInDbList.Add(servicesInAppointment);
-                
+
             }
 
             foreach (var workSchedule in workSchedules)
@@ -97,7 +99,7 @@ namespace appointmentApp.Controllers
                     return BadRequest("Serviço não encontrado no banco de dados.");
                 }
 
-                var newAppointment = new Appointment(Guid.NewGuid(), userId, model.SelectedServiceId, model.SelectedDayAndHour);
+                var newAppointment = new Appointment(Guid.NewGuid(), userId, model.SelectedServiceId, model.SelectedDayAndHour, "Waiting");
 
                 await _appService.Create(newAppointment);
                 TempData["SuccessMessage"] = "Agendamento realizado com sucesso!";
@@ -117,6 +119,26 @@ namespace appointmentApp.Controllers
             return View(appointmentsViewModel);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken] // Boa prática de segurança
+        public async Task<ActionResult> UpdateStatus(Guid id, Status newStatus)
+        {
+            var dbappointment = await _appService.GetById(id);
+
+            if (dbappointment == null)
+                return NotFound("Este agendamento não existe.");
+
+            // Atualiza o status no objeto da entidade
+            dbappointment.SetStatus(newStatus);
+
+            // PERSISTÊNCIA: Você precisa chamar o serviço para salvar no banco!
+            await _appService.Update(dbappointment);
+
+            TempData["SuccessMessage"] = "Status atualizado com sucesso!";
+
+            // Redireciona para onde o usuário estava (ex: IndexAdm da Home)
+            return RedirectToAction("Index", "Client");
+        }
         // GET: AppointmentController/Details/5
         public ActionResult Details(int id)
         {

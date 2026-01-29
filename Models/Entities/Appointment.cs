@@ -1,4 +1,5 @@
 
+using AppointmentAppMvc.Services.Utilities.Enum;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,14 +11,16 @@ public class Appointment{
     public int ServiceId { get; private set; }
     public DateTime Day { get; private set; }
     public TimeSpan Hour { get; private set; }
+    public string Status { get; private set; }
 
     private Appointment() { }
-    public Appointment(Guid id, string clientId, int serviceId, DateTime day)
+    public Appointment(Guid id, string clientId, int serviceId, DateTime day, string status)
     {
         Id = id;
         ClientId = clientId;
         ServiceId = serviceId;
         Day = day;
+        Status = status;
     }
 
     public void SetClientId(string id)
@@ -35,5 +38,10 @@ public class Appointment{
     public void SetHour(TimeSpan hour)
     {
         Hour = hour;
+    }
+
+    public void SetStatus(Status status)
+    {
+        Status = status.ToString();
     }
 }

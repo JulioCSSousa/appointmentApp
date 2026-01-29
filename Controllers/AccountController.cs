@@ -1,10 +1,12 @@
 using appointmentApp.Models.Entities;
 using appointmentApp.Models.ViewModels;
+using AppointmentAppMvc.ApplicationSeed;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Sprache;
 
 public class AccountController : Controller
 {
@@ -219,63 +221,54 @@ public class AccountController : Controller
         return View();
     }
 
+
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? searchTerm = null, int page = 1)
     {
-        var users = _userManager.Users.ToList();
-        List<UserWithRolesViewModel> userWithRoles = new List<UserWithRolesViewModel>();
-        foreach (var user in users)
-        {
-            var roles = await _userManager.GetRolesAsync(user);
+        int itemByPge = 10;
+        int skip = (page - 1) * itemByPge;
 
-            userWithRoles.Add(new UserWithRolesViewModel
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Role = roles.ToList().First()
-            }
-            );
+        // 1. Criamos a QUERY (IQueryable), não a lista ainda
+        var query = _userManager.Users.AsQueryable();
+
+        // 2. Aplicamos o filtro se existir
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(u => u.Name.Contains(searchTerm) || u.Email.Contains(searchTerm));
         }
 
-        return View(userWithRoles);
-    }
+        // 3. CONTAMOS o total de registros que batem com o filtro (antes de paginar!)
+        // Isso é o que faz a sua ViewBag.TotalPages funcionar
+        int totalItems = await query.CountAsync();
 
-    [HttpGet]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> GetUsers(string? searchTerm = null)
-    {
-        // Obter todos os usu�rios se o campo de buscar n�o for preenchido se n�o recuperar
-        //de acordo com a consulta
+        // 4. Agora sim, paginamos e transformamos em Lista
+        var users = await query
+            .OrderBy(u => u.Name)
+            .Skip(skip)
+            .Take(itemByPge)
+            .ToListAsync();
 
-        var users = string.IsNullOrEmpty(searchTerm)
-           ? await _userManager.Users.ToListAsync()
-           : await _userManager.Users
-           .Where(u => u.Name.Contains(searchTerm) || u.Email.Contains(searchTerm))
-           .ToListAsync();
+        // 5. Preenchemos as ViewBags com base no total REAL do banco
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / itemByPge);
+        ViewBag.SearchTerm = searchTerm;
 
-
+        // 6. Mapeamento para o ViewModel (seu loop está correto)
         List<UserWithRolesViewModel> usersWithRoles = new List<UserWithRolesViewModel>();
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            roles.ToList();
-
-            var item = new UserWithRolesViewModel
+            usersWithRoles.Add(new UserWithRolesViewModel
             {
+                Id = user.Id,
                 Name = user.Name,
                 UserName = user.UserName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                Role = roles.FirstOrDefault()
-            };
-
-            usersWithRoles.Add(item);
-
+                Role = roles.FirstOrDefault() ?? "Sem Role"
+            });
         }
-
 
         return View("Index", usersWithRoles);
     }

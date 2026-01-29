@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace appointmentApp.Controllers
-{ 
+{
     public class ClientController : Controller
     {
         private readonly IServiceManager _service;
@@ -24,8 +24,8 @@ namespace appointmentApp.Controllers
         public async Task<IActionResult> Index()
         {
             List<ClientIndexViewModel> clients = new List<ClientIndexViewModel>();
-            
-                var appointments = await _appointmentService.Get();
+
+            var appointments = await _appointmentService.Get();
             if (appointments.Count() != 0 || appointments != null)
             {
                 foreach (var appointment in appointments)

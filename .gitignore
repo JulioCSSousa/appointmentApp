@@ -1,3 +1,16 @@
-.env
-appsettings.json
+# Pastas do build
 bin/
+obj/
+Migrations/
+# Configuração do usuário
+.vs/
+[Bb]in/
+[Ob]j/
+*.user
+
+# Configuração do ambiente
+.env
+appsettings
+appsettings-prod.json
+# Dependências do sistema
+

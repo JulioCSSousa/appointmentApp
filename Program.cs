@@ -7,6 +7,7 @@ using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
+using AppointmentAppMvc.ApplicationSeed;
 using DotNetEnv;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -115,19 +116,28 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
-// Inicialização dos dados (Seed)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<AppDbContext>();
-    var logger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
-    await SeedWorkSchedule.SeedWorkSchedules(context, logger);
-}
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<User>>();
+        var logger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
 
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    await RoleInitializer.SeedRolesAsync(roleManager);
+        // 1. Roles primeiro (essencial para não dar erro ao atribuir ao usuário)
+        await RoleInitializer.SeedRolesAsync(roleManager);
+
+        // 2. Schedules
+        await SeedWorkSchedule.SeedWorkSchedules(context, logger);
+
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocorreu um erro ao popular o banco de dados.");
+    }
 }
 
 

@@ -14,6 +14,9 @@ namespace appointmentApp.Models.Entities
         {
             Name = name;
             Email = email;
+            NormalizedEmail = email.ToUpper(); // Boa prática setar a normalização
+            UserName = email;                 // ISSO ESTAVA FALTANDO
+            NormalizedUserName = email.ToUpper();
             PhoneNumber = phoneNumber;
         }
 
