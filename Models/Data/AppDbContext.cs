@@ -3,11 +3,11 @@ using appointmentApp.Models.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-public class AppDbContext : IdentityDbContext<User>
+public class AppDbContext : IdentityDbContext<UserModel>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options){ }
     
-    public DbSet<Appointment> Appointments { get; set; }
-    public DbSet<Service> Services { get; set; }
-    public DbSet<WorkSchedule> WorkSchedules { get; set; }
+    public DbSet<AppointmentModel> Appointments { get; set; }
+    public DbSet<ServiceModel> Services { get; set; }
+    public DbSet<WorkScheduleModel> WorkSchedules { get; set; }
 }

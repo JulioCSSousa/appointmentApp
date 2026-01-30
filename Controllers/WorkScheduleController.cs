@@ -1,5 +1,5 @@
-﻿using appointmentApp.Models.ViewModels;
-using appointmentApp.Services.WorkScheduleService;
+﻿using appointmentApp.Services.WorkScheduleService;
+using AppointmentAppMvc.Models.ViewModels.WorkSchedule;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

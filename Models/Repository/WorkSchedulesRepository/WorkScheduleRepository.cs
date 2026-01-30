@@ -13,7 +13,7 @@ namespace appointmentApp.Models.Repository.WorkScheduleRepository
             _context = context;
         }
 
-        public IQueryable<WorkSchedule> GetAsync()
+        public IQueryable<WorkScheduleModel> GetAsync()
         {
             
             var result = _context.WorkSchedules.AsQueryable();
@@ -21,12 +21,12 @@ namespace appointmentApp.Models.Repository.WorkScheduleRepository
 
         }
 
-        public async Task<WorkSchedule> GetByIdAsync(int id)
+        public async Task<WorkScheduleModel> GetByIdAsync(int id)
         {
             return await _context.WorkSchedules.FindAsync(id);
         }
 
-        public async Task Create(WorkSchedule workSchedule)
+        public async Task Create(WorkScheduleModel workSchedule)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace appointmentApp.Models.Repository.WorkScheduleRepository
             }
         }
 
-        public async Task UpdateAsync(WorkSchedule workSchedule)
+        public async Task UpdateAsync(WorkScheduleModel workSchedule)
         {
             if (workSchedule == null) throw new ArgumentNullException(nameof(workSchedule));
 
@@ -53,7 +53,7 @@ namespace appointmentApp.Models.Repository.WorkScheduleRepository
 
         }
 
-        public async Task DeleteAsync(WorkSchedule workSchedule)
+        public async Task DeleteAsync(WorkScheduleModel workSchedule)
         {
             if (workSchedule == null)
             {

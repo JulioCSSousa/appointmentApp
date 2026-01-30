@@ -318,7 +318,7 @@ C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\staticwebassets.buil
 C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\Appointm.4A74D7B3.Up2Date
 C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\AppointmentAppMvc.genruntimeconfig.cache
 C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\ref\AppointmentAppMvc.dll
+C:\Users\julio\Source\Repos\appointmentApp\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

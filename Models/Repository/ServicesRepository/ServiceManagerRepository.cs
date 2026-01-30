@@ -12,12 +12,12 @@ namespace appointmentApp.Models.Repository.ServicesRepository
             _context = context;
         }
 
-        public IQueryable<Service> GetAsync()
+        public IQueryable<ServiceModel> GetAsync()
         {
             return _context.Services;
         }
 
-        public async Task<Service> GetByIdAsync(int id)
+        public async Task<ServiceModel> GetByIdAsync(int id)
         {
             var result = await _context.Services.FindAsync(id);
 
@@ -25,7 +25,7 @@ namespace appointmentApp.Models.Repository.ServicesRepository
             
         }
 
-        public async Task Create(Service service)
+        public async Task Create(ServiceModel service)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace appointmentApp.Models.Repository.ServicesRepository
 
         }
 
-        public async Task UpdateAsync(Service service)
+        public async Task UpdateAsync(ServiceModel service)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (service.ServiceName.Length < 3) throw new ArgumentException("Invalid name");
@@ -55,7 +55,7 @@ namespace appointmentApp.Models.Repository.ServicesRepository
 
         }
 
-        public async Task DeleteAsync(Service service)
+        public async Task DeleteAsync(ServiceModel service)
         {
             if (service == null)
             {

@@ -1,5 +1,5 @@
 using appointmentApp.Models.Entities;
-using appointmentApp.Models.ViewModels;
+using AppointmentAppMvc.Models.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -9,13 +9,13 @@ using Sprache;
 
 public class AccountController : Controller
 {
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
+    private readonly UserManager<UserModel> _userManager;
+    private readonly SignInManager<UserModel> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailSender _emailSender;
 
-    public AccountController(UserManager<User> userManager,
-        SignInManager<User> signInManager,
+    public AccountController(UserManager<UserModel> userManager,
+        SignInManager<UserModel> signInManager,
         RoleManager<IdentityRole> roleManager,
         IEmailSender emailSender)
     {
@@ -41,7 +41,7 @@ public class AccountController : Controller
 
             if (!users)
             {
-                var user = new User(model.Name, model.Email, model.PhoneNumber)
+                var user = new UserModel(model.Name, model.Email, model.PhoneNumber)
                 {
                     UserName = model.Email,
                     Email = model.Email,
@@ -62,7 +62,7 @@ public class AccountController : Controller
             }
             else
             {
-                var user = new User(model.Name, model.Email, model.PhoneNumber)
+                var user = new UserModel(model.Name, model.Email, model.PhoneNumber)
                 {
                     UserName = model.Email,
                     Email = model.Email,

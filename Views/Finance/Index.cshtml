@@ -1,100 +1,154 @@
-﻿@{
+﻿@using AppointmentAppMvc.Models.ViewModels.Finance
+@{
     ViewData["Title"] = "Dashboard Financeiro";
 }
+@model List<FinanceViewModel>
 
-<div class="container my-5">
-    <h2 class="text-center mb-4">Dashboard Financeiro</h2>
-
-    <!-- Resumo Financeiro -->
-    <div class="row text-center mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h5>Saldo Atual</h5>
-                <h3 class="text-success">R$ 12.500,00</h3>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h5>Total de Receitas</h5>
-                <h3 class="text-primary">R$ 25.000,00</h3>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h5>Total de Despesas</h5>
-                <h3 class="text-danger">R$ 12.500,00</h3>
-            </div>
-        </div>
+<a asp-action="IndexAdm" asp-controller="Home"
+   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
+    ⬅ Retornar
+</a>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Gestão Financeira</h2>
+        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">Baixar Relatório</button>
     </div>
 
-    <!-- Gráfico Financeiro -->
-    <div class="card p-4 shadow-sm mb-4">
-        <h5 class="text-center">Gráfico Financeiro</h5>
-        <canvas id="financeChart" height="100"></canvas>
-    </div>
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card finance-card bg-primary text-white shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="mb-1 opacity-75">Saldo Total</p>
+                                <h3 class="fw-bold">@Model.Sum(x => x.ServicePrice).ToString("C2")</h3>
+                            </div>
+                            <div class="icon-shape"><i class="bi bi-wallet2"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Tabela de Transações -->
-    <div class="card shadow-sm p-4">
-        <h5 class="text-center">Últimas Transações</h5>
-        <table class="table table-striped mt-3">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Descrição</th>
-                    <th>Categoria</th>
-                    <th>Valor</th>
-                    <th>Tipo</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>22/02/2025</td>
-                    <td>Pagamento Cliente A</td>
-                    <td>Serviço</td>
-                    <td class="text-success">+ R$ 3.000,00</td>
-                    <td><span class="badge bg-primary">Receita</span></td>
-                </tr>
-                <tr>
-                    <td>21/02/2025</td>
-                    <td>Aluguel Escritório</td>
-                    <td>Despesas Fixas</td>
-                    <td class="text-danger">- R$ 2.500,00</td>
-                    <td><span class="badge bg-danger">Despesa</span></td>
-                </tr>
-                <tr>
-                    <td>20/02/2025</td>
-                    <td>Venda Produto X</td>
-                    <td>Produtos</td>
-                    <td class="text-success">+ R$ 1.500,00</td>
-                    <td><span class="badge bg-primary">Receita</span></td>
-                </tr>
-            </tbody>
-        </table>
+            <div class="col-md-4">
+                <div class="card finance-card bg-white shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between text-dark">
+                            <div>
+                                <p class="mb-1 text-muted">Serviços Concluídos</p>
+                                <h3 class="fw-bold">@Model.Count()</h3>
+                            </div>
+                            <div class="icon-shape text-primary bg-light"><i class="bi bi-scissors"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card finance-card bg-white shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between text-dark">
+                            <div>
+                                <p class="mb-1 text-muted">Ticket Médio</p>
+                                <h3 class="fw-bold">@( (Model.Sum(x => x.ServicePrice) / Model.Count()).ToString("C2") )</h3>
+                            </div>
+                            <div class="icon-shape text-success bg-light"><i class="bi bi-graph-up"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-4">Desempenho Semanal</h5>
+                <canvas id="financeChart" height="150"></canvas>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-4">Últimos Ganhos</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <tbody>
+                            @foreach (var item in Model.Take(5))
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold mb-0">@item.ClientName</div>
+                                        <small class="text-muted">@item.Date.ToString("dd/MM")</small>
+                                    </td>
+                                    <td class="text-end text-success fw-bold">
+                                        + @item.ServicePrice.ToString("C2")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <a href="#" class="btn btn-light btn-sm w-100 mt-auto">Ver tudo</a>
+            </div>
+        </div>
     </div>
 </div>
 
+<style>
+    .finance-card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+    .finance-card:hover {
+        transform: translateY(-5px);
+    }
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        background-color: rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+    }
+    .table-container {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+</style>
 <!-- Importando Chart.js para o gráfico -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // 1. Extrair os dados do Model C# para variáveis JS
+    // Usamos o mapeamento do Razor para criar arrays de strings e números
+    const labelsFinance = @Html.Raw(Json.Serialize(Model.Select(x => x.Date.ToString("dd/MM"))));
+    const dataReceitas = @Html.Raw(Json.Serialize(Model.Select(x => x.ServicePrice)));
+
+    // Se você ainda não tem despesas reais, podemos deixar zerado ou mapear se existirem
+    const dataDespesas = @Html.Raw(Json.Serialize(Model.Select(x => 0)));
+
     var ctx = document.getElementById('financeChart').getContext('2d');
     var financeChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
+            labels: labelsFinance, // Datas vindas do banco
             datasets: [
                 {
                     label: 'Receitas',
                     backgroundColor: 'rgba(0, 128, 0, 0.5)',
                     borderColor: 'rgba(0, 128, 0, 1)',
                     borderWidth: 1,
-                    data: [5000, 7000, 8000, 6000, 7500]
+                    data: dataReceitas // Preços vindos do banco
                 },
                 {
                     label: 'Despesas',
                     backgroundColor: 'rgba(255, 0, 0, 0.5)',
                     borderColor: 'rgba(255, 0, 0, 1)',
                     borderWidth: 1,
-                    data: [3000, 4000, 3500, 4500, 5000]
+                    data: dataDespesas
                 }
             ]
         },
@@ -102,7 +156,12 @@
             responsive: true,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value; // Adiciona o prefixo de real no gráfico
+                        }
+                    }
                 }
             }
         }

@@ -1,7 +1,8 @@
 ﻿using appointmentApp.Models.Entities;
-using appointmentApp.Models.ViewModels;
 using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
+using AppointmentAppMvc.Models.ViewModels.Appointment;
+using AppointmentAppMvc.Models.ViewModels.Get;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,10 @@ namespace appointmentApp.Controllers
     {
         private readonly IServiceManager _service;
         private readonly IAppointmentService _appointmentService;
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<UserModel> _userManager;
 
         public ClientController(IServiceManager serviceManager, IAppointmentService appointmentService,
-            UserManager<User> userManager)
+            UserManager<UserModel> userManager)
         {
             _service = serviceManager;
             _appointmentService = appointmentService;

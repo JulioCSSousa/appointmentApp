@@ -2,6 +2,7 @@
 using appointmentApp.Models.ViewModels;
 using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
+using AppointmentAppMvc.Models.ViewModels.Get;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +10,11 @@ namespace appointmentApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<UserModel> _userManager;
         private readonly IAppointmentService _appointmentService;
         private readonly IServiceManager _serviceManager;
 
-        public HomeController(UserManager<User> userManager, IAppointmentService appointmentService, IServiceManager serviceManager)
+        public HomeController(UserManager<UserModel> userManager, IAppointmentService appointmentService, IServiceManager serviceManager)
         {
             _userManager = userManager;
             _appointmentService = appointmentService;

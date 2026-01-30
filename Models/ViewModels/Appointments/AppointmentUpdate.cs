@@ -1,6 +1,6 @@
 ﻿using AppointmentAppMvc.Services.Utilities.Enum;
 
-namespace AppointmentAppMvc.Models.ViewModels
+namespace AppointmentAppMvc.Models.ViewModels.Appointment
 {
     public class AppointmentUpdate
     {

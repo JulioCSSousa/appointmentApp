@@ -13,7 +13,7 @@ namespace appointmentApp.Services.ServiceManager
             _repository = repository;
         }
 
-        public async Task<IEnumerable<Service>> GetAsync(string? txt)
+        public async Task<IEnumerable<ServiceModel>> GetAsync(string? txt)
         {
             var dbResult = _repository.GetAsync();
             if (!string.IsNullOrEmpty(txt))
@@ -27,7 +27,7 @@ namespace appointmentApp.Services.ServiceManager
             }
         }
 
-        public async Task<Service> GetByIdAsync(int id)
+        public async Task<ServiceModel> GetByIdAsync(int id)
         {
 
             var result = await _repository.GetByIdAsync(id);
@@ -35,7 +35,7 @@ namespace appointmentApp.Services.ServiceManager
             return result;
         }
 
-        public async Task CreateAsync(Service service)
+        public async Task CreateAsync(ServiceModel service)
         {
 
             if (service.ServiceName == null || service.ServiceName.Length <= 2) throw new ArgumentException("Invalid name");
@@ -52,7 +52,7 @@ namespace appointmentApp.Services.ServiceManager
             }
         }
 
-        public async Task UpdateAsync(Service service)
+        public async Task UpdateAsync(ServiceModel service)
         {
             if (service == null) throw new ArgumentNullException(nameof(service));
             if (service.ServiceName == null || service.ServiceName.Length == 0) throw new ArgumentException("Invalid name");
@@ -68,7 +68,7 @@ namespace appointmentApp.Services.ServiceManager
 
         }
 
-        public async Task DeleteAsync(Service service)
+        public async Task DeleteAsync(ServiceModel service)
         {
             if (service == null)
             {

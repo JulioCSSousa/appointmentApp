@@ -1,13 +1,15 @@
-﻿namespace appointmentApp.Services.AppointmentServices
+﻿using appointmentApp.Models.Entities;
+
+namespace appointmentApp.Services.AppointmentServices
 {
     public interface IAppointmentService
     {
-        Task<IEnumerable<Appointment>> Get();
-        Task<Appointment> GetById(Guid id);
-        Task<Appointment?> GetByUserId(string id);
-        Task<Appointment?> GetByServiceId(int id);
-        Task Create(Appointment appointment);
-        Task Update(Appointment appointment);
-        Task Delete(Appointment appointment);
+        Task<IEnumerable<AppointmentModel>> Get();
+        Task<AppointmentModel> GetById(Guid id);
+        Task<AppointmentModel?> GetByUserId(string id);
+        Task<AppointmentModel?> GetByServiceId(int id);
+        Task Create(AppointmentModel appointment);
+        Task Update(AppointmentModel appointment);
+        Task Delete(AppointmentModel appointment);
     }
 }

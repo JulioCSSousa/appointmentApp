@@ -1,4 +1,5 @@
 ﻿
+using appointmentApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace appointmentApp.Models.Repository.AppointmentRepository
@@ -12,26 +13,26 @@ namespace appointmentApp.Models.Repository.AppointmentRepository
             _context = context;
         }
 
-        public IQueryable<Appointment> Get()
+        public IQueryable<AppointmentModel> Get()
         {
             return _context.Appointments;
         }
 
-        public async Task<Appointment> GetById(Guid id)
+        public async Task<AppointmentModel> GetById(Guid id)
         {
             return await _context.Appointments.FindAsync(id);
         }
-        public async Task<Appointment?> GetByUserId(string id)
+        public async Task<AppointmentModel?> GetByUserId(string id)
         {
             var result = await _context.Appointments.Where(i => i.ClientId == id).FirstOrDefaultAsync();
             return result;
         }
-        public async Task<Appointment?> GetByServiceId(int id)
+        public async Task<AppointmentModel?> GetByServiceId(int id)
         {
             var result = await _context.Appointments.Where(i => i.ServiceId == id).FirstOrDefaultAsync();
             return result;
         }
-        public async Task Create(Appointment appointment)
+        public async Task Create(AppointmentModel appointment)
         {
             await _context.AddAsync(appointment);
             await _context.SaveChangesAsync();
@@ -40,13 +41,13 @@ namespace appointmentApp.Models.Repository.AppointmentRepository
             
         }
 
-        public async Task Delete(Appointment appointment)
+        public async Task Delete(AppointmentModel appointment)
         {
             _context.Remove(appointment);
             await _context.SaveChangesAsync();
         }
 
-        public Task Update(Appointment appointment)
+        public Task Update(AppointmentModel appointment)
         {
             _context.Update(appointment);
             _context.Entry(appointment).State = EntityState.Modified;

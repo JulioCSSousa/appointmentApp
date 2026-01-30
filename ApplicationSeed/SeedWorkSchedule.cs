@@ -24,7 +24,7 @@ namespace appointmentApp.ApplicationSeed
                         TimeSpan start = new TimeSpan(8, 0, 0);
                         TimeSpan end = new TimeSpan(17, 0, 0);
 
-                        var workSchedule = new WorkSchedule(dayDate, isSelected, start, end);
+                        var workSchedule = new WorkScheduleModel(dayDate, isSelected, start, end);
                         context.WorkSchedules.Add(workSchedule);
                     }
 

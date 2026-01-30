@@ -1,4 +1,5 @@
 ﻿
+using appointmentApp.Models.Entities;
 using appointmentApp.Models.Repository.AppointmentRepository;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ namespace appointmentApp.Services.AppointmentServices
         {
             _repository = repository;
         }
-        public async Task  Create(Appointment appointment)
+        public async Task  Create(AppointmentModel appointment)
         {
             var existingAppointment = await _repository.GetByUserId(appointment.ClientId);
             if (existingAppointment != null)
@@ -26,31 +27,31 @@ namespace appointmentApp.Services.AppointmentServices
         }
 
 
-        public async Task Delete(Appointment appointment)
+        public async Task Delete(AppointmentModel appointment)
         {
             await _repository.Delete(appointment);
         }
 
-        public async Task<IEnumerable<Appointment>> Get()
+        public async Task<IEnumerable<AppointmentModel>> Get()
         {
             return await _repository.Get().ToListAsync();
         }
 
-        public async Task<Appointment> GetById(Guid id)
+        public async Task<AppointmentModel> GetById(Guid id)
         {
             return await _repository.GetById(id);
         }
-        public async Task<Appointment?> GetByUserId(string id)
+        public async Task<AppointmentModel?> GetByUserId(string id)
         {
             return await _repository.GetByUserId(id);
 
         }
-        public async Task<Appointment?> GetByServiceId(int id)
+        public async Task<AppointmentModel?> GetByServiceId(int id)
         {
             return await _repository.GetByServiceId(id);
 
         }
-        public async Task Update(Appointment appointment)
+        public async Task Update(AppointmentModel appointment)
         {
             var result = _repository.GetById(appointment.Id);
             if (result == null)

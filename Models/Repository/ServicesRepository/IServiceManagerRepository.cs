@@ -2,11 +2,11 @@
 {
     public interface IServiceManagerRepository
     {
-        IQueryable<Service> GetAsync();
-        Task<Service> GetByIdAsync(int id);
-        Task Create(Service service);
-        Task UpdateAsync(Service service);
-        Task DeleteAsync(Service service);
+        IQueryable<ServiceModel> GetAsync();
+        Task<ServiceModel> GetByIdAsync(int id);
+        Task Create(ServiceModel service);
+        Task UpdateAsync(ServiceModel service);
+        Task DeleteAsync(ServiceModel service);
 
     }
 }

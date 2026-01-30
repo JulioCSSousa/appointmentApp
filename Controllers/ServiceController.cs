@@ -1,6 +1,6 @@
-﻿using appointmentApp.Models.ViewModels;
-using appointmentApp.Services.AppointmentServices;
+﻿using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
+using AppointmentAppMvc.Models.ViewModels.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace appointmentApp.Controllers
@@ -16,7 +16,7 @@ namespace appointmentApp.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Service>>> Index(string? txt)
+        public async Task<ActionResult<IEnumerable<ServiceModel>>> Index(string? txt)
         {
             var services = await _serviceManager.GetAsync(txt);
 
@@ -36,7 +36,7 @@ namespace appointmentApp.Controllers
             }
             try
             {
-                var service = new Service(model.ServiceName, model.Price, model.Duration, model.Category);
+                var service = new ServiceModel(model.ServiceName, model.Price, model.Duration, model.Category);
 
                 await _serviceManager.CreateAsync(service);
 

@@ -4,11 +4,11 @@ namespace appointmentApp.Models.Repository.WorkScheduleRepository
 {
     public interface IWorkScheduleRepository
     {
-        IQueryable<WorkSchedule> GetAsync();
-        Task<WorkSchedule> GetByIdAsync(int id);
-        Task Create(WorkSchedule workSchedule);
-        Task UpdateAsync(WorkSchedule workSchedule);
-        Task DeleteAsync(WorkSchedule workSchedule);
+        IQueryable<WorkScheduleModel> GetAsync();
+        Task<WorkScheduleModel> GetByIdAsync(int id);
+        Task Create(WorkScheduleModel workSchedule);
+        Task UpdateAsync(WorkScheduleModel workSchedule);
+        Task DeleteAsync(WorkScheduleModel workSchedule);
 
     }
 }

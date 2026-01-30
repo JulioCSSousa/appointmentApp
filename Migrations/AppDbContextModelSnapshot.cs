@@ -18,35 +18,6 @@ namespace AppointmentAppMvc.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("Appointment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("ClientId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("Day")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<TimeSpan>("Hour")
-                        .HasColumnType("time(6)");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("WorkScheduleId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WorkScheduleId");
-
-                    b.ToTable("Appointments");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -175,7 +146,7 @@ namespace AppointmentAppMvc.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Service", b =>
+            modelBuilder.Entity("ServiceModel", b =>
                 {
                     b.Property<int>("ServiceId")
                         .ValueGeneratedOnAdd()
@@ -201,7 +172,40 @@ namespace AppointmentAppMvc.Migrations
                     b.ToTable("Services");
                 });
 
-            modelBuilder.Entity("appointmentApp.Models.Entities.User", b =>
+            modelBuilder.Entity("appointmentApp.Models.Entities.AppointmentModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Day")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<TimeSpan>("Hour")
+                        .HasColumnType("time(6)");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("WorkScheduleModelId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkScheduleModelId");
+
+                    b.ToTable("Appointments");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.UserModel", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
@@ -269,7 +273,7 @@ namespace AppointmentAppMvc.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("appointmentApp.Models.Entities.WorkSchedule", b =>
+            modelBuilder.Entity("appointmentApp.Models.Entities.WorkScheduleModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -292,13 +296,6 @@ namespace AppointmentAppMvc.Migrations
                     b.ToTable("WorkSchedules");
                 });
 
-            modelBuilder.Entity("Appointment", b =>
-                {
-                    b.HasOne("appointmentApp.Models.Entities.WorkSchedule", null)
-                        .WithMany("Appointments")
-                        .HasForeignKey("WorkScheduleId");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -310,7 +307,7 @@ namespace AppointmentAppMvc.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("appointmentApp.Models.Entities.User", null)
+                    b.HasOne("appointmentApp.Models.Entities.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -319,7 +316,7 @@ namespace AppointmentAppMvc.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("appointmentApp.Models.Entities.User", null)
+                    b.HasOne("appointmentApp.Models.Entities.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -334,7 +331,7 @@ namespace AppointmentAppMvc.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("appointmentApp.Models.Entities.User", null)
+                    b.HasOne("appointmentApp.Models.Entities.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -343,14 +340,21 @@ namespace AppointmentAppMvc.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("appointmentApp.Models.Entities.User", null)
+                    b.HasOne("appointmentApp.Models.Entities.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("appointmentApp.Models.Entities.WorkSchedule", b =>
+            modelBuilder.Entity("appointmentApp.Models.Entities.AppointmentModel", b =>
+                {
+                    b.HasOne("appointmentApp.Models.Entities.WorkScheduleModel", null)
+                        .WithMany("Appointments")
+                        .HasForeignKey("WorkScheduleModelId");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.WorkScheduleModel", b =>
                 {
                     b.Navigation("Appointments");
                 });

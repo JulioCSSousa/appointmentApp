@@ -2,10 +2,10 @@
 {
     public interface IServiceManager
     {
-        Task<IEnumerable<Service>> GetAsync(string? txt);
-        Task<Service> GetByIdAsync(int id);
-        Task CreateAsync(Service service);
-        Task UpdateAsync(Service Service);
-        Task DeleteAsync(Service Service);
+        Task<IEnumerable<ServiceModel>> GetAsync(string? txt);
+        Task<ServiceModel> GetByIdAsync(int id);
+        Task CreateAsync(ServiceModel service);
+        Task UpdateAsync(ServiceModel Service);
+        Task DeleteAsync(ServiceModel Service);
     }
 }

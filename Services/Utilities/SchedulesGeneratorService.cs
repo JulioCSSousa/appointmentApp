@@ -4,7 +4,7 @@ namespace appointmentApp.Services.Utilities
 {
     public class SchedulesGeneratorService
     {
-        public static List<TimeSpan> GenerateHours(TimeSpan start, TimeSpan end, DateOnly day, List<Appointment> appointments, List<Service> services)
+        public static List<TimeSpan> GenerateHours(TimeSpan start, TimeSpan end, DateOnly day, List<AppointmentModel> appointments, List<ServiceModel> services)
         {
             var availableHours = new List<TimeSpan>();
 

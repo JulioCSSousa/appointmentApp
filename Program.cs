@@ -36,7 +36,7 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 // Adicionar serviços de autenticação e identidade
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 {
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
@@ -122,7 +122,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<AppDbContext>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<User>>();
+        var userManager = services.GetRequiredService<UserManager<UserModel>>();
         var logger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
 
         // 1. Roles primeiro (essencial para não dar erro ao atribuir ao usuário)

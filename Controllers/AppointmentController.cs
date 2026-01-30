@@ -1,10 +1,10 @@
 ﻿using appointmentApp.Models.Entities;
-using appointmentApp.Models.ViewModels;
 using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
 using AppointmentAppMvc.Models.ViewModels;
+using AppointmentAppMvc.Models.ViewModels.Appointment;
 using AppointmentAppMvc.Services.Utilities.Enum;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -35,7 +35,7 @@ namespace appointmentApp.Controllers
             var appointmentDateAndHourList = new Dictionary<DateTime, List<TimeSpan>>();
             var isDayOpenList = new List<bool>();
             var servicesIdsInAppointment = appointments.Select(x => x.ServiceId);
-            var servicesInDbList = new List<Service>();
+            var servicesInDbList = new List<ServiceModel>();
             foreach (var serviceId in servicesIdsInAppointment)
             {
 
@@ -99,7 +99,7 @@ namespace appointmentApp.Controllers
                     return BadRequest("Serviço não encontrado no banco de dados.");
                 }
 
-                var newAppointment = new Appointment(Guid.NewGuid(), userId, model.SelectedServiceId, model.SelectedDayAndHour, "Waiting");
+                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, model.SelectedDayAndHour, "Waiting");
 
                 await _appService.Create(newAppointment);
                 TempData["SuccessMessage"] = "Agendamento realizado com sucesso!";
