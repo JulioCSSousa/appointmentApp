@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Sprache;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 public class AccountController : Controller
 {
@@ -228,17 +230,13 @@ public class AccountController : Controller
         int itemByPge = 10;
         int skip = (page - 1) * itemByPge;
 
-        // 1. Criamos a QUERY (IQueryable), não a lista ainda
         var query = _userManager.Users.AsQueryable();
 
-        // 2. Aplicamos o filtro se existir
         if (!string.IsNullOrEmpty(searchTerm))
         {
             query = query.Where(u => u.Name.Contains(searchTerm) || u.Email.Contains(searchTerm));
         }
 
-        // 3. CONTAMOS o total de registros que batem com o filtro (antes de paginar!)
-        // Isso é o que faz a sua ViewBag.TotalPages funcionar
         int totalItems = await query.CountAsync();
 
         // 4. Agora sim, paginamos e transformamos em Lista
@@ -389,9 +387,18 @@ public class AccountController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AddRole()
+    public async Task<IActionResult> AddRole(string? searchTerm = null, int page = 1)
     {
-        var users = await _userManager.Users.ToListAsync();
+        int itemByPge = 10;
+        int skip = (page - 1) * itemByPge;
+
+
+        var users = _userManager.Users.AsQueryable();
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            users = users.Where(u => u.Name.Contains(searchTerm) || u.Email.Contains(searchTerm));
+        }
+
         List<UserWithRolesViewModel> userWithRoles = new List<UserWithRolesViewModel>();
         if (users == null)
         {
@@ -400,6 +407,7 @@ public class AccountController : Controller
         foreach(var u in users)
         {
             var role = await _userManager.GetRolesAsync(u);
+
             userWithRoles.Add(new UserWithRolesViewModel
             {
                 Id = u.Id,
@@ -416,6 +424,17 @@ public class AccountController : Controller
             var admin = userWithRoles.FirstOrDefault(u => u.Role == "Admin");
             userWithRoles.Remove(admin);
         }
+        int totalItems = userWithRoles.Count();
+
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / itemByPge);
+        ViewBag.SearchTerm = searchTerm;
+        userWithRoles = userWithRoles.Select(x => x)
+            .OrderBy(u => u.Name)
+            .Skip(skip)
+            .Take(itemByPge)
+            .ToList();
+
         return View(userWithRoles);
     }
 
