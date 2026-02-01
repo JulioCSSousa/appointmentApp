@@ -3,11 +3,13 @@ using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using AppointmentAppMvc.Models.ViewModels.Appointment;
 using AppointmentAppMvc.Models.ViewModels.Get;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace appointmentApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ClientController : Controller
     {
         private readonly IServiceManager _service;
@@ -22,34 +24,42 @@ namespace appointmentApp.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+
+        public async Task<IActionResult> Index(int page = 1)
         {
+            int pageSize = 10; 
             List<ClientIndexViewModel> clients = new List<ClientIndexViewModel>();
 
-            var appointments = await _appointmentService.Get();
-            if (appointments.Count() != 0 || appointments != null)
-            {
-                foreach (var appointment in appointments)
-                {
-                    try
-                    {
-                        var findService = await _service.GetByIdAsync(appointment.ServiceId);
-                        var user = await _userManager.FindByIdAsync(appointment.ClientId);
+            var allAppointments = await _appointmentService.Get();
 
-                        var newClientView = new ClientIndexViewModel
-                        {
-                            Appointment = appointment,
-                            Service = findService,
-                            User = user
-                        };
-                        clients.Add(newClientView);
-                    }
-                    catch (NullReferenceException)
-                    {
-                        return BadRequest("Nenhum Agendamento");
-                    }
-                }
+            if (allAppointments == null || !allAppointments.Any())
+            {
+                return View(clients);
             }
+
+            var sortedAppointments = allAppointments.OrderByDescending(a => a.Day);
+
+            int totalItems = sortedAppointments.Count();
+            var pagedAppointments = sortedAppointments
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            foreach (var appointment in pagedAppointments)
+            {
+                var findService = await _service.GetByIdAsync(appointment.ServiceId);
+                var user = await _userManager.FindByIdAsync(appointment.ClientId);
+
+                clients.Add(new ClientIndexViewModel
+                {
+                    Appointment = appointment,
+                    Service = findService,
+                    User = user
+                });
+            }
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             return View(clients);
         }

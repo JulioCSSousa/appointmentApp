@@ -3,10 +3,12 @@ using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
+using AppointmentAppMvc.Hubs;
 using AppointmentAppMvc.Models.ViewModels;
 using AppointmentAppMvc.Models.ViewModels.Appointment;
 using AppointmentAppMvc.Services.Utilities.Enum;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace appointmentApp.Controllers
@@ -16,14 +18,18 @@ namespace appointmentApp.Controllers
         private readonly IAppointmentService _appService;
         private readonly IServiceManager _serviceManager;
         private readonly IWorkScheduleService _workSchedule;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
         public AppointmentController(IAppointmentService appservice,
             IServiceManager serviceManager,
-            IWorkScheduleService workschedule)
+            IWorkScheduleService workschedule,
+            IHubContext<NotificationHub> hubContext)
+
         {
             _appService = appservice;
             _serviceManager = serviceManager;
             _workSchedule = workschedule;
+            _hubContext = hubContext;
         }
 
         private async Task<AppointmentViewModel> LoadAppointmentViewModelAsync()
@@ -103,6 +109,8 @@ namespace appointmentApp.Controllers
 
                 await _appService.Create(newAppointment);
                 TempData["SuccessMessage"] = "Agendamento realizado com sucesso!";
+                await _hubContext.Clients.All.SendAsync("ReceiveNewAppointment", "Novo agendamento realizado!");
+                ViewBag.NewAppointment = "New";
                 return RedirectToAction("Index", "Home");
             }
             catch (InvalidOperationException ex)
@@ -145,7 +153,6 @@ namespace appointmentApp.Controllers
             return View();
         }
 
-
         public async Task<IActionResult> Delete(Guid id)
         {
 
@@ -161,6 +168,13 @@ namespace appointmentApp.Controllers
                 return RedirectToAction("IndexAdm", "Home");
             else
                 return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLatestAppointmentId()
+        {
+            var lastApp = (await _appService.Get()).OrderByDescending(x => x.Day).FirstOrDefault();
+            return Json(new { id = lastApp?.Id, client = lastApp?.ClientId });
         }
     }
 }

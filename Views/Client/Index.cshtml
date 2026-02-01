@@ -6,100 +6,269 @@
     ViewData["Title"] = "Agendamentos";
 }
 
-<div class="container">
-    
-    <h2 class="my-4 text-center">Lista de Agendamentos</h2>
-    <!-- Tabela de Agendamentos -->
-    
-    <table class="table table-striped table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">Data</th>
-                <th scope="col">Horário</th>
-                <th scope="col">Cliente</th>
-                <th scope="col">Email</th>
-                <th scope="col">Serviço</th>
-                <th scope="col">Duração</th>
-                <th scope="col">Valor</th>
-                <th scope="col">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null)
-            {
-                @foreach (var item in Model)
-                {
+<div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a asp-action="IndexAdm" asp-controller="Home" class="btn btn-link text-decoration-none text-muted p-0 mb-1">
+                <i class="bi bi-arrow-left"></i> Painel Administrativo
+            </a>
+            <h2 class="fw-bold text-dark m-0">Lista de Agendamentos</h2>
+            <p class="text-muted small">Acompanhe e gerencie o status das reservas em tempo real.</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-white shadow-sm rounded-3">
+                <i class="bi bi-download me-2"></i>Exportar
+            </button>
+            <button class="btn btn-custom-indigo shadow-sm rounded-3">
+                <i class="bi bi-calendar-plus me-2"></i>Novo Agendamento
+            </button>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
                     <tr>
-                        <td>@DayOfWeekHelper.ToPortuguese(item.Appointment.Day.DayOfWeek)</td>
-                        <td>@item.Appointment.Day.TimeOfDay</td>
-                        <td>@item.User?.Name</td>
-                        <td>@item.User?.Email</td>
-                        <td>@item.Service?.ServiceName</td>
-                        <td>@item.Service?.Duration.ToString(@"hh\:mm")</td>
-                        <td>@item.Service?.Price.ToString("C")</td>
-                        <td style="width: 150px;">
-                            <form asp-action="UpdateStatus" asp-controller="Appointment" method="post">
-                                @Html.AntiForgeryToken()
-
-                                <input type="hidden" name="id" value="@item.Appointment.Id" />
-
-                                <select name="newStatus" class="form-select form-select-sm" onchange="this.form.submit()">
-                                    <option value="Waiting" selected="@(item.Appointment.Status == "Waiting")">Aguardando</option>
-                                    <option value="Finished" selected="@(item.Appointment.Status == "Finished")">Finalizado</option>
-                                    <option value="Canceled" selected="@(item.Appointment.Status == "Canceled")">Cancelado</option>
-                                </select>
-                            </form>
-                        </td>
-                        <td>
-                            <a asp-action="Delete" asp-controller="Appointment" asp-route-id="@item.Appointment.Id" class="row btn btn-danger" onclick="return confirm('Tem certeza que deseja cancelar este agendamento?');">
-                                Cancelar
-                            </a>
-                        </td>
-                        
+                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Data e Hora</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Cliente</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Serviço</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Valor</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Status</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Ações</th>
                     </tr>
-
-                }
-            } else{
+                </thead>
                 <tbody>
-                    Not Found
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var statusClass = item.Appointment.Status switch
+                            {
+                                "Waiting" => "status-waiting",
+                                "Finished" => "status-finished",
+                                "Canceled" => "status-canceled",
+                                _ => ""
+                            };
+
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="date-badge me-3">
+                                            <span class="day">@item.Appointment.Day.Day</span>
+                                            <span class="month">@item.Appointment.Day.ToString("MMM").ToUpper()</span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@DayOfWeekHelper.ToPortuguese(item.Appointment.Day.DayOfWeek)</div>
+                                            <div class="text-muted small"><i class="bi bi-clock me-1"></i>@item.Appointment.Day.ToString(@"HH\:mm")</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@item.User?.Name</div>
+                                    <div class="text-muted small">@item.User?.Email</div>
+                                </td>
+                                <td>
+                                    <div class="text-dark fw-medium">@item.Service?.ServiceName</div>
+                                    <div class="text-muted small">Duração: @item.Service?.Duration.ToString(@"hh\:mm")</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold text-dark">@item.Service?.Price.ToString("C")</span>
+                                </td>
+                                <td>
+                                    <form asp-action="UpdateStatus" asp-controller="Appointment" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.Appointment.Id" />
+                                        <select name="newStatus" class="form-select form-select-sm rounded-pill status-select @statusClass" onchange="this.form.submit()">
+                                            <option value="Waiting" selected="@(item.Appointment.Status == "Waiting")">Aguardando</option>
+                                            <option value="Finished" selected="@(item.Appointment.Status == "Finished")">Finalizado</option>
+                                            <option value="Canceled" selected="@(item.Appointment.Status == "Canceled")">Cancelado</option>
+                                        </select>
+                                    </form>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-action="Delete" asp-controller="Appointment" asp-route-id="@item.Appointment.Id"
+                                       class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2"
+                                       onclick="return confirm('Tem certeza que deseja cancelar este agendamento?');">
+                                        <i class="bi bi-trash3 fs-5"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <i class="bi bi-calendar-x text-muted display-4"></i>
+                                <p class="text-muted mt-2">Nenhum agendamento encontrado.</p>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
+            </table>
+        </div>
+    </div>
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 mb-5 gap-3 px-4">
+            <div class="text-muted small">
+                Mostrando página <span class="fw-bold text-dark">@ViewBag.CurrentPage</span> de <span class="fw-bold text-dark">@ViewBag.TotalPages</span>
+            </div>
 
-            }
+            <nav>
+                <ul class="pagination shadow-sm mb-0">
+                    <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
 
-    </table>
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@i">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                        <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
 </div>
 
-<!-- Adicionando um toque no estilo para destacar a view -->
 <style>
-    .container {
-        margin-top: 20px;
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --slate-900: #0f172a;
+        --emerald: #10b981;
+        --rose: #f43f5e;
+        --amber: #f59e0b;
     }
 
-    .thead-dark th {
-        background-color: #343a40;
+    .fs-xs {
+        font-size: 0.75rem;
+    }
+
+    /* Date Badge Style */
+    .date-badge {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        min-width: 50px;
+        text-align: center;
+        padding: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+        .date-badge .day {
+            display: block;
+            font-weight: 800;
+            font-size: 1.1rem;
+            line-height: 1;
+            color: var(--slate-900);
+        }
+
+        .date-badge .month {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--indigo);
+        }
+
+    /* Custom Buttons */
+    .btn-custom-indigo {
+        background-color: var(--indigo);
         color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 10px 20px;
     }
 
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
+        .btn-custom-indigo:hover {
+            background-color: #4f46e5;
+            color: white;
+        }
+
+    .btn-white {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 10px 20px;
     }
 
+    /* Select Status Styles */
+    .status-select {
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding-left: 15px;
+        width: 130px;
+        cursor: pointer;
+    }
+
+    .status-waiting {
+        background-color: #fffbeb;
+        color: var(--amber);
+        border-color: #fef3c7;
+    }
+
+    .status-finished {
+        background-color: #ecfdf5;
+        color: var(--emerald);
+        border-color: #d1fae5;
+    }
+
+    .status-canceled {
+        background-color: #fff1f2;
+        color: var(--rose);
+        border-color: #ffe4e6;
+    }
+
+    .table thead th {
+        background-color: #fcfcfd;
+        border-bottom: 1px solid #f1f5f9;
+        letter-spacing: 0.05em;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    /* Estilos Adicionais para a Paginação */
     .pagination {
-        margin-top: 20px;
+        border-radius: 12px;
+        overflow: hidden;
     }
 
     .page-link {
-        background-color: #f8f9fa;
-        color: #495057;
+        color: var(--slate-900);
+        font-weight: 600;
+        transition: all 0.2s;
     }
 
         .page-link:hover {
-            background-color: #e2e6ea;
+            background-color: var(--indigo-soft);
+            color: var(--indigo);
         }
 
+    .page-item.active .page-link {
+        background-color: var(--indigo) !important;
+        color: white !important;
+    }
+
     .page-item.disabled .page-link {
-        color: #6c757d;
-        pointer-events: none;
+        background-color: #f1f5f9;
+        color: #cbd5e1;
+    }
+
+    .bg-indigo {
+        background-color: var(--indigo);
     }
 </style>

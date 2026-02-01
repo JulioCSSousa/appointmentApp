@@ -1,95 +1,192 @@
 ﻿@using appointmentApp.Models.ViewModels
-
-@{
-    ViewData["Title"] = "Controle de Agendamentos";
-}
-
 @model IEnumerable<ServiceModel>
 
+@{
+    ViewData["Title"] = "Controle de Serviços";
+}
+
+<div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
 
     @if (TempData["AppointmentExists"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["AppointmentExists"]
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 d-flex align-items-center mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+            <div>@TempData["AppointmentExists"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
     }
-<a asp-action="IndexAdm" asp-controller="Home"
-   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-    ⬅ Retornar
-</a>
-<h1>Controle de Serviços</h1>
 
-<form method="get" asp-action="Index">
-        <div class="input-group mb-3">
-            <input type="text" name="txt" class="form-control" placeholder="Digite o nome do serviço..." 
-                   value="@Context.Request.Query["txt"]">
-            <button type="submit" class="btn btn-primary">Buscar</button>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a asp-action="IndexAdm" asp-controller="Home" class="btn btn-link text-decoration-none text-muted p-0 mb-1">
+                <i class="bi bi-arrow-left"></i> Voltar ao Painel
+            </a>
+            <h2 class="fw-bold text-dark m-0">Catálogo de Serviços</h2>
+            <p class="text-muted small">Gerencie os serviços, preços e durações oferecidos.</p>
         </div>
-    </form>
 
-@if (Model != null && Model.Any())
-{
-    <table class="table mt-4">
-        <thead>
-            <tr>
-                <th>Nome do Serviço</th>
-                <th>Preço</th>
-                <th>Duração</th>
-                <th>Categoria</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var service in Model)
-            {
-                <tr>
-                    <td>@service.ServiceName</td>
-                    <td>@service.Price.ToString("C")</td>
-                    <td>@service.Duration</td>
-                    <td>@service.Category</td>
+        <a asp-controller="Service" asp-action="Create" class="btn btn-custom-indigo shadow-sm px-4">
+            <i class="bi bi-plus-lg me-2"></i>Novo Serviço
+        </a>
+    </div>
 
-                    
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@service.ServiceId" class="btn btn-warning btn-sm">Editar</a>
-                    <td>
-                        <button class="btn btn-sm btn-danger"
-                                type="button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#confirmDeleteModal-@service.ServiceId">
-                            Deletar
-                        </button>
-                    </td>
-                    <!-- Modal de Confirmação -->
-                    <div class="modal fade" id="confirmDeleteModal-@service.ServiceId" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Tem certeza de que deseja excluir este serviço?
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <form method="post" action="@Url.Action("Delete", "Service", new { id = service.ServiceId    })">
-                                            @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-danger">Excluir</button>
-                                    </form>
+    <div class="card border-0 shadow-sm mb-4 rounded-4">
+        <div class="card-body p-3">
+            <form method="get" asp-action="Index" class="row g-2">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted ps-3">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="txt" class="form-control border-start-0 ps-2"
+                               placeholder="Digite o nome do serviço..." value="@Context.Request.Query["txt"]">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-dark w-100 fw-bold">Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Serviço</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Duração</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Categoria</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Preço</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var service in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">@service.ServiceName</div>
+                                    <div class="text-muted small">ID: #@service.ServiceId</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border fw-medium rounded-pill px-3">
+                                        <i class="bi bi-clock me-1 text-muted"></i> @service.Duration
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-indigo-soft text-indigo px-3 py-2 rounded-pill">
+                                        @service.Category
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="fw-bold text-dark fs-5">@service.Price.ToString("C")</div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm rounded-3">
+                                        <a asp-action="Edit" asp-route-id="@service.ServiceId"
+                                           class="btn btn-sm btn-white border-end" title="Editar">
+                                            <i class="bi bi-pencil-square text-primary"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-white"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmDeleteModal-@service.ServiceId" title="Excluir">
+                                            <i class="bi bi-trash3 text-danger"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <div class="modal fade" id="confirmDeleteModal-@service.ServiceId" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow-lg">
+                                        <div class="modal-body text-center p-5">
+                                            <div class="mb-4">
+                                                <i class="bi bi-trash3 text-danger" style="font-size: 4rem;"></i>
+                                            </div>
+                                            <h4 class="fw-bold text-dark">Excluir Serviço?</h4>
+                                            <p class="text-muted">Você está prestes a remover o serviço <strong>@service.ServiceName</strong>.</p>
+                                            <div class="d-flex justify-content-center gap-2 mt-4">
+                                                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                <form method="post" action="@Url.Action("Delete", "Service", new { id = service.ServiceId })">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-danger px-4 fw-bold">Confirmar Exclusão</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    </td>
-                </tr>
-            }
-            
-        </tbody>
-    </table>
-}
-else
-{
-    <p class="mt-4">Nenhum serviço encontrado.</p>
-}
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="bi bi-search text-muted display-4 mb-3 d-block"></i>
+                                <p class="text-muted">Nenhum serviço encontrado com esse nome.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<a asp-controller="Service" asp-action="Create"> Criar novo serviço</a>
+<style>
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --slate-900: #0f172a;
+    }
+
+    .fs-xs {
+        font-size: 0.75rem;
+    }
+
+    .btn-custom-indigo {
+        background-color: var(--indigo);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 10px 24px;
+        transition: all 0.2s;
+    }
+
+        .btn-custom-indigo:hover {
+            background-color: #4f46e5;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .bg-indigo-soft {
+        background-color: var(--indigo-soft);
+    }
+
+    .text-indigo {
+        color: var(--indigo);
+    }
+
+    .btn-white {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+    }
+
+        .btn-white:hover {
+            background-color: #f8fafc;
+        }
+
+    .table thead th {
+        border-bottom: 1px solid #f1f5f9;
+        background-color: #fcfcfd;
+        letter-spacing: 0.05em;
+    }
+
+    /* Estilo do Modal */
+    .modal-content {
+        border-radius: 20px;
+    }
+</style>

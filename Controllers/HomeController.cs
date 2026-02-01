@@ -3,6 +3,7 @@ using appointmentApp.Models.ViewModels;
 using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using AppointmentAppMvc.Models.ViewModels.Get;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,7 @@ namespace appointmentApp.Controllers
             _serviceManager = serviceManager;
         }
 
+        [Authorize(Roles = "Admin")]
         public ActionResult IndexAdm()
         {
             return View();

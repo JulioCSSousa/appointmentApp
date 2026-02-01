@@ -7,12 +7,15 @@ using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
+using AppointmentAppMvc.ApplicationSeed;
+using AppointmentAppMvc.Hubs;
 using DotNetEnv;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,11 +24,11 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Agora você pode acessar as variáveis de ambiente com `Environment.GetEnvironmentVariable`
-var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
-var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
-var dbUser = Environment.GetEnvironmentVariable("DB_USER");
-var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-var dbName = Environment.GetEnvironmentVariable("DB");
+var dbHost = Environment.GetEnvironmentVariable("AIVEN_HOST");
+var dbPort = Environment.GetEnvironmentVariable("AIVEN_PORT");
+var dbUser = Environment.GetEnvironmentVariable("AIVEN_USER");
+var dbPassword = Environment.GetEnvironmentVariable("AIVEN_PASSWORD");
+var dbName = Environment.GetEnvironmentVariable("AIVEN_DB");
 
 // Criar a string de conexão
 var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword}";
@@ -85,7 +88,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
-
+builder.Services.AddSignalR();
 // Construir a aplicação
 var app = builder.Build();
 
@@ -122,23 +125,25 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<AppDbContext>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<UserModel>>();
         var logger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
+        var userManager = services.GetRequiredService<UserManager<UserModel>>();
+        await context.Database.MigrateAsync();
 
-        // 1. Roles primeiro (essencial para não dar erro ao atribuir ao usuário)
         await RoleInitializer.SeedRolesAsync(roleManager);
 
-        // 2. Schedules
         await SeedWorkSchedule.SeedWorkSchedules(context, logger);
 
+        //await UserInitializer.SeedMassUsersAsync(userManager); // O "povoamento" em massa
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocorreu um erro ao popular o banco de dados.");
+        logger.LogError(ex, "Erro catastrófico no Seeding do banco de dados.");
     }
 }
 
+// ... depois do build:
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

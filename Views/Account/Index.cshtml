@@ -1,179 +1,212 @@
 ﻿@using AppointmentAppMvc.Models.ViewModels.Account
 @using appointmentApp.Models.ViewModels
-
 @model IEnumerable<UserWithRolesViewModel>
+
 @{
     ViewData["Title"] = "Gerenciar Usuários";
 }
 
+<div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
 
-<div class="container mt-4">
-    <a asp-action="IndexAdm" asp-controller="Home"
-       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-        ⬅ Retornar
-    </a>
-    <div class="row">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a asp-action="IndexAdm" asp-controller="Home" class="btn btn-link text-decoration-none text-muted p-0 mb-2">
+                <i class="bi bi-arrow-left"></i> Voltar ao Painel
+            </a>
+            <h2 class="fw-bold text-dark m-0">Gerenciar Usuários</h2>
+            <p class="text-muted small">Controle de acessos e permissões da plataforma.</p>
+        </div>
 
-        <!-- Painel principal para gerenciar usuários -->
-        <div class="col-md-9">
-            <h2>Gerenciar Usuários</h2>
-            @if (User.Identity.IsAuthenticated) {<h2>@User.Identity.Name</h2> }
+        <div class="d-flex gap-2">
+            <a asp-action="Register" class="btn btn-custom-indigo shadow-sm">
+                <i class="bi bi-person-plus-fill me-2"></i>Novo Usuário
+            </a>
+            <button class="btn btn-outline-dark shadow-sm" data-bs-toggle="modal" data-bs-target="#addRoleModal">
+                <i class="bi bi-shield-lock me-2"></i>Adicionar Role
+            </button>
+        </div>
+    </div>
 
-            <!-- Botões de ações -->
-            <div class="d-flex justify-content-between mb-3">
-                <div>
-                    <a asp-action="Register" class="btn btn-primary me-2">Novo Usuário</a>
-                    <a asp-action="AddRole" class="btn btn-secondary">Adicionar Role</a>
+    <div class="card border-0 shadow-sm mb-4 rounded-4">
+        <div class="card-body p-3">
+            <form asp-action="Index" method="get" class="row g-2">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" class="form-control border-start-0 ps-0" placeholder="Buscar por nome, e-mail ou função...">
+                    </div>
                 </div>
-                <div>
-                    <form asp-action="Index" method="get" class="d-flex">
-                        <input type="text" name="searchTerm" class="form-control" placeholder="Pesquisar usuários...">
-                        <button type="submit" class="btn btn-outline-primary ms-2">Pesquisar</button>
-                    </form>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-dark w-100">Filtrar</button>
                 </div>
-            </div>
+            </form>
+        </div>
+    </div>
 
-            <!-- Lista de usuários -->
-            <table class="table table-bordered table-striped">
-                <thead>
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
                     <tr>
-                        <th>Nome</th>
-                        <th>Email</th>
-                        <th>Número</th>
-                        <th>Função</th>
-                        <th>Ações</th>
+                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Usuário</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Contato</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Função</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model != null)
+                    @if (Model != null && Model.Any())
                     {
                         foreach (var user in Model)
                         {
                             <tr>
-                                <td>@user.Name</td>
-                                <td>@user.Email</td>
-                                <td>@user.PhoneNumber</td>
-                                <td>@user.Role</td>
-                                
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-3 bg-indigo-soft text-indigo fw-bold">
+                                            @user.Name.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@user.Name</div>
+                                            <div class="text-muted small">ID: @user.Id.ToString().Substring(0, 8)...</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-dark">@user.Email</div>
+                                    <div class="text-muted small">@user.PhoneNumber</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @(user.Role == "Admin" ? "bg-rose-soft text-rose" : "bg-indigo-soft text-indigo") px-3 py-2 rounded-pill">
+                                        @user.Role
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Update", "Account", new { id = user.Id })" class="btn btn-sm btn-outline-secondary border-0">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal-@user.Id">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
 
-                                <td>
-                                    <a href="@Url.Action("Update", "Account", new { id = user.Id })" class="btn btn-sm btn-secondary">Alterar</a>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger"
-                                            type="button"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#confirmDeleteModal-@user.Id">
-                                        Deletar
-                                    </button>
-                                </td>
-                                <!-- Modal de Confirmação -->
-                                <div class="modal fade" id="confirmDeleteModal-@user.Id" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                Tem certeza de que deseja excluir este usuário?
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <div class="modal fade" id="confirmDeleteModal-@user.Id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow">
+                                        <div class="modal-body text-center p-5">
+                                            <i class="bi bi-exclamation-circle text-danger display-1 mb-3"></i>
+                                            <h4 class="fw-bold">Excluir Usuário?</h4>
+                                            <p class="text-muted">Esta ação não pode ser desfeita. Você irá remover <b>@user.Name</b> do sistema.</p>
+                                            <div class="d-flex justify-content-center gap-2 mt-4">
+                                                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
                                                 <form method="post" action="@Url.Action("Delete", "Account", new { id = user.Id })">
                                                     @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-danger">Excluir</button>
+                                                    <button type="submit" class="btn btn-danger px-4">Sim, Excluir</button>
                                                 </form>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-                            </tr>
+                            </div>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="3" class="text-center">Nenhum usuário encontrado.</td>
+                            <td colspan="4" class="text-center py-5 text-muted">Nenhum usuário encontrado.</td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
+
+    <nav aria-label="..." class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
+                <a class="page-link shadow-sm rounded-start-pill px-3" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)" asp-route-searchTerm="@ViewBag.SearchTerm">Anterior</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link bg-white text-dark border-start-0 border-end-0 fw-bold">@ViewBag.CurrentPage / @ViewBag.TotalPages</span>
+            </li>
+            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link shadow-sm rounded-end-pill px-3" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)" asp-route-searchTerm="@ViewBag.SearchTerm">Próxima</a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
-<!-- Modal para adicionar Role -->
-<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addRoleModalLabel">Adicionar Role</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form asp-action="AddRole" method="post">
-                    <div class="mb-3">
-                        <label for="userId" class="form-label">Usuário</label>
-                        <select name="userId" id="userId" class="form-control">
-                            @if (Model != null)
-                            {
-                                foreach (var user in Model)
-                                {
-                                    <option value="@user.Id">@user.Email</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="role" class="form-label">Role</label>
-                        <input type="text" name="role" id="role" class="form-control" required />
-                    </div>
-                    <button type="submit" class="btn btn-primary">Adicionar</button>
-                </form>
-            </div>
-        </div>
-    </div>
+<style>
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --rose: #f43f5e;
+        --rose-soft: #fff1f2;
+        --slate-900: #0f172a;
+    }
 
-</div>
-<nav aria-label="Navegação de usuários" class="mt-4">
-    <ul class="pagination justify-content-center">
-        @if (ViewBag.CurrentPage > 1)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index"
-                   asp-route-page="@(ViewBag.CurrentPage - 1)"
-                   asp-route-searchTerm="@ViewBag.SearchTerm">Anterior</a>
-            </li>
+    .fs-xs {
+        font-size: 0.75rem;
+    }
+
+    .btn-custom-indigo {
+        background-color: var(--indigo);
+        color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 8px 20px;
+    }
+
+        .btn-custom-indigo:hover {
+            background-color: #4f46e5;
+            color: white;
         }
 
-        <li class="page-item disabled">
-            <span class="page-link text-dark">
-                Página <strong>@ViewBag.CurrentPage</strong> de <strong>@ViewBag.TotalPages</strong>
-            </span>
-        </li>
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-size: 1.1rem;
+    }
 
-        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index"
-                   asp-route-page="@(ViewBag.CurrentPage + 1)"
-                   asp-route-searchTerm="@ViewBag.SearchTerm">Próxima</a>
-            </li>
-        }
-    </ul>
-</nav>
-@section Scripts {
-    <script>
-        function showDeleteModal(userId) {
-            // Atualiza a URL do formulário de exclusão
-            const deleteForm = document.getElementById('deleteForm');
-            deleteForm.action = `/Account/Delete/${userId}`; // Atualize a rota de exclusão conforme seu projeto
-            // Exibe o modal
-            const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-            modal.show();
-        }
-    </script>
-}
+    .bg-indigo-soft {
+        background-color: var(--indigo-soft);
+    }
 
+    .text-indigo {
+        color: var(--indigo);
+    }
+
+    .bg-rose-soft {
+        background-color: var(--rose-soft);
+    }
+
+    .text-rose {
+        color: var(--rose);
+    }
+
+    .table thead th {
+        border-bottom: 1px solid #f1f5f9;
+        letter-spacing: 0.05em;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .page-link {
+        color: var(--slate-900);
+        border-color: #e2e8f0;
+    }
+
+    .page-item.disabled .page-link {
+        background-color: #f8fafc;
+    }
+</style>

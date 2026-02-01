@@ -3,52 +3,63 @@
 @using appointmentApp.Models.ViewModels
 @using appointmentApp.Services;
 @using appointmentApp.Services.Utilities
-
 @model IEnumerable<DayScheduleViewModel>
 
-<a asp-action="IndexAdm" asp-controller="Home"
-   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-    ⬅ Retornar
-</a>
-<h2 class="text-center mb-4">Gerenciamento de Horários</h2>
+<div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
 
-<form asp-action="SaveWorkSchedule" method="post" class="container">
-    <div class="alert alert-info mb-4">
-        <strong>Dica:</strong> Defina um horário padrão e aplique-o a todos os dias. Depois, ajuste individualmente os horários, se necessário.
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a asp-action="IndexAdm" asp-controller="Home" class="btn btn-link text-decoration-none text-muted p-0 mb-2">
+                <i class="bi bi-arrow-left"></i> Painel Administrativo
+            </a>
+            <h2 class="fw-bold text-dark m-0">Configuração de Escala</h2>
+            <p class="text-muted small">Defina os dias e horários de atendimento da sua equipe.</p>
+        </div>
+
+        <div class="alert alert-indigo d-flex align-items-center mb-0 shadow-sm border-0 py-2 px-3">
+            <i class="bi bi-info-circle-fill me-2 fs-5 text-indigo"></i>
+            <span class="small text-indigo-emphasis">Configure um horário padrão para agilizar o preenchimento.</span>
+        </div>
     </div>
 
-<div class="card mb-4 shadow-sm">
-    <div class="card-body">
-        <h5 class="card-title mb-3">Horário Padrão</h5>
-        <div class="row g-3 align-items-center">
-            <div class="col-md-4">
-                <label for="defaultStart" class="form-label">Horário Inicial</label>
-                <input type="time" id="defaultStart" class="form-control" placeholder="Horário Inicial" />
-            </div>
-            <div class="col-md-4">
-                <label for="defaultEnd" class="form-label">Horário Final</label>
-                <input type="time" id="defaultEnd" class="form-control" placeholder="Horário Final" />
-            </div>
-            <div class="col-md-4 d-flex pt-lg-4">
-                <div class="d-flex align-items-center "> <!-- Novo container -->
-                    <button type="button" id="applyDefault" class="btn btn-primary w-100">
-                        <i class="bi bi-check-circle me-2"></i>Aplicar a Todos
-                    </button>
+    <form asp-action="SaveWorkSchedule" method="post">
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+            <div class="card-body p-4">
+                <h6 class="text-uppercase fw-bold text-muted small mb-3">Ajuste em Lote</h6>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">Horário Inicial Padrão</label>
+                        <div class="input-group border rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-clock"></i></span>
+                            <input type="time" id="defaultStart" class="form-control border-0" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">Horário Final Padrão</label>
+                        <div class="input-group border rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-clock-fill"></i></span>
+                            <input type="time" id="defaultEnd" class="form-control border-0" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" id="applyDefault" class="btn btn-indigo-soft w-100 fw-bold py-2">
+                            <i class="bi bi-magic me-2"></i>Aplicar a Todos
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-    <div class="card shadow-sm">
-        <div class="card-body">
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-dark text-white">
                         <tr>
-                            <th class="text-center">Dia da Semana</th>
-                            <th class="text-center">Trabalha neste dia?</th>
-                            <th class="text-center">Horário Inicial</th>
-                            <th class="text-center">Horário Final</th>
+                            <th class="ps-4 py-3 fw-medium">Dia da Semana</th>
+                            <th class="py-3 fw-medium text-center">Status de Trabalho</th>
+                            <th class="py-3 fw-medium">Horário de Início</th>
+                            <th class="py-3 fw-medium">Horário de Término</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,33 +67,30 @@
                         {
                             var schedule = Model.ElementAt(i);
                             var isDisabled = !schedule.IsSelected;
-                            var rowClass = isDisabled ? "text-muted" : "";
 
-                            <tr class="@rowClass">
-                                <!-- Dia da semana -->
-                                <td class="text-center align-middle">
+                            <tr class="schedule-row @(isDisabled ? "bg-light-subtle opacity-75" : "")">
+                                <td class="ps-4">
                                     <input type="hidden" name="models[@i].Day" value="@schedule.Day" />
-                                    @DayOfWeekHelper.ToPortuguese(schedule.Day.DayOfWeek)
+                                    <span class="fw-bold text-dark">@DayOfWeekHelper.ToPortuguese(schedule.Day.DayOfWeek)</span>
                                 </td>
-                                <!-- Trabalha neste dia -->
-                                <td class="text-center align-middle">
+                                <td>
                                     <div class="form-check form-switch d-flex justify-content-center">
-                                        <input type="checkbox" id="@schedule.Id" class="form-check-input individual-day"
+                                        <input type="checkbox" id="@schedule.Id" class="form-check-input individual-day custom-switch"
                                                name="models[@i].IsSelected"
                                                value="true" @(schedule.IsSelected ? "checked" : "") />
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="time" class="form-control start-hour"
+                                    <input type="time" class="form-control form-control-sm rounded-3 start-hour border-0 shadow-sm"
                                            name="models[@i].Start"
                                            value="@schedule.Start.ToString(@"hh\:mm")"
-                                    @(isDisabled ? "disabled" : "") />
+                                           @(isDisabled ? "disabled" : "") />
                                 </td>
                                 <td>
-                                    <input type="time" class="form-control end-hour"
+                                    <input type="time" class="form-control form-control-sm rounded-3 end-hour border-0 shadow-sm"
                                            name="models[@i].End"
                                            value="@schedule.End.ToString(@"hh\:mm")"
-                                    @(isDisabled ? "disabled" : "") />
+                                           @(isDisabled ? "disabled" : "") />
                                 </td>
                             </tr>
                         }
@@ -90,21 +98,80 @@
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- Botão de Salvar -->
-    <div class="d-flex justify-content-end mt-4">
-        <button type="submit" id="savebtn" class="btn btn-success">
-            <i class="bi bi-save me-2"></i>Salvar Alterações
-        </button>
-    </div>
-</form>
+        <div class="sticky-bottom py-3 mt-4 bg-white border-top shadow-lg mx-n4 px-4 rounded-top-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small d-none d-md-inline">Certifique-se de salvar antes de sair da página.</span>
+                <button type="submit" id="savebtn" class="btn btn-dark px-5 py-2 fw-bold rounded-pill">
+                    <i class="bi bi-cloud-check me-2"></i>Salvar Cronograma
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
 
 <style>
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --slate-900: #0f172a;
+    }
+
+    /* Estilo para o Alert sutil */
+    .alert-indigo {
+        background-color: var(--indigo-soft);
+        color: var(--indigo);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-indigo-soft {
+        background-color: var(--indigo-soft);
+        color: var(--indigo);
+        border: none;
+    }
+
+        .btn-indigo-soft:hover {
+            background-color: var(--indigo);
+            color: white;
+        }
+
+    /* Tabela */
+    .schedule-row {
+        transition: all 0.2s;
+    }
+
+    /* Inputs de tempo */
+    .form-control[type="time"] {
+        max-width: 150px;
+        background-color: #f1f5f9;
+    }
+
+        .form-control[type="time"]:focus {
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+    /* Switch Customizado */
+    .custom-switch {
+        width: 3rem !important;
+        height: 1.5rem !important;
+        cursor: pointer;
+    }
+
+        .custom-switch:checked {
+            background-color: var(--indigo);
+            border-color: var(--indigo);
+        }
+
     .is-invalid {
-        border-color: red;
-        box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        border: 2px solid #f43f5e !important;
+        box-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
+    }
+
+    /* Sticky save bar */
+    .sticky-bottom {
+        position: sticky;
+        bottom: 0;
+        z-index: 1020;
     }
 </style>
-
-<script src="~/js/workSchedule.js" />

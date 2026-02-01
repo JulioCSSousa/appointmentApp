@@ -389,6 +389,7 @@ public class AccountController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddRole()
     {
         var user = await _userManager.Users.ToListAsync();
@@ -402,6 +403,7 @@ public class AccountController : Controller
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddRole(string id, string role)
     {
         if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(role))

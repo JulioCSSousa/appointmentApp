@@ -1,10 +1,12 @@
 ﻿using appointmentApp.Services.WorkScheduleService;
 using AppointmentAppMvc.Models.ViewModels.WorkSchedule;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace appointmentApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class WorkScheduleController : Controller
     {
         private readonly IWorkScheduleService _scheduleService;

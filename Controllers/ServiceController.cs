@@ -1,10 +1,12 @@
 ﻿using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using AppointmentAppMvc.Models.ViewModels.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace appointmentApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ServiceController : Controller
     {
         private readonly IServiceManager _serviceManager;

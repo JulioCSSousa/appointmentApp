@@ -1,81 +1,89 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container my-4">
-    <div class="text-center mb-6">
-        <h1 class="display-4">Painel Administrativo</h1>
-        <p class="lead">Gerencie usuários, agendamentos, clientes e financeiro de forma prática e rápida.</p>
+<div class="container-fluid py-5 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
+    <div class="row mb-5">
+        <div class="col-12 text-center text-md-start">
+            <h1 class="fw-bold text-dark mb-1" style="letter-spacing: -1px;">Dashboard Administrativo</h1>
+            <p class="text-muted">Bem-vindo de volta! Aqui está o resumo operacional do seu negócio.</p>
+        </div>
     </div>
 
-    <div class="row g-5">
-        <!-- Controle de Usuários -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="icon mb-3">
-                        <i class="bi bi-people fs-1 text-primary"></i>
+    <div class="row g-4">
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100 custom-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-shape bg-indigo-soft text-indigo">
+                            <i class="bi bi-people-fill fs-3"></i>
+                        </div>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Usuários</h5>
                     </div>
-                    <h5 class="card-title">Controle de Usuários</h5>
-                    <p class="card-text">Gerencie permissões, roles e informações de usuários.</p>
-                    <a asp-controller="Account" asp-action="Index" class="btn btn-primary">Acessar</a>
+                    <p class="card-text text-muted mb-4">Gerencie permissões, roles e acessos administrativos de forma centralizada.</p>
+                    <a asp-controller="Account" asp-action="Index" class="btn btn-custom-dark w-100">Gerenciar Painel</a>
                 </div>
             </div>
         </div>
 
-        <!-- Horários -->
-        <div class="col-lg-4 col-md-5">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="icon mb-3">
-                        <i class="bi bi-calendar-check fs-1 text-success"></i>
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100 custom-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-shape bg-emerald-soft text-emerald">
+                            <i class="bi bi-calendar-week-fill fs-3"></i>
+                        </div>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Agenda & Horários</h5>
                     </div>
-                    <h5 class="card-title">Horários</h5>
-                    <p class="card-text">Visualize e organize horários de agendamento e funcionamento.</p>
-                    <a asp-controller="WorkSchedule" asp-action="SaveWorkSchedule" class="btn btn-success">Acessar</a>
+                    <p class="card-text text-muted mb-4">Acompanhe o fluxo de agendamentos e configure o horário de funcionamento.</p>
+                    <a asp-controller="WorkSchedule" asp-action="SaveWorkSchedule" class="btn btn-custom-dark w-100">Ver Agenda</a>
                 </div>
             </div>
         </div>
 
-        <!-- Serviços-->
-        <div class="col-lg-3 col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="icon mb-3">
-                        <i class="bi bi-scissors fs-3 text-success"></i>
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100 custom-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-shape bg-amber-soft text-amber">
+                            <i class="bi bi-scissors fs-3"></i>
+                        </div>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Catálogo de Serviços</h5>
                     </div>
-                    <h5 class="card-title">Serviços</h5>
-                    <p class="card-text">Visualize e organize os Serviços ofertados.</p>
-                    <a asp-controller="Service" asp-action="Index" class="btn btn-dark">Acessar</a>
+                    <p class="card-text text-muted mb-4">Edite preços, descrições e categorias dos serviços ofertados.</p>
+                    <a asp-controller="Service" asp-action="Index" class="btn btn-custom-dark w-100">Editar Catálogo</a>
                 </div>
             </div>
         </div>
 
-        <!-- Clientes -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="icon mb-3">
-                        <i class="bi bi-person-lines-fill fs-1 text-info"></i>
+        <div class="col-xl-4 col-md-6">
+            <div class="card h-100 custom-card border-left-info">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-shape bg-rose-soft text-rose">
+                            <i class="bi bi-person-heart fs-3"></i>
+                        </div>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Base de Clientes</h5>
                     </div>
-                    <h5 class="card-title">Clientes</h5>
-                    <p class="card-text">Gerencie informações e histórico dos clientes.</p>
-                    <a asp-controller="Client" asp-action="Index" class="btn btn-danger">Acessar</a>
+                    <p class="card-text text-muted mb-4">Histórico completo de atendimentos e dados de contato dos seus clientes.</p>
+                    <a asp-controller="Client" asp-action="Index" class="btn btn-custom-dark w-100">Acessar CRM</a>
                 </div>
             </div>
         </div>
 
-        <!-- Financeiro -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="icon mb-3">
-                        <i class="bi bi-currency-dollar fs-1 text-warning"></i>
+        <div class="col-xl-8 col-md-6">
+            <div class="card h-100 custom-card bg-dark text-white shadow-lg">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h3 class="fw-bold mb-2">Relatórios Financeiros</h3>
+                            <p class="text-white-50">Monitore sua receita mensal, despesas e a saúde financeira do negócio em tempo real.</p>
+                            <a asp-controller="Finance" asp-action="Index" class="btn btn-light fw-bold px-4 py-2 mt-2">Visualizar Lucros</a>
+                        </div>
+                        <div class="col-md-5 d-none d-md-block text-end">
+                            <i class="bi bi-graph-up-arrow display-1 opacity-25"></i>
+                        </div>
                     </div>
-                    <h5 class="card-title">Financeiro</h5>
-                    <p class="card-text">Controle receitas, despesas e relatórios financeiros.</p>
-                    <a asp-controller="Finance" asp-action="Index" class="btn btn-warning">Acessar</a>
                 </div>
             </div>
         </div>
@@ -83,20 +91,88 @@
 </div>
 
 <style>
-    .icon {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 80px;
-        width: 80px;
-        border-radius: 50%;
-        background-color: #f8f9fa;
+    /* Variáveis de Cores "Não-IA" */
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --emerald: #10b981;
+        --emerald-soft: #ecfdf5;
+        --amber: #f59e0b;
+        --amber-soft: #fffbeb;
+        --rose: #f43f5e;
+        --rose-soft: #fff1f2;
+        --slate-900: #0f172a;
     }
+
+    .custom-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+            border-color: var(--indigo);
+        }
+
+    .icon-shape {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+    }
+
+    /* Estilização das cores customizadas */
+    .bg-indigo-soft {
+        background-color: var(--indigo-soft);
+    }
+
+    .text-indigo {
+        color: var(--indigo);
+    }
+
+    .bg-emerald-soft {
+        background-color: var(--emerald-soft);
+    }
+
+    .text-emerald {
+        color: var(--emerald);
+    }
+
+    .bg-amber-soft {
+        background-color: var(--amber-soft);
+    }
+
+    .text-amber {
+        color: var(--amber);
+    }
+
+    .bg-rose-soft {
+        background-color: var(--rose-soft);
+    }
+
+    .text-rose {
+        color: var(--rose);
+    }
+
+    .btn-custom-dark {
+        background-color: var(--slate-900);
+        color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 10px;
+        transition: opacity 0.2s;
+    }
+
+        .btn-custom-dark:hover {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
 </style>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
