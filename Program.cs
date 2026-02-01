@@ -134,7 +134,7 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<AppDbContext>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var logger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
-        var userManager = services.GetRequiredService<UserManager<UserModel>>();
+        //var userManager = services.GetRequiredService<UserManager<UserModel>>();
         await context.Database.MigrateAsync();
 
         await RoleInitializer.SeedRolesAsync(roleManager);
