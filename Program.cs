@@ -24,11 +24,11 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Agora você pode acessar as variáveis de ambiente com `Environment.GetEnvironmentVariable`
-var dbHost = Environment.GetEnvironmentVariable("AIVEN_HOST");
-var dbPort = Environment.GetEnvironmentVariable("AIVEN_PORT");
-var dbUser = Environment.GetEnvironmentVariable("AIVEN_USER");
-var dbPassword = Environment.GetEnvironmentVariable("AIVEN_PASSWORD");
-var dbName = Environment.GetEnvironmentVariable("AIVEN_DB");
+var dbHost = Environment.GetEnvironmentVariable("LOCAL_HOST") ?? Environment.GetEnvironmentVariable("AIVEN_HOST");
+var dbPort = Environment.GetEnvironmentVariable("LOCAL_PORT") ?? Environment.GetEnvironmentVariable("AIVEN_PORT");
+var dbUser = Environment.GetEnvironmentVariable("LOCAL_USER") ?? Environment.GetEnvironmentVariable("AIVEN_USER");
+var dbPassword = Environment.GetEnvironmentVariable("LOCAL_PASSWORD") ?? Environment.GetEnvironmentVariable("AIVEN_PASSWORD");
+var dbName = Environment.GetEnvironmentVariable("LOCAL_DB") ?? Environment.GetEnvironmentVariable("AIVEN_DB");
 
 // Criar a string de conexão
 var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword}";

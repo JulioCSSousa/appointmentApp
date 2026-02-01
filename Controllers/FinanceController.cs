@@ -27,7 +27,7 @@ namespace appointmentApp.Controllers
             var clientsWithAppointments = await _appointmentService.Get();
             if (clientsWithAppointments == null || clientsWithAppointments.Count() == 0)
             {
-                return BadRequest("Has no Appointments");
+                return View(model);
             }
             var filteredClients = clientsWithAppointments.Where(c => c.Status == "Finished");
 
