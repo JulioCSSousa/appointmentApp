@@ -79,17 +79,14 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
-var serverVersion = ServerVersion.AutoDetect(connectionString);
 // Configurar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion, mysqlOptions =>
-    {
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), mysqlOptions =>
         mysqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 10, // Tenta 10 vezes
-            maxRetryDelay: TimeSpan.FromSeconds(30), // Espera até 30s entre tentativas
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
             errorNumbersToAdd: null
-        );
-    }));
+        )));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization(options =>
