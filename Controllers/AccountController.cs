@@ -389,16 +389,34 @@ public class AccountController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddRole()
     {
-        var user = await _userManager.Users.ToListAsync();
-        if (user == null)
+        var users = await _userManager.Users.ToListAsync();
+        List<UserWithRolesViewModel> userWithRoles = new List<UserWithRolesViewModel>();
+        if (users == null)
         {
             return BadRequest();
         }
+        foreach(var u in users)
+        {
+            var role = await _userManager.GetRolesAsync(u);
+            userWithRoles.Add(new UserWithRolesViewModel
+            {
+                Id = u.Id,
+                Email = u.UserName,
+                Name = u.Name,
+                PhoneNumber = u.PhoneNumber,
+                Role = role.FirstOrDefault()?.ToString()
+            });
+        }
+        var adminCount = userWithRoles.Select(x => x.Role == ("Admin"));
 
-        return View(user);
+        if (adminCount.Count() == 2)
+        {
+            var admin = userWithRoles.FirstOrDefault(u => u.Role == "Admin");
+            userWithRoles.Remove(admin);
+        }
+        return View(userWithRoles);
     }
 
     [HttpPost]

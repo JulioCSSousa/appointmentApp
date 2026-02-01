@@ -1,50 +1,146 @@
-﻿@using appointmentApp.Constants
-@using appointmentApp.Models.Entities
-
-@model List<UserModel>
+﻿@using AppointmentAppMvc.Models.ViewModels.Account
+@using appointmentApp.Constants
+@model List<UserWithRolesViewModel>
 
 @{
-    ViewData["Title"] = "Adicionar um role ao usuário";
+    ViewData["Title"] = "Gestão de Permissões";
 }
-<a asp-action="Index"
-   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-    ⬅ Retornar
-</a>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Selecionar Role</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null)
-        {
-            foreach (var user in Model)
-            {
-                <tr>     
-                    <td>@user.Name</td>
-                    <td>@user.Email</td>
+<div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
 
-                    <td>
-                        <form asp-action="AddRole" method="post">
-                            <input type="hidden" name="id" value="@user.Id" />
-                            <div class="form-group">
-                                <select id="role" name="role" class="form-control">
-                                    @foreach (var role in Roles.AllRoles)
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted p-0 mb-1">
+                <i class="bi bi-arrow-left"></i> Voltar à Lista
+            </a>
+            <h2 class="fw-bold text-dark m-0">Atribuir Níveis de Acesso</h2>
+            <p class="text-muted small">Defina quem são os administradores e quem são os profissionais (workers).</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Usuário</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Status Atual</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Nova Permissão</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var user in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3">
+                                            @user.Name.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@user.Name</div>
+                                            <div class="text-muted small">@user.Email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @* Aqui assumindo que seu ViewModel tenha a lista de Roles atuais *@
+                                    @if (user.Role != null && user.Role.Any())
                                     {
-                                        <option value="@role">@role</option>
+                                        <span class="badge @(user.Role == "Admin" ? "bg-dark" : "bg-indigo-soft text-indigo") rounded-pill px-3 py-2">
+                                            @user.Role
+                                            </span> 
                                     }
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Atribuir Role</button>
-                        </form>
-                        
-                    </td>
-                </tr>
-            }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-2">Sem Role</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <form asp-action="AddRole" method="post" class="d-flex justify-content-end gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@user.Id" />
+
+                                        <div style="min-width: 160px;">
+                                            <select name="role" class="form-select form-select-sm rounded-3 shadow-sm">
+                                                <option value="" disabled selected>Selecionar...</option>
+                                                @foreach (var role in Roles.AllRoles)
+                                                {
+                                                    <option value="@role">@role</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-sm btn-indigo px-3 rounded-3 shadow-sm">
+                                            <i class="bi bi-person-check-fill me-1"></i> Atribuir
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --slate-900: #0f172a;
+    }
+
+    .fs-xs {
+        font-size: 0.75rem;
+    }
+
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background-color: var(--indigo-soft);
+        color: var(--indigo);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .bg-indigo-soft {
+        background-color: var(--indigo-soft);
+    }
+
+    .text-indigo {
+        color: var(--indigo);
+    }
+
+    .btn-indigo {
+        background-color: var(--indigo);
+        color: white;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+        .btn-indigo:hover {
+            background-color: #4f46e5;
+            color: white;
+            transform: translateY(-1px);
         }
-    </tbody>
-</table>
+
+    .form-select-sm {
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+        border-color: #e2e8f0;
+    }
+
+    .table thead th {
+        background-color: #fcfcfd;
+        border-bottom: 1px solid #f1f5f9;
+        letter-spacing: 0.05em;
+    }
+</style>
