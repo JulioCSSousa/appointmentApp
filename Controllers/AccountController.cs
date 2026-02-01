@@ -239,19 +239,17 @@ public class AccountController : Controller
 
         int totalItems = await query.CountAsync();
 
-        // 4. Agora sim, paginamos e transformamos em Lista
+        //  pagina e transforma em Lista
         var users = await query
             .OrderBy(u => u.Name)
             .Skip(skip)
             .Take(itemByPge)
             .ToListAsync();
 
-        // 5. Preenchemos as ViewBags com base no total REAL do banco
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / itemByPge);
         ViewBag.SearchTerm = searchTerm;
 
-        // 6. Mapeamento para o ViewModel (seu loop está correto)
         List<UserWithRolesViewModel> usersWithRoles = new List<UserWithRolesViewModel>();
         foreach (var user in users)
         {
@@ -289,7 +287,7 @@ public class AccountController : Controller
             PhoneNumber = user.PhoneNumber
         };
 
-        return View(model); // Exibe a p�gina de atualiza��o com os dados do usu�rio
+        return View(model);
     }
 
 
