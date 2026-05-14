@@ -475,4 +475,5 @@ public class AccountController : Controller
         return RedirectToAction("Index"); // Retorna para a lista de usu�rios ou outra p�gina
     }
 
+
 }

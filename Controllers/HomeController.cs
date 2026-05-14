@@ -7,21 +7,42 @@ using AppointmentAppMvc.Models.ViewModels.Get;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace appointmentApp.Controllers
+namespace AppointmentAppMvc.Controllers
 {
     public class HomeController : Controller
     {
         private readonly UserManager<UserModel> _userManager;
         private readonly IAppointmentService _appointmentService;
         private readonly IServiceManager _serviceManager;
+        private static DateTime _lastKeepAlive = DateTime.MinValue;
 
         public HomeController(UserManager<UserModel> userManager, IAppointmentService appointmentService, IServiceManager serviceManager)
         {
             _userManager = userManager;
             _appointmentService = appointmentService;
             _serviceManager = serviceManager;
+
+            //Task para impedir do banco desligar
+            if ((DateTime.Now - _lastKeepAlive).TotalHours > 24)
+            {
+                _lastKeepAlive = DateTime.Now;
+
+                Task.Run(async () =>
+                {
+                    try
+                    {
+
+                        await _userManager.Users.Take(1).ToListAsync();
+                    }
+                    catch
+                    {
+                        _lastKeepAlive = DateTime.MinValue;
+                    }
+                });
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -69,6 +90,12 @@ namespace appointmentApp.Controllers
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             return View(clients);
+        }
+
+        [AllowAnonymous]
+        public ActionResult OfflineDbError()
+        {
+            return View();
         }
 
 

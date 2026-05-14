@@ -3,44 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\julio\\source\\repos\\appointmentApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\controllers\\appointmentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:controllers\\appointmentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\controllers\\clientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:controllers\\clientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\controllers\\servicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:controllers\\servicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\views\\client\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:views\\client\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\views\\home\\indexadm.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:views\\home\\indexadm.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\middlewares\\databaseexceptionmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:middlewares\\databaseexceptionmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\views\\appointment\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:views\\appointment\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\views\\workschedule\\saveworkschedule.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:views\\workschedule\\saveworkschedule.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\services\\utilities\\schedulesgeneratorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:services\\utilities\\schedulesgeneratorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\models\\viewmodels\\workschedule\\dayscheduleviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:models\\viewmodels\\workschedule\\dayscheduleviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\controllers\\workschedulecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:controllers\\workschedulecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|c:\\users\\julio\\source\\repos\\appointmentapp\\views\\home\\offlinedberror.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{BB171D4F-458D-4682-9837-B8816F493CDE}|AppointmentAppMvc.csproj|solutionrelative:views\\home\\offlinedberror.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -50,136 +30,71 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ClientController.cs",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\ClientController.cs",
-              "RelativeDocumentMoniker": "Controllers\\ClientController.cs",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\ClientController.cs",
-              "RelativeToolTip": "Controllers\\ClientController.cs",
-              "ViewState": "AgIAADwAAAAAAAAAAAAqwEoAAAAqAAAAAAAAAA==",
+              "Title": "ServiceController.cs",
+              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\ServiceController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ServiceController.cs",
+              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\ServiceController.cs",
+              "RelativeToolTip": "Controllers\\ServiceController.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAA1wAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T20:13:31.576Z",
+              "WhenOpened": "2026-05-14T01:46:13.728Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\Home\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\Home\\Index.cshtml",
-              "RelativeToolTip": "Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAAB8AAAAAAAAAAAAAACwAAAA8AAAAAAAAAA==",
+              "Title": "OfflineDbError.cshtml",
+              "DocumentMoniker": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\Views\\Home\\OfflineDbError.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\OfflineDbError.cshtml",
+              "ToolTip": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\Views\\Home\\OfflineDbError.cshtml",
+              "RelativeToolTip": "Views\\Home\\OfflineDbError.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-02T20:10:29.059Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\Client\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Client\\Index.cshtml",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\Client\\Index.cshtml",
-              "RelativeToolTip": "Views\\Client\\Index.cshtml",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAUwBYAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-02T20:01:35.724Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Create.cshtml",
-              "DocumentMoniker": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\Views\\Appointment\\Create.cshtml",
-              "RelativeDocumentMoniker": "Views\\Appointment\\Create.cshtml",
-              "ToolTip": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\Views\\Appointment\\Create.cshtml",
-              "RelativeToolTip": "Views\\Appointment\\Create.cshtml",
-              "ViewState": "AgIAAKEAAAAAAAAAAAAUwL4AAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-02T19:34:09.322Z",
+              "WhenOpened": "2026-05-14T01:30:29.645Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AppointmentController.cs",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\AppointmentController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AppointmentController.cs",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\AppointmentController.cs",
-              "RelativeToolTip": "Controllers\\AppointmentController.cs",
-              "ViewState": "AgIAAB8AAAAAAAAAAADwv1kAAAAJAAAAAAAAAA==",
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "Controllers\\HomeController.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAiwB8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T15:44:25.652Z",
+              "WhenOpened": "2026-05-14T00:41:54.242Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAGQAAAAAAAAAAAAqwGsAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-14T00:38:57.342Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "IndexAdm.cshtml",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\Home\\IndexAdm.cshtml",
-              "RelativeDocumentMoniker": "Views\\Home\\IndexAdm.cshtml",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\Home\\IndexAdm.cshtml",
-              "RelativeToolTip": "Views\\Home\\IndexAdm.cshtml",
-              "ViewState": "AgIAABcAAAAAAAAAAAAwwCUAAABWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-02T20:12:12.524Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "SaveWorkSchedule.cshtml",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\WorkSchedule\\SaveWorkSchedule.cshtml",
-              "RelativeDocumentMoniker": "Views\\WorkSchedule\\SaveWorkSchedule.cshtml",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Views\\WorkSchedule\\SaveWorkSchedule.cshtml",
-              "RelativeToolTip": "Views\\WorkSchedule\\SaveWorkSchedule.cshtml",
-              "ViewState": "AgIAACcAAAAAAAAAAAAAADAAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-02T19:28:17.214Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "SchedulesGeneratorService.cs",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Services\\Utilities\\SchedulesGeneratorService.cs",
-              "RelativeDocumentMoniker": "Services\\Utilities\\SchedulesGeneratorService.cs",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Services\\Utilities\\SchedulesGeneratorService.cs",
-              "RelativeToolTip": "Services\\Utilities\\SchedulesGeneratorService.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAywCgAAAAJAAAAAAAAAA==",
+              "Title": "DatabaseExceptionMiddleware.cs",
+              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Middlewares\\DatabaseExceptionMiddleware.cs",
+              "RelativeDocumentMoniker": "Middlewares\\DatabaseExceptionMiddleware.cs",
+              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Middlewares\\DatabaseExceptionMiddleware.cs",
+              "RelativeToolTip": "Middlewares\\DatabaseExceptionMiddleware.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAowBsAAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T16:07:44.989Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "DayScheduleViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Models\\ViewModels\\WorkSchedule\\DayScheduleViewModel.cs",
-              "RelativeDocumentMoniker": "Models\\ViewModels\\WorkSchedule\\DayScheduleViewModel.cs",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Models\\ViewModels\\WorkSchedule\\DayScheduleViewModel.cs",
-              "RelativeToolTip": "Models\\ViewModels\\WorkSchedule\\DayScheduleViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T15:39:44.527Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "WorkScheduleController.cs",
-              "DocumentMoniker": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\WorkScheduleController.cs",
-              "RelativeDocumentMoniker": "Controllers\\WorkScheduleController.cs",
-              "ToolTip": "C:\\Users\\julio\\source\\repos\\appointmentApp\\Controllers\\WorkScheduleController.cs",
-              "RelativeToolTip": "Controllers\\WorkScheduleController.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T15:39:18.471Z",
+              "WhenOpened": "2026-05-14T00:37:00.966Z",
               "EditorCaption": ""
             }
           ]

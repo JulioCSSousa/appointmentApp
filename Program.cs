@@ -9,6 +9,7 @@ using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
 using AppointmentAppMvc.ApplicationSeed;
 using AppointmentAppMvc.Hubs;
+using AppointmentAppMvc.Middlewares;
 using DotNetEnv;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -28,7 +29,7 @@ var dbHost = Environment.GetEnvironmentVariable("LOCAL_HOST") ?? Environment.Get
 var dbPort = Environment.GetEnvironmentVariable("LOCAL_PORT") ?? Environment.GetEnvironmentVariable("AIVEN_PORT");
 var dbUser = Environment.GetEnvironmentVariable("LOCAL_USER") ?? Environment.GetEnvironmentVariable("AIVEN_USER");
 var dbPassword = Environment.GetEnvironmentVariable("LOCAL_PASSWORD") ?? Environment.GetEnvironmentVariable("AIVEN_PASSWORD");
-var dbName = Environment.GetEnvironmentVariable("LOCAL_DB") ?? Environment.GetEnvironmentVariable("AIVEN_DB");
+var dbName = Environment.GetEnvironmentVariable("LOCAL") ?? Environment.GetEnvironmentVariable("AIVEN_DB");
 
 // Criar a string de conexão
 var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword}";
@@ -80,10 +81,11 @@ builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
 // Configurar DbContext
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 30));
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), mysqlOptions =>
+    options.UseMySql(connectionString, serverVersion, mysqlOptions =>
         mysqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
+            maxRetryCount: 1,
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorNumbersToAdd: null
         )));
@@ -97,19 +99,14 @@ builder.Services.AddSignalR();
 // Construir a aplicação
 var app = builder.Build();
 
-// Usar o middleware de exceção
-app.UseMiddleware<ExceptionMiddleware>();
 
-// Configuração do pipeline HTTP
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    app.UseExceptionHandler("/Home/OfflineDbError");
 }
-else
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+app.UseMiddleware<DatabaseExceptionMiddleware>();
+// Usar o middleware de exceção
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
