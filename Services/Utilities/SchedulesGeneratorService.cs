@@ -8,27 +8,30 @@ namespace appointmentApp.Services.Utilities
         {
             var availableHours = new List<TimeSpan>();
 
-            // Lista de horários já agendados com suas respectivas durações
+            // REMOVIDO: start = DateTime.Now.TimeOfDay... (Isso quebrava os dias futuros)
+
+            // 1. Identifica os intervalos ocupados para este dia específico
             var bookedIntervals = appointments
-                .Where(a => DateOnly.FromDateTime(a.Day) == day)
+                .Where(a => DateOnly.FromDateTime(a.Day) == day &&
+                            a.Status != "Canceled" &&
+                            a.Status != "Finished")
                 .Select(a =>
                 {
                     var service = services.FirstOrDefault(s => s.ServiceId == a.ServiceId);
-                    var duration = service != null ? service.Duration : TimeSpan.FromMinutes(30); // Duração padrão se não encontrado
+                    var duration = service != null ? service.Duration : TimeSpan.FromMinutes(30);
                     return new { Start = a.Day.TimeOfDay, End = a.Day.TimeOfDay + duration };
                 })
                 .ToList();
 
-            // Percorre o horário de 30 em 30 minutos verificando disponibilidade
-            for (TimeSpan h = start; h + TimeSpan.FromMinutes(30) <= end; h += TimeSpan.FromMinutes(30))
-            {
-                // Verifica se esse horário está dentro de algum intervalo já ocupado
-                bool isAvailable = !bookedIntervals.Any(b =>
-                    (h >= b.Start && h < b.End) ||  // Está dentro de um intervalo ocupado
-                    (h + TimeSpan.FromMinutes(30) > b.Start && h + TimeSpan.FromMinutes(30) <= b.End) // Próximo bloco também está ocupado
-                );
+            // 2. Loop de geração de slots (ex: 30 em 30 min)
+            TimeSpan interval = TimeSpan.FromMinutes(30);
 
-                if (isAvailable)
+            for (TimeSpan h = start; h + interval <= end; h += interval)
+            {
+                // Verifica se o slot h até h+interval sobrepõe algum agendamento existente
+                bool isBooked = bookedIntervals.Any(b => h < b.End && b.Start < (h + interval));
+
+                if (!isBooked)
                 {
                     availableHours.Add(h);
                 }

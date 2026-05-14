@@ -4,10 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Sprache;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 public class AccountController : Controller
 {
@@ -269,7 +267,7 @@ public class AccountController : Controller
     }
 
     [HttpGet("Update/{id}")]
-    [Authorize(Roles = "Admin")]
+
     public async Task<IActionResult> Update(string id)
     {
         var user = await _userManager.FindByIdAsync(id);

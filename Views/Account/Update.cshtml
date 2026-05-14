@@ -1,82 +1,106 @@
 ﻿@using AppointmentAppMvc.Models.ViewModels.Account
 @model UpdateUserViewModel
 
-<a asp-action="Index"
-   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-    ⬅ Retornar
-</a>
-<div class="container mt-5">
+@{
+    ViewData["Title"] = "Editar Perfil";
+}
+
+<div class="container-fluid py-5 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg p-4">
-                <h2 class="text-center mb-4">Alterar Dados do Usuário</h2>
+        <div class="col-md-6 col-lg-5">
 
-                <form asp-action="Update" method="post">
-                    <input type="hidden" name="id" value="@Model.Id" />
-
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nome</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input type="text" id="name" name="Name" value="@Model.Name" class="form-control" placeholder="Digite seu nome" required />
-                        </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 text-center">
+                    <div class="avatar-sm mx-auto mb-3 bg-indigo-soft text-indigo rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-gear fs-2"></i>
                     </div>
+                    <h3 class="fw-bold text-dark m-0">Editar Usuário</h3>
+                    <p class="text-muted small">Altere as informações de contato e nome.</p>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="email" class="form-label">E-mail</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input type="email" id="email" name="Email" value="@Model.Email" class="form-control" placeholder="Digite seu e-mail" required />
+                <div class="card-body p-4">
+                    <form asp-action="Update" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-muted small text-uppercase">Nome Completo</label>
+                            <div class="input-group border rounded-3 overflow-hidden shadow-sm">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-person text-indigo"></i></span>
+                                <input type="text" asp-for="Name" class="form-control border-0 bg-light py-2" placeholder="Nome do usuário" required />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger small"></span>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="phoneNumber" class="form-label">Telefone</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                            <input type="text" id="phoneNumber" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control" placeholder="Digite seu telefone" required />
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-muted small text-uppercase">E-mail Corporativo</label>
+                            <div class="input-group border rounded-3 overflow-hidden shadow-sm">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-envelope text-indigo"></i></span>
+                                <input type="email" asp-for="Email" class="form-control border-0 bg-light py-2" placeholder="email@exemplo.com" required />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
                         </div>
-                    </div>
 
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-save"></i> Salvar Alterações
-                    </button>
-                </form>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-muted small text-uppercase">Telefone / WhatsApp</label>
+                            <div class="input-group border rounded-3 overflow-hidden shadow-sm">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-whatsapp text-indigo"></i></span>
+                                <input type="text" asp-for="PhoneNumber" class="form-control border-0 bg-light py-2" placeholder="(00) 00000-0000" required />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-indigo py-2 fw-bold rounded-3 shadow-sm">
+                                <i class="bi bi-check2-all me-2"></i>Salvar Alterações
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-light text-muted border-0 py-2 fw-semibold">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Adicionando o FontAwesome para ícones -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-
 <style>
-    .card {
-        border-radius: 12px;
-        border: none;
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --slate-800: #1e293b;
     }
 
-    .input-group-text {
-        background-color: #f8f9fa;
-        border-right: 0;
+    .bg-indigo-soft {
+        background-color: var(--indigo-soft);
     }
 
-    .form-control {
-        border-left: 0;
+    .text-indigo {
+        color: var(--indigo);
     }
 
-        .form-control:focus {
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    .btn-indigo {
+        background-color: var(--indigo);
+        color: white;
+        transition: all 0.2s ease;
+    }
+
+        .btn-indigo:hover {
+            background-color: #4f46e5;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-        padding: 10px;
-        font-size: 1.1em;
+    .input-group:focus-within {
+        border-color: var(--indigo) !important;
+        ring: 2px solid var(--indigo-soft);
     }
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
+    .form-control:focus {
+        background-color: #fff;
+        outline: none;
+        box-shadow: none;
+    }
 </style>

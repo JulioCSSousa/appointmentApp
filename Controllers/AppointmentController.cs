@@ -7,6 +7,7 @@ using AppointmentAppMvc.Hubs;
 using AppointmentAppMvc.Models.ViewModels;
 using AppointmentAppMvc.Models.ViewModels.Appointment;
 using AppointmentAppMvc.Services.Utilities.Enum;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
@@ -18,63 +19,78 @@ namespace appointmentApp.Controllers
         private readonly IAppointmentService _appService;
         private readonly IServiceManager _serviceManager;
         private readonly IWorkScheduleService _workSchedule;
+        private readonly UserManager<UserModel> _userManager;
         private readonly IHubContext<NotificationHub> _hubContext;
 
         public AppointmentController(IAppointmentService appservice,
             IServiceManager serviceManager,
             IWorkScheduleService workschedule,
-            IHubContext<NotificationHub> hubContext)
+            IHubContext<NotificationHub> hubContext,
+            UserManager<UserModel> userManager)
 
         {
             _appService = appservice;
             _serviceManager = serviceManager;
             _workSchedule = workschedule;
             _hubContext = hubContext;
+            _userManager = userManager;
         }
 
         private async Task<AppointmentViewModel> LoadAppointmentViewModelAsync()
         {
-            var services = await _serviceManager.GetAsync("");
-            var workSchedules = await _workSchedule.GetAsync();
+            // 1. Buscas
+            var allServices = (await _serviceManager.GetAsync("")).ToList();
+            var workSchedules = await _workSchedule.GetAsync(); // Aqui vêm as configs de Dom a Dom
             var appointments = await _appService.Get();
 
             var appointmentDateAndHourList = new Dictionary<DateTime, List<TimeSpan>>();
             var isDayOpenList = new List<bool>();
-            var servicesIdsInAppointment = appointments.Select(x => x.ServiceId);
-            var servicesInDbList = new List<ServiceModel>();
-            foreach (var serviceId in servicesIdsInAppointment)
+
+            // 2. Ordenar por data e garantir que pegamos tudo do banco (Hoje em diante)
+            var schedulesConfigurados = workSchedules
+                .Where(ws => ws.Day.Date >= DateTime.Today)
+                .OrderBy(ws => ws.Day.Date)
+                .ToList(); // Se tiver 7, 15 ou 30 dias no banco, ele pegará todos
+
+            foreach (var workSchedule in schedulesConfigurados)
             {
-
-                var servicesInAppointment = await _serviceManager.GetByIdAsync(serviceId);
-                servicesInDbList.Add(servicesInAppointment);
-
-            }
-
-            foreach (var workSchedule in workSchedules)
-            {
-                isDayOpenList.Add(workSchedule.IsSelected);
-
+                // Gerar os horários para o dia (seja ele sábado, domingo ou segunda)
                 var hoursInDay = SchedulesGeneratorService.GenerateHours(
                     workSchedule.Start,
                     workSchedule.End,
                     DateOnly.FromDateTime(workSchedule.Day),
                     appointments.ToList(),
-                    servicesInDbList
+                    allServices
                 );
 
-                appointmentDateAndHourList[workSchedule.Day] = hoursInDay;
+                // Filtro para o dia de hoje (não mostrar horários que já passaram)
+                if (workSchedule.Day.Date == DateTime.Today)
+                {
+                    var margem = DateTime.Now.TimeOfDay.Add(TimeSpan.FromMinutes(20));
+                    hoursInDay = hoursInDay.Where(h => h > margem).ToList();
+                }
+
+                // ADICIONA AO DICIONÁRIO (Independente do dia da semana)
+                appointmentDateAndHourList[workSchedule.Day.Date] = hoursInDay;
+
+                // Sincroniza se o dia está aberto ou fechado conforme o seu Checkbox no Admin
+                isDayOpenList.Add(workSchedule.IsSelected);
             }
+
+            var usersWithRoles = await UserModel.UserWithRolesAsync(_userManager);
+            var workers = usersWithRoles.Where(w => w.Role == "Colaborador").ToList();
 
             return new AppointmentViewModel
             {
-                Services = services.ToList(),
+                Services = allServices,
                 HoursToSchedule = appointmentDateAndHourList,
-                IsDayClosed = isDayOpenList
+                IsDayClosed = isDayOpenList,
+                Workers = workers
             };
         }
 
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Create()
         {
             var appointmentsViewModel = await LoadAppointmentViewModelAsync();
             return View(appointmentsViewModel);
@@ -105,7 +121,7 @@ namespace appointmentApp.Controllers
                     return BadRequest("Serviço não encontrado no banco de dados.");
                 }
 
-                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, model.SelectedDayAndHour, "Waiting");
+                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, model.WorkerId, model.SelectedDayAndHour, "Waiting");
 
                 await _appService.Create(newAppointment);
                 TempData["SuccessMessage"] = "Agendamento realizado com sucesso!";
@@ -151,6 +167,25 @@ namespace appointmentApp.Controllers
         public ActionResult Details(int id)
         {
             return View();
+        }
+
+        public async Task<ActionResult> CancelAppointment(Guid id, Status newStatus)
+        {
+            var dbappointment = await _appService.GetById(id);
+
+            if (dbappointment == null)
+                return NotFound("Este agendamento não existe.");
+
+            // Atualiza o status no objeto da entidade
+            dbappointment.SetStatus(Status.Canceled);
+
+            // PERSISTÊNCIA: Você precisa chamar o serviço para salvar no banco!
+            await _appService.Update(dbappointment);
+
+            TempData["SuccessMessage"] = "Status atualizado com sucesso!";
+
+            // Redireciona para onde o usuário estava (ex: IndexAdm da Home)
+            return RedirectToAction("Index", "Home");
         }
 
         public async Task<IActionResult> Delete(Guid id)

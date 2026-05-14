@@ -15,14 +15,13 @@ namespace appointmentApp.Services.AppointmentServices
         }
         public async Task  Create(AppointmentModel appointment)
         {
-            var existingAppointment = await _repository.GetByUserId(appointment.ClientId);
+            /*var existingAppointment = await _repository.GetByUserId(appointment.ClientId);
             if (existingAppointment != null)
             {
                 // Lança uma exceção com a mensagem apropriada
                 throw new InvalidOperationException("Já existe um agendamento para este cliente.");
-            }
+            }*/
 
-            // Caso contrário, cria o novo agendamento
             await _repository.Create(appointment);
         }
 

@@ -1,0 +1,191 @@
+﻿@using System.Globalization
+@using AppointmentAppMvc.Models.ViewModels.Appointment
+@using appointmentApp.Models.ViewModels
+@using appointmentApp.Services.Utilities
+@model AppointmentViewModel
+
+@{
+    ViewData["Title"] = "Agendamento";
+}
+
+<div class="container py-4">
+    <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-header bg-dark text-white p-4 rounded-top-4">
+            <h3 class="mb-0"><i class="bi bi-calendar2-check me-2"></i>Novo Agendamento</h3>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Create" asp-controller="Appointment" method="post" id="mainForm">
+
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="bi bi-tools me-1"></i> Escolha o Serviço</label>
+                        <select class="form-select form-select-lg shadow-sm border-2" id="serviceSelect" name="SelectedServiceId" required>
+                            <option selected disabled>Selecione um serviço...</option>
+                            @foreach (var service in Model.Services)
+                            {
+                                @* Usando CultureInfo.InvariantCulture para evitar erros de formatação no data-attribute *@
+                                <option value="@service.ServiceId"
+                                        data-price="@service.Price.ToString("F2", CultureInfo.InvariantCulture)"
+                                        data-duration="@service.Duration.TotalMinutes">
+                                    @service.ServiceName
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="bi bi-person-badge me-1"></i> Selecione o Profissional</label>
+                        <select class="form-select form-select-lg shadow-sm border-2" id="workerSelect" name="SelectWorkerId" required>
+                            <option selected disabled>Selecione um Funcionário...</option>
+                            @foreach (var worker in Model.Workers)
+                            {
+                                <option value="@worker.Id" data-name="@worker.Name">@worker.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <div id="serviceDetails" class="d-none animate__animated animate__fadeIn">
+                            <div class="alert alert-secondary d-flex align-items-center mb-0 border-0 shadow-sm rounded-3">
+                                <div class="me-4">
+                                    <small class="text-muted d-block">Preço:</small>
+                                    <strong class="fs-5 text-dark">R$ <span id="priceDisplay">-</span></strong>
+                                </div>
+                                <div class="border-start ps-4">
+                                    <small class="text-muted d-block">Duração:</small>
+                                    <strong class="fs-5 text-dark"><span id="durationDisplay">-</span> minutos</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Escolha um Horário Disponível</h5>
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    @foreach (var date in Model.HoursToSchedule.Keys)
+                                    {
+                                        <th class="text-center py-3">
+                                            <span class="d-block small fw-normal">@date.ToString("MMMM", new CultureInfo("pt-BR"))</span>
+                                            <span class="fs-5">@date.Day</span>
+                                            <span class="d-block small fw-normal">@date.ToString("ddd", new CultureInfo("pt-BR"))</span>
+                                        </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    @for (int i = 0; i < Model.HoursToSchedule.Count; i++)
+                                    {
+                                        var date = Model.HoursToSchedule.Keys.ElementAt(i);
+                                        var timeList = Model.HoursToSchedule[date];
+                                        bool isClosed = !Model.IsDayClosed[i];
+
+                                        <td class="@(isClosed ? "day-off-bg" : "") p-3">
+                                            @if (isClosed)
+                                            {
+                                                <div class="text-center text-danger small fw-bold">FECHADO</div>
+                                            }
+                                            else
+                                            {
+                                                <select class="form-select time-select border-0 bg-light text-center"
+                                                        data-day="@date.ToShortDateString()">
+                                                    <option selected value="">Horários...</option>
+                                                    @foreach (var time in timeList)
+                                                    {
+                                                        <option value="@date.Add(time).ToString("yyyy-MM-dd HH:mm")">
+                                                            @time.ToString(@"hh\:mm")
+                                                        </option>
+                                                    }
+                                                </select>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <input type="hidden" name="ServiceName" id="hiddenServiceName">
+                <input type="hidden" name="Price" id="hiddenPrice">
+                <input type="hidden" name="Duration" id="hiddenDuration">
+                <input type="hidden" name="SelectedDayAndHour" id="hiddenSelectedDayAndHour">
+                <input type="hidden" name="ClientId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+                    <button type="submit" id="bookButton" class="btn btn-success btn-lg px-5 shadow rounded-pill" disabled>
+                        <i class="bi bi-calendar-check-fill me-2"></i>Confirmar Agendamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .day-off-bg {
+        background-color: #fff5f5 !important;
+    }
+
+    .table thead th {
+        border: none;
+    }
+
+    .time-select:focus {
+        box-shadow: none;
+        border-color: transparent;
+        background-color: #e9ecef;
+    }
+
+    .animate__animated {
+        animation-duration: 0.5s;
+    }
+</style>
+
+<script>
+    const bookButton = document.getElementById("bookButton");
+    const hiddenTime = document.getElementById("hiddenSelectedDayAndHour");
+    const hiddenServiceId = document.getElementById("hiddenServiceName"); // ID do serviço
+
+    function checkFormCompletion() {
+        // Habilita se tiver Serviço selecionado E Horário preenchido
+        const serviceId = document.getElementById("serviceSelect").value;
+        const timeValue = hiddenTime.value;
+        bookButton.disabled = !(serviceId && timeValue);
+    }
+
+    // Monitor do Serviço
+    document.getElementById("serviceSelect").addEventListener("change", function() {
+        const selectedOption = this.options[this.selectedIndex];
+
+        // Atualiza campos de UI
+        document.getElementById("priceDisplay").innerText = selectedOption.getAttribute("data-price");
+        document.getElementById("durationDisplay").innerText = selectedOption.getAttribute("data-duration");
+        document.getElementById("serviceDetails").classList.remove("d-none");
+
+        // Atualiza campos ocultos
+        document.getElementById("hiddenPrice").value = selectedOption.getAttribute("data-price");
+        document.getElementById("hiddenDuration").value = selectedOption.getAttribute("data-duration");
+        hiddenServiceId.value = this.value;
+
+        checkFormCompletion();
+    });
+
+    // Monitor da Tabela de Horários
+    document.querySelectorAll(".time-select").forEach(function(select) {
+        select.addEventListener("change", function() {
+            // Reseta outros selects de tempo para não haver confusão
+            document.querySelectorAll(".time-select").forEach(s => { if(s !== select) s.value = ""; });
+
+            hiddenTime.value = this.value;
+            checkFormCompletion();
+        });
+    });
+
+    // Lógica para o Worker (opcional, caso queira validar)
+    document.getElementById("workerSelect").addEventListener("change", checkFormCompletion);
+</script>
