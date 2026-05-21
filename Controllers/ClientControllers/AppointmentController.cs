@@ -88,14 +88,24 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 isDayOpenList.Add(workSchedule.IsSelected);
             }
 
-            var usersWithRoles = await UserModel.UserWithRolesAsync(_userManager, "Colaborador");
+            var usersWithRoles = await _userManager.GetUsersInRoleAsync("Colaborador");
+            var workersModel = new List<UserWithRolesViewModel>();
+
+            foreach (var item in usersWithRoles)
+            {
+                workersModel.Add(new UserWithRolesViewModel
+                {
+                    Id = item.Id,
+                    Name = item.Name // Garanta que a sua classe de usuário possui a propriedade Name populada
+                });
+            }
 
             return new AppointmentViewModel
             {
                 Services = allServices,
                 HoursToSchedule = appointmentDateAndHourList,
                 IsDayClosed = isDayOpenList,
-                Workers = usersWithRoles
+                Workers = workersModel // Repassa a lista nativa encontrada
             };
         }
 
