@@ -33,7 +33,7 @@ namespace appointmentApp.Services.AppointmentServices
 
         public async Task<IEnumerable<AppointmentModel>> Get()
         {
-            return await _repository.Get().ToListAsync();
+            return await _repository.GetAsync();
         }
 
         public async Task<AppointmentModel> GetById(Guid id)

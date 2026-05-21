@@ -12,6 +12,7 @@
     string ToPortuguese(string txt) => txt switch
     {
         "Waiting" => "Aguardando",
+        "InProgress" => "Em Progresso",
         "Finished" => "Concluído",
         "Canceled" => "Cancelado",
         _ => ""
@@ -103,7 +104,7 @@
                                 </td>
                                 <td>
                                     @* Badge colorida baseada no status *@
-                                    <span class="badge @(statusStr switch { "Waiting" => "bg-warning text-dark", "Finished" => "bg-success", "Canceled" => "bg-danger", _ => "bg-secondary" })">
+                                    <span class="badge @(statusStr switch { "Waiting" => "bg-warning text-dark", "InProgress" => "bg-primary text-dark", "Finished" => "bg-success", "Canceled" => "bg-danger", _ => "bg-secondary" })">
                                         @ToPortuguese(statusStr)
                                     </span>
                                 </td>

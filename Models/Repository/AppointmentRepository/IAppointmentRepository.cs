@@ -4,7 +4,7 @@ namespace appointmentApp.Models.Repository.AppointmentRepository
 {
     public interface IAppointmentRepository
     {
-        IQueryable<AppointmentModel> Get();
+        Task<IEnumerable<AppointmentModel>> GetAsync();
         Task<AppointmentModel> GetById(Guid id);
         Task<AppointmentModel?> GetByUserId(string id);
         Task<AppointmentModel?> GetByServiceId(int id);

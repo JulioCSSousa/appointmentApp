@@ -13,9 +13,9 @@ namespace appointmentApp.Models.Repository.AppointmentRepository
             _context = context;
         }
 
-        public IQueryable<AppointmentModel> Get()
+        public async Task<IEnumerable<AppointmentModel>> GetAsync()
         {
-            return _context.Appointments;
+            return await _context.Appointments.ToListAsync();
         }
 
         public async Task<AppointmentModel> GetById(Guid id)

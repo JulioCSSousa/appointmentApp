@@ -64,8 +64,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwb2ludG1lbnRcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/julio/Source/Repos/appointmentApp/Views/Client/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50XEluZGV4LmNzaHRtbA==
+[C:/Users/julio/Source/Repos/appointmentApp/Views/Appointment/_HoursTablePartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwb2ludG1lbnRcX0hvdXJzVGFibGVQYXJ0aWFsLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/julio/Source/Repos/appointmentApp/Views/ClientBase/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50QmFzZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/julio/Source/Repos/appointmentApp/Views/Finance/Index.cshtml]
@@ -78,6 +82,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/julio/Source/Repos/appointmentApp/Views/Home/IndexAdm.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleEFkbS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/julio/Source/Repos/appointmentApp/Views/Home/IndexWorker.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleFdvcmtlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/julio/Source/Repos/appointmentApp/Views/Home/OfflineDbError.cshtml]
@@ -108,8 +116,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/julio/Source/Repos/appointmentApp/Views/WorkSchedule/SaveWorkSchedule.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya1NjaGVkdWxlXFNhdmVXb3JrU2NoZWR1bGUuY3NodG1s
+[C:/Users/julio/Source/Repos/appointmentApp/Views/WorkSchedule/WorkSchedule.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya1NjaGVkdWxlXFdvcmtTY2hlZHVsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/julio/Source/Repos/appointmentApp/Views/_ViewImports.cshtml]

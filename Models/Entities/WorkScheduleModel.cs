@@ -3,6 +3,7 @@
     public class WorkScheduleModel
     {
         public int Id { get; private set; }
+        public Guid? WorkerId { get; private set; } = Guid.Empty;
         public DateTime Day { get; private set; }
         public bool IsSelected { get; private set; }
         public TimeSpan Start { get; private set; }
@@ -10,14 +11,19 @@
         public List<AppointmentModel> Appointments { get; set; } = new List<AppointmentModel>();
 
         private WorkScheduleModel() { }
-        public WorkScheduleModel(DateTime day, bool isSelected, TimeSpan start, TimeSpan end)
+        public WorkScheduleModel(DateTime day, bool isSelected, TimeSpan start, TimeSpan end, Guid? workerId)
         {
             Day = day;
             IsSelected = isSelected;
             Start = start;
             End = end;
+            WorkerId = workerId;
         }
 
+        public void SetWorkerId(Guid? id)
+        {
+            WorkerId = id;
+        }
         public void SetDay(DateTime day)
         {
             Day = day;

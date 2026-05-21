@@ -3,6 +3,7 @@
     public class DayScheduleViewModel
     {
         public int Id { get; set; }
+        public Guid? WokerId { get; set; }
         public DateTime Day { get; set; }
         public bool IsSelected { get; set; }
         public TimeSpan Start { get; set; }

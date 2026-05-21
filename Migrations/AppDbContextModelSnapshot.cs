@@ -198,6 +198,9 @@ namespace AppointmentAppMvc.Migrations
                     b.Property<int?>("WorkScheduleModelId")
                         .HasColumnType("int");
 
+                    b.Property<string>("WorkerId")
+                        .HasColumnType("longtext");
+
                     b.HasKey("Id");
 
                     b.HasIndex("WorkScheduleModelId");
@@ -290,6 +293,9 @@ namespace AppointmentAppMvc.Migrations
 
                     b.Property<TimeSpan>("Start")
                         .HasColumnType("time(6)");
+
+                    b.Property<Guid?>("WorkerId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 

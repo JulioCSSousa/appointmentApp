@@ -13,10 +13,16 @@ namespace appointmentApp.Models.Repository.WorkScheduleRepository
             _context = context;
         }
 
-        public IQueryable<WorkScheduleModel> GetAsync()
+        public async Task<IEnumerable<WorkScheduleModel>> GetAsync(DateTime? startDate, DateTime? endDate)
         {
+            var result = await _context.WorkSchedules.ToListAsync();
+
+            if (startDate != null || endDate != null)
+            {
+                result = result.Where(d => d.Day >= startDate && d.Day <= endDate).ToList();
+            }
             
-            var result = _context.WorkSchedules.AsQueryable();
+
             return result;
 
         }

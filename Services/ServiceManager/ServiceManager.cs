@@ -15,15 +15,15 @@ namespace appointmentApp.Services.ServiceManager
 
         public async Task<IEnumerable<ServiceModel>> GetAsync(string? txt)
         {
-            var dbResult = _repository.GetAsync();
+            var dbResult = await _repository.GetAsync();
             if (!string.IsNullOrEmpty(txt))
             {
                 dbResult = dbResult.Where(s => s.ServiceName.Contains(txt));
-                return await dbResult.ToListAsync();
+                return dbResult.ToList();
             }
             else
             {
-                return await dbResult.ToListAsync();
+                return dbResult.ToList();
             }
         }
 

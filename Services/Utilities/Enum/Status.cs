@@ -3,7 +3,8 @@
     public enum Status
     {
         Waiting = 0,
-        Finished = 1,
-        Canceled = 2
+        InProgress = 1,
+        Finished = 2,
+        Canceled = 3
     }
 }

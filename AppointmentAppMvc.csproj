@@ -25,4 +25,8 @@
 	  
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\WorkerControllers\" />
+  </ItemGroup>
+
 </Project>

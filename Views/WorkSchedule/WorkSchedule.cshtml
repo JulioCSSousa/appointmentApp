@@ -1,0 +1,236 @@
+﻿@using AppointmentAppMvc.Models.ViewModels.WorkSchedule
+@using appointmentApp.Models.Entities
+@using appointmentApp.Models.ViewModels
+@using appointmentApp.Services;
+@using appointmentApp.Services.Utilities
+@model IEnumerable<DayScheduleViewModel>
+
+@{
+    var currentWorkerId = ViewBag.CurrentWorkerId;
+    var currentWorkerName = ViewBag.CurrentWorkerName;
+    var hasWorkers = ViewBag.Workers != null && ((IEnumerable<dynamic>)ViewBag.Workers).Any();
+}
+
+<div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
+
+    <!-- HEADER DA PÁGINA -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <a asp-action="IndexAdm" asp-controller="Home" class="btn btn-link text-decoration-none text-muted p-0 mb-2">
+                <i class="bi bi-arrow-left"></i> Painel Administrativo
+            </a>
+            <h2 class="fw-bold text-dark m-0">Escala de Atendimento</h2>
+            <p class="text-muted small mb-0">Gerencie os dias de trabalho e horários de atendimento da barbearia.</p>
+        </div>
+
+        <!-- O card de contexto se adapta: se tem worker mostra o nome, se não, mostra que é a escala padrão -->
+        <div class="alert alert-indigo d-flex align-items-center mb-0 shadow-sm border-0 py-2 px-3">
+            <i class="bi bi-calendar-week me-2 fs-5 text-indigo"></i>
+            <span class="small text-indigo-emphasis">
+                @if (currentWorkerId != null)
+                {
+                    <span>Configurando a agenda de: <strong>@currentWorkerName</strong></span>
+                }
+                else
+                {
+                    <strong>Escala Geral da Barbearia (Padrão)</strong>
+                }
+            </span>
+        </div>
+    </div>
+
+    <!-- SELETOR DE PROFISSIONAL: Só renderiza se de fato existirem workers cadastrados no banco -->
+    @if (hasWorkers)
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-dark mb-2">Selecione o Colaborador:</label>
+                        <select id="workerSelector" class="form-select border rounded-3 p-2 fw-semibold text-muted" onchange="changeWorker(this.value)">
+                            <option value="">-- Escala Padrão da Empresa --</option>
+                            @foreach (var worker in ViewBag.Workers)
+                            {
+                                <option value="@worker.Id" selected="@(worker.Id.ToString() == currentWorkerId?.ToString() ? "selected" : null)">
+                                    @worker.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <span class="badge bg-light text-dark border p-2 rounded-3 small">
+                            <i class="bi bi-person-gear me-1 text-indigo"></i> Escala por Profissional ativa
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- O FORMULÁRIO FICA SEMPRE VISÍVEL AGORA -->
+    <form asp-action="WorkSchedule" method="post">
+
+        <!-- Envia o ID do worker se existir, se for nulo, o controller já sabe que é a escala global -->
+        <input type="hidden" name="WorkerId" value="@currentWorkerId" />
+
+        <!-- AJUSTE EM LOTE -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+            <div class="card-body p-4">
+                <h6 class="text-uppercase fw-bold text-muted small mb-3">Ajuste em Lote</h6>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">Horário Inicial Padrão</label>
+                        <div class="input-group border rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-clock"></i></span>
+                            <input type="time" id="defaultStart" class="form-control border-0" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">Horário Final Padrão</label>
+                        <div class="input-group border rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-clock-fill"></i></span>
+                            <input type="time" id="defaultEnd" class="form-control border-0" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" id="applyDefault" class="btn btn-indigo-soft w-100 fw-bold py-2">
+                            <i class="bi bi-magic me-2"></i>Aplicar a Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRID DOS CARDS DE HORÁRIO -->
+        <div class="row">
+            @for (var i = 0; i < Model.Count(); i++)
+            {
+                var schedule = Model.ElementAt(i);
+                var isDisabled = !schedule.IsSelected;
+                var dayOfWeekName = DayOfWeekHelper.ToPortuguese(schedule.Day.DayOfWeek);
+                var formattedDate = schedule.Day.ToString("dd/MM");
+
+                <div class="col-md-6 col-lg-3 mb-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 schedule-card @(isDisabled ? "card-disabled" : "")"
+                         style="transition: all 0.2s; background-color: #ffffff;">
+
+                        <div class="card-header border-0 bg-transparent pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <input type="hidden" name="models[@i].Day" value="@schedule.Day" />
+                                <input type="hidden" name="models[@i].Id" value="@schedule.Id" />
+                                <h5 class="fw-bold m-0 text-dark">@dayOfWeekName</h5>
+                                <small class="text-muted fw-semibold"><i class="bi bi-calendar3 me-1"></i>@formattedDate</small>
+                            </div>
+                            <div class="form-check form-switch p-0 m-0">
+                                <input type="checkbox" id="switch_@i" class="form-check-input individual-day custom-switch m-0"
+                                       name="models[@i].IsSelected"
+                                       value="true" @(schedule.IsSelected ? "checked" : "") />
+                            </div>
+                        </div>
+
+                        <div class="card-body px-4 pb-4 pt-2">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted mb-1">Início</label>
+                                    <div class="input-group input-group-sm border rounded-3 overflow-hidden bg-light">
+                                        <span class="input-group-text bg-transparent border-0 text-muted px-2"><i class="bi bi-clock"></i></span>
+                                        <input type="time" class="form-control border-0 bg-transparent start-hour p-1 text-center font-monospace"
+                                               name="models[@i].Start"
+                                               value="@schedule.Start.ToString(@"hh\:mm")"
+                                               @(isDisabled ? "disabled" : "") />
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted mb-1">Fim</label>
+                                    <div class="input-group input-group-sm border rounded-3 overflow-hidden bg-light">
+                                        <span class="input-group-text bg-transparent border-0 text-muted px-2"><i class="bi bi-clock-fill"></i></span>
+                                        <input type="time" class="form-control border-0 bg-transparent end-hour p-1 text-center font-monospace"
+                                               name="models[@i].End"
+                                               value="@schedule.End.ToString(@"hh\:mm")"
+                                               @(isDisabled ? "disabled" : "") />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- BARRA DE SALVAMENTO FIXA -->
+        <div class="sticky-bottom py-3 mt-4 bg-white border-top shadow-lg mx-n4 px-4 rounded-top-4">
+            <div class="d-flex justify-content-between align-items-center container-fluid">
+                <span class="text-muted small d-none d-md-inline">Altere os horários e clique em salvar para aplicar as modificações.</span>
+                <button type="submit" id="savebtn" class="btn btn-dark px-5 py-2 fw-bold rounded-pill">
+                    <i class="bi bi-cloud-check me-2"></i>Salvar Cronograma
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* O CSS antigo se mantém idêntico aqui */
+    :root {
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+    }
+
+    .alert-indigo {
+        background-color: var(--indigo-soft);
+        color: var(--indigo);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-indigo-soft {
+        background-color: var(--indigo-soft);
+        color: var(--indigo);
+        border: none;
+    }
+
+        .btn-indigo-soft:hover {
+            background-color: var(--indigo);
+            color: white;
+        }
+
+    .custom-switch {
+        width: 3rem !important;
+        height: 1.5rem !important;
+        cursor: pointer;
+    }
+
+        .custom-switch:checked {
+            background-color: var(--indigo);
+            border-color: var(--indigo);
+        }
+
+    .sticky-bottom {
+        position: sticky;
+        bottom: 0;
+        z-index: 1020;
+    }
+
+    .card-disabled {
+        background-color: #f1f5f9 !important;
+        border: 1px dashed #cbd5e1 !important;
+        opacity: 0.6;
+    }
+
+    .schedule-card:not(.card-disabled):hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05) !important;
+    }
+
+    .form-control[type="time"] {
+        max-width: none !important;
+        font-size: 0.9rem;
+    }
+</style>
+
+<script>
+    function changeWorker(workerId) {
+        // Se selecionar a primeira opção (vazia), recarrega a escala padrão sem ID
+        window.location.href = '@Url.Action("WorkSchedule", "WorkSchedule")' + (workerId ? '?workerId=' + workerId : '');
+    }
+</script>

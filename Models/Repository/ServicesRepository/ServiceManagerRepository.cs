@@ -12,9 +12,9 @@ namespace appointmentApp.Models.Repository.ServicesRepository
             _context = context;
         }
 
-        public IQueryable<ServiceModel> GetAsync()
+        public async Task<IEnumerable<ServiceModel>> GetAsync()
         {
-            return _context.Services;
+            return await _context.Services.ToListAsync();
         }
 
         public async Task<ServiceModel> GetByIdAsync(int id)
@@ -29,7 +29,7 @@ namespace appointmentApp.Models.Repository.ServicesRepository
         {
             try
             {
-                var create = _context.Services.AddAsync(service);
+                var create = await _context.Services.AddAsync(service);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

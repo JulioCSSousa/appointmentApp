@@ -12,9 +12,9 @@ namespace appointmentApp.Services.WorkScheduleService
             _repository = repository;
         }
 
-        async Task<IEnumerable<WorkScheduleModel>> IWorkScheduleService.GetAsync()
+        async Task<IEnumerable<WorkScheduleModel>> IWorkScheduleService.GetAsync(DateTime? startDate, DateTime? endDate)
         {
-            return await _repository.GetAsync().ToListAsync();
+            return await _repository.GetAsync(startDate, endDate);
         }
         async Task IWorkScheduleService.Create(WorkScheduleModel workSchedule)
         {

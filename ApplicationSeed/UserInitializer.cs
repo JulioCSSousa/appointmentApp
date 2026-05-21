@@ -7,13 +7,11 @@ namespace AppointmentAppMvc.ApplicationSeed
     {
         public static async Task SeedMassUsersAsync(UserManager<UserModel> userManager)
         {
-            // Lista de nomes para deixar o banco com cara de real
             var nomes = new[] { "Gabriel", "Lucas", "Rafael", "Ana", "Beatriz", "Marcos", "Julian", "Erik", "Caio", "Larissa" };
             var sobrenomes = new[] { "Silva", "Santos", "Oliveira", "Souza", "Pereira", "Ferreira", "Almeida" };
 
             var random = new Random();
 
-            // Vamos criar 20 usuários de teste
             for (int i = 1; i <= 100; i++)
             {
                 var nomeAleatorio = nomes[random.Next(nomes.Length)];

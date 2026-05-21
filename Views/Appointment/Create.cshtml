@@ -35,13 +35,21 @@
 
                     <div class="col-md-6">
                         <label class="form-label fw-bold"><i class="bi bi-person-badge me-1"></i> Selecione o Profissional</label>
-                        <select class="form-select form-select-lg shadow-sm border-2" id="workerSelect" name="SelectWorkerId" required>
-                            <option selected disabled>Selecione um Funcionário...</option>
-                            @foreach (var worker in Model.Workers)
-                            {
-                                <option value="@worker.Id" data-name="@worker.Name">@worker.Name</option>
-                            }
-                        </select>
+                        @if (Model.Workers.Any())
+                        {
+                            <select class="form-select form-select-lg shadow-sm border-2" id="workerSelect" name="SelectWorkerId" required>
+                                <option selected disabled>Selecione um Funcionário...</option>
+                                @foreach (var worker in Model.Workers)
+                                {
+                                    <option value="@worker.Id" data-name="@worker.Name">@worker.Name</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <div>Não há colaboradores</div>
+                        }
+
                     </div>
 
                     <div class="col-12">
@@ -60,54 +68,9 @@
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Escolha um Horário Disponível</h5>
-                    <div class="table-responsive rounded-3 border">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-dark">
-                                <tr>
-                                    @foreach (var date in Model.HoursToSchedule.Keys)
-                                    {
-                                        <th class="text-center py-3">
-                                            <span class="d-block small fw-normal">@date.ToString("MMMM", new CultureInfo("pt-BR"))</span>
-                                            <span class="fs-5">@date.Day</span>
-                                            <span class="d-block small fw-normal">@date.ToString("ddd", new CultureInfo("pt-BR"))</span>
-                                        </th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    @for (int i = 0; i < Model.HoursToSchedule.Count; i++)
-                                    {
-                                        var date = Model.HoursToSchedule.Keys.ElementAt(i);
-                                        var timeList = Model.HoursToSchedule[date];
-                                        bool isClosed = !Model.IsDayClosed[i];
-
-                                        <td class="@(isClosed ? "day-off-bg" : "") p-3">
-                                            @if (isClosed)
-                                            {
-                                                <div class="text-center text-danger small fw-bold">FECHADO</div>
-                                            }
-                                            else
-                                            {
-                                                <select class="form-select time-select border-0 bg-light text-center"
-                                                        data-day="@date.ToShortDateString()">
-                                                    <option selected value="">Horários...</option>
-                                                    @foreach (var time in timeList)
-                                                    {
-                                                        <option value="@date.Add(time).ToString("yyyy-MM-dd HH:mm")">
-                                                            @time.ToString(@"hh\:mm")
-                                                        </option>
-                                                    }
-                                                </select>
-                                            }
-                                        </td>
-                                    }
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div id="hoursTableContainer">
+                    <!-- Renderiza os horários iniciais padrão (vazio ou da barbearia) ao carregar a página -->
+                    @await Html.PartialAsync("_HoursTablePartial", Model)
                 </div>
 
                 <input type="hidden" name="ServiceName" id="hiddenServiceName">
@@ -147,27 +110,27 @@
 </style>
 
 <script>
-    const bookButton = document.getElementById("bookButton");
+      const bookButton = document.getElementById("bookButton");
     const hiddenTime = document.getElementById("hiddenSelectedDayAndHour");
-    const hiddenServiceId = document.getElementById("hiddenServiceName"); // ID do serviço
+    const hiddenServiceId = document.getElementById("hiddenServiceName");
 
     function checkFormCompletion() {
-        // Habilita se tiver Serviço selecionado E Horário preenchido
         const serviceId = document.getElementById("serviceSelect").value;
+        const workerId = document.getElementById("workerSelect")?.value;
         const timeValue = hiddenTime.value;
-        bookButton.disabled = !(serviceId && timeValue);
+
+        // O botão agora só ativa se tiver Serviço, Profissional E Horário escolhidos
+        bookButton.disabled = !(serviceId && workerId && timeValue);
     }
 
     // Monitor do Serviço
     document.getElementById("serviceSelect").addEventListener("change", function() {
         const selectedOption = this.options[this.selectedIndex];
 
-        // Atualiza campos de UI
         document.getElementById("priceDisplay").innerText = selectedOption.getAttribute("data-price");
         document.getElementById("durationDisplay").innerText = selectedOption.getAttribute("data-duration");
         document.getElementById("serviceDetails").classList.remove("d-none");
 
-        // Atualiza campos ocultos
         document.getElementById("hiddenPrice").value = selectedOption.getAttribute("data-price");
         document.getElementById("hiddenDuration").value = selectedOption.getAttribute("data-duration");
         hiddenServiceId.value = this.value;
@@ -175,17 +138,42 @@
         checkFormCompletion();
     });
 
-    // Monitor da Tabela de Horários
-    document.querySelectorAll(".time-select").forEach(function(select) {
-        select.addEventListener("change", function() {
-            // Reseta outros selects de tempo para não haver confusão
-            document.querySelectorAll(".time-select").forEach(s => { if(s !== select) s.value = ""; });
+    // ESCUTADOR DINÂMICO PARA SELEÇÃO DO COLABORADOR
+    document.getElementById("workerSelect").addEventListener("change", function() {
+        const workerId = this.value;
+        if (!workerId) return;
 
-            hiddenTime.value = this.value;
-            checkFormCompletion();
-        });
+        // Faz a chamada assíncrona ao controller passando o Id do colaborador selecionado
+        fetch(`/Appointment/GetAvailableHours?workerId=${workerId}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Erro ao carregar os horários.");
+                return response.text(); // Esperamos HTML como resposta (a partial view)
+            })
+            .then(htmlHeaders => {
+                // Injeta o HTML novo dentro do container estável da tabela
+                document.getElementById("hoursTableContainer").innerHTML = htmlHeaders;
+
+                // Como a tabela foi recriada, precisamos reatribuir os eventos de escuta aos novos 'selects' de horas
+                attachTimeSelectEvents();
+
+                // Reseta a escolha anterior de horário para o cliente ter que escolher de novo
+                hiddenTime.value = "";
+                checkFormCompletion();
+            })
+            .catch(error => console.error("Erro:", error));
     });
 
-    // Lógica para o Worker (opcional, caso queira validar)
-    document.getElementById("workerSelect").addEventListener("change", checkFormCompletion);
+    // Encapsula a lógica dos seletores de hora para facilitar o re-vínculo dinâmico
+    function attachTimeSelectEvents() {
+        document.querySelectorAll(".time-select").forEach(function(select) {
+            select.addEventListener("change", function() {
+                document.querySelectorAll(".time-select").forEach(s => { if(s !== select) s.value = ""; });
+                hiddenTime.value = this.value;
+                checkFormCompletion();
+            });
+        });
+    }
+
+    // Executa na primeira carga da página para a tabela inicial funcionar
+    attachTimeSelectEvents();
 </script>
