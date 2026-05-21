@@ -10,10 +10,10 @@ namespace appointmentApp.Models.Entities
         [Key]
         public Guid Id { get; set; }
         public string ClientId { get; private set; }
-        public string? WorkerId { get; private set; }
         public int ServiceId { get; private set; }
+        public string? WorkerId { get; private set; }
+        
         public DateTime Day { get; private set; }
-        public TimeSpan Hour { get; private set; }
         public string Status { get; private set; }
 
         private AppointmentModel() { }
@@ -38,10 +38,6 @@ namespace appointmentApp.Models.Entities
         public void SetDay(DateTime day)
         {
             Day = day;
-        }
-        public void SetHour(TimeSpan hour)
-        {
-            Hour = hour;
         }
 
         public void SetStatus(Status status)

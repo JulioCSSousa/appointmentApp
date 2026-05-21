@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AppointmentAppMvc")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac6763b8898abfabe035585bd3684a2d1ccb2a2e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2498bb37876e2be130c03dbf235c734f51c74440")]
 [assembly: System.Reflection.AssemblyProductAttribute("AppointmentAppMvc")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AppointmentAppMvc")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -39,7 +39,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
 
         private async Task<AppointmentViewModel> LoadAppointmentViewModelAsync(int offsetWeeks = 0)
         {
-            // 0. Define o fuso horário de Brasília para não quebrar no Render
+            // 0. Define o fuso horário de Brasília 
             TimeZoneInfo brazilTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
             DateTime todayInBrazil = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone).Date;
             DateTime nowInBrazil = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone);
@@ -73,7 +73,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                     allServices
                 );
 
-                // CORREÇÃO AQUI: Aplica o filtro de margem APENAS para o dia de HOJE
+                // Aplica o filtro de margem APENAS para o dia de HOJE
                 if (workSchedule.Day.Date == todayInBrazil)
                 {
                     // Usa o horário atual do Brasil + 20 minutos de margem
@@ -96,7 +96,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 workersModel.Add(new UserWithRolesViewModel
                 {
                     Id = item.Id,
-                    Name = item.Name // Garanta que a sua classe de usuário possui a propriedade Name populada
+                    Name = item.Name 
                 });
             }
 
@@ -105,7 +105,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 Services = allServices,
                 HoursToSchedule = appointmentDateAndHourList,
                 IsDayClosed = isDayOpenList,
-                Workers = workersModel // Repassa a lista nativa encontrada
+                Workers = workersModel 
             };
         }
 

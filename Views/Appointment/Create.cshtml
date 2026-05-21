@@ -37,7 +37,7 @@
                         <label class="form-label fw-bold"><i class="bi bi-person-badge me-1"></i> Selecione o Profissional</label>
                         @if (Model.Workers.Any())
                         {
-                            <select class="form-select form-select-lg shadow-sm border-2" id="workerSelect" name="SelectWorkerId" required>
+                            <select asp-for="WorkerId" class="form-select form-select-lg shadow-sm border-2" id="workerSelect" required>
                                 <option selected disabled>Selecione um Funcionário...</option>
                                 @foreach (var worker in Model.Workers)
                                 {

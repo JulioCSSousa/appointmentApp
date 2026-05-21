@@ -65,7 +65,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             // 2. FILTRA pelo usuário logado PRIMEIRO (Evita que o loop pegue lixo de outros users)
             var userAppointments = allAppointments.Where(a => a.ClientId == userId).OrderByDescending(a => a.Day).ToList();
 
-            // 3. Agora calcula a paginação baseada apenas nos agendamentos DELE
+            // 3. calcula a paginação baseada apenas nos agendamentos DELE
             int totalItems = userAppointments.Count();
             var pagedAppointments = userAppointments
                 .Skip((page - 1) * pageSize)
@@ -96,8 +96,10 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         {
             int pageSize = 10;
             List<ClientIndexViewModel> clients = new List<ClientIndexViewModel>();
-
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var allAppointments = await _appointmentService.Get();
+
+            allAppointments = allAppointments.Where(x => x.WorkerId == userId);
 
             if (allAppointments == null || !allAppointments.Any())
             {

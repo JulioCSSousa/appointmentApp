@@ -185,9 +185,6 @@ namespace AppointmentAppMvc.Migrations
                     b.Property<DateTime>("Day")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<TimeSpan>("Hour")
-                        .HasColumnType("time(6)");
-
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
