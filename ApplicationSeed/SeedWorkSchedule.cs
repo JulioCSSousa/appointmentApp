@@ -15,7 +15,9 @@ namespace appointmentApp.ApplicationSeed
         {
             try
             {
-                DateTime today = DateTime.Today;
+
+                TimeZoneInfo brazilTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+                DateTime today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone).Date;
                 DateTime limitDate = today.AddDays(SCHEDULE_WINDOW_DAYS);
 
                 // 1. Descobre o ID da Role "Colaborador" no sistema

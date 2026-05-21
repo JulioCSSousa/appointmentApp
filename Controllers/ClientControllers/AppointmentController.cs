@@ -39,25 +39,32 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
 
         private async Task<AppointmentViewModel> LoadAppointmentViewModelAsync(int offsetWeeks = 0)
         {
-            DateTime startDate = DateTime.Today.AddDays(offsetWeeks * 7);
+            // 0. Define o fuso horário de Brasília para não quebrar no Render
+            TimeZoneInfo brazilTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+            DateTime todayInBrazil = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone).Date;
+            DateTime nowInBrazil = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone);
+
+            // Ajusta as datas de início e fim com base no dia correto do Brasil
+            DateTime startDate = todayInBrazil.AddDays(offsetWeeks * 7);
             DateTime endDate = startDate.AddDays(6);
+
             // 1. Buscas
             var allServices = (await _serviceManager.GetAsync("")).ToList();
-            var workSchedules = await _workSchedule.GetAsync(startDate, endDate); // Aqui vêm as configs de Dom a Dom
+            var workSchedules = await _workSchedule.GetAsync(startDate, endDate);
             var appointments = await _appService.Get();
 
             var appointmentDateAndHourList = new Dictionary<DateTime, List<TimeSpan>>();
             var isDayOpenList = new List<bool>();
 
-            // 2. Ordenar por data e garantir que pegamos tudo do banco (Hoje em diante)
+            // 2. Filtrar os schedules que são de hoje em diante (baseado no Brasil)
             var schedulesConfigurados = workSchedules
-                .Where(ws => ws.Day >= DateTime.Today)
+                .Where(ws => ws.Day.Date >= todayInBrazil)
                 .OrderBy(ws => ws.Day.Date)
-                .ToList(); // Se tiver 7, 15 ou 30 dias no banco, ele pegará todos
+                .ToList();
 
             foreach (var workSchedule in schedulesConfigurados)
             {
-                // Gerar os horários para o dia (seja ele sábado, domingo ou segunda)
+                // Gerar os horários padrões do dia
                 var hoursInDay = SchedulesGeneratorService.GenerateHours(
                     workSchedule.Start,
                     workSchedule.End,
@@ -66,31 +73,23 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                     allServices
                 );
 
-                // Filtro para o dia de hoje (não mostrar horários que já passaram)
-                if (workSchedule.Day.Date >= DateTime.Today)
+                // CORREÇÃO AQUI: Aplica o filtro de margem APENAS para o dia de HOJE
+                if (workSchedule.Day.Date == todayInBrazil)
                 {
-                    var margem = DateTime.Now.TimeOfDay.Add(TimeSpan.FromMinutes(20));
+                    // Usa o horário atual do Brasil + 20 minutos de margem
+                    var margem = nowInBrazil.TimeOfDay.Add(TimeSpan.FromMinutes(20));
                     hoursInDay = hoursInDay.Where(h => h > margem).ToList();
                 }
 
-                // ADICIONA AO DICIONÁRIO (Independente do dia da semana)
+                // Adiciona ao dicionário usando a data limpa
                 appointmentDateAndHourList[workSchedule.Day.Date] = hoursInDay;
 
-                // Sincroniza se o dia está aberto ou fechado conforme o seu Checkbox no Admin
+                // Sincroniza se o dia está aberto (IsSelected == true significa Aberto)
                 isDayOpenList.Add(workSchedule.IsSelected);
             }
 
             var usersWithRoles = await UserModel.UserWithRolesAsync(_userManager, "Colaborador");
-            var workersModel = new List<UserWithRolesViewModel>();
-            foreach(var item in usersWithRoles)
-            {
-                workersModel.Add(new UserWithRolesViewModel
-                {
-                    Id = item.Id,
-                    Name = item.Name
-                }
-                );
-            }
+
             return new AppointmentViewModel
             {
                 Services = allServices,
