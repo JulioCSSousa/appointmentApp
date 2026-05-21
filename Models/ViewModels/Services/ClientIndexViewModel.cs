@@ -8,5 +8,6 @@ namespace AppointmentAppMvc.Models.ViewModels.Get
         public UserModel? User { get; set; }
         public AppointmentModel? Appointment { get; set; }
         public ServiceModel? Service { get; set; }
+        public string? WorkerName { get; set; }
     }
 }

@@ -48,13 +48,19 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         [Authorize(Roles = "Admin")]
         public ActionResult IndexAdm()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = _userManager.FindByIdAsync(userId).Result;
+
+            ViewBag.UserName = userName.Name;
             return View();
         }
         [HttpGet]
         public async Task<IActionResult> Index(int page = 1)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = _userManager.FindByIdAsync(userId).Result;
 
+            ViewBag.UserName = userName.Name;
 
             int pageSize = 10;
             List<ClientIndexViewModel> clients = new List<ClientIndexViewModel>();
@@ -63,7 +69,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             var allAppointments = await _appointmentService.Get();
 
             // 2. FILTRA pelo usuário logado PRIMEIRO (Evita que o loop pegue lixo de outros users)
-            var userAppointments = allAppointments.Where(a => a.ClientId == userId).OrderByDescending(a => a.Day).ToList();
+            var userAppointments = allAppointments.Where(a => a.ClientId == userId).OrderByDescending(a => a.Day).OrderByDescending(s => s.Status).ToList();
 
             // 3. calcula a paginação baseada apenas nos agendamentos DELE
             int totalItems = userAppointments.Count();
@@ -97,6 +103,9 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             int pageSize = 10;
             List<ClientIndexViewModel> clients = new List<ClientIndexViewModel>();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = _userManager.FindByIdAsync(userId).Result;
+
+            ViewBag.UserName = userName.Name;
             var allAppointments = await _appointmentService.Get();
 
             allAppointments = allAppointments.Where(x => x.WorkerId == userId);
@@ -118,12 +127,14 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             {
                 var findService = await _serviceManager.GetByIdAsync(appointment.ServiceId);
                 var user = await _userManager.FindByIdAsync(appointment.ClientId);
-
+                var worker = await _userManager.FindByIdAsync(appointment?.WorkerId);
                 clients.Add(new ClientIndexViewModel
                 {
                     Appointment = appointment,
                     Service = findService,
-                    User = user
+                    User = user,
+                    WorkerName = worker.Name
+                    
                 });
             }
 
