@@ -20,7 +20,7 @@ namespace appointmentApp.ApplicationSeed
 
                 // 1. Descobre o ID da Role "Colaborador" no sistema
                 var colaboradorRoleId = await context.Roles
-                    .Where(r => r.Name == "Worker")
+                    .Where(r => r.Name == "Colaborador")
                     .Select(r => r.Id)
                     .FirstOrDefaultAsync();
 
