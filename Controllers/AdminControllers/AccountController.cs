@@ -163,7 +163,7 @@ public class AccountController : Controller
         // Envia o link de recupera��o de senha para o e-mail do usu�rio
         await _emailSender.SendEmailAsync(
             email,
-            "Redefini��o de Senha",
+            "Redefinição de Senha",
             $"Clique aqui para redefinir sua senha: <a href='{callbackUrl}'>Redefinir Senha</a>");
 
         return RedirectToAction("PasswordRecoveryConfirmation", "Account");

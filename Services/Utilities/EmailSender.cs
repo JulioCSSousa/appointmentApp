@@ -22,21 +22,31 @@ public class EmailSender : IEmailSender
     {
         using (var client = new SmtpClient(_smtpHost, _smtpPort))
         {
-            client.Credentials = new NetworkCredential(_smtpUser, _smtpPass);
-            client.EnableSsl = true; // Necessário para conexões seguras
+            // 1. PRIMEIRO desative as credenciais padrão
             client.UseDefaultCredentials = false;
+
+            // 2. DEPOIS insira a sua App Password e o seu e-mail do Gmail
+            client.Credentials = new NetworkCredential(_smtpUser, _smtpPass);
+
+            client.EnableSsl = true;
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+            // 3. DINÂMICO: Ajusta o TargetName de acordo com o Host que vier do appsettings (Gmail ou Mailtrap)
+            client.TargetName = $"STARTTLS/{_smtpHost}";
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(_smtpUser),
+                // O Gmail exige que o 'From' seja exatamente o e-mail autenticado no _smtpUser
+                From = new MailAddress(_smtpUser, "Agendamento Salão"),
                 Subject = subject,
                 Body = message,
                 IsBodyHtml = true
             };
 
             mailMessage.To.Add(email);
+
             await client.SendMailAsync(mailMessage);
         }
     }
 }
+
