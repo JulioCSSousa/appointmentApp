@@ -34,52 +34,62 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
-
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            var users = await _userManager.Users.AnyAsync();
+            return View(model);
+        }
 
-            if (!users)
+        // Verifica se é o primeiro usuário do sistema antes de criar
+        var isFirstUser = !await _userManager.Users.AnyAsync();
+
+        var user = new UserModel(model.Name, model.Email, model.PhoneNumber)
+        {
+            UserName = model.Email,
+            Email = model.Email,
+            PhoneNumber = model.PhoneNumber,
+            EmailConfirmed = true // Já deixa como confirmado para não dar chabu no Identity
+        };
+
+        // 1. Cria o usuário no banco
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (result.Succeeded)
+        {
+            // 2. Define a Role correspondente
+            if (isFirstUser)
             {
-                var user = new UserModel(model.Name, model.Email, model.PhoneNumber)
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                };
-                var result = await _userManager.CreateAsync(user, model.Password);
                 await _userManager.AddToRoleAsync(user, "Admin");
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("Login", "Account");
-
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-
             }
             else
             {
-                var user = new UserModel(model.Name, model.Email, model.PhoneNumber)
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber
-                };
-                var result = await _userManager.CreateAsync(user, model.Password);
                 await _userManager.AddToRoleAsync(user, "Cliente");
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("Index", "Account");
-
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
             }
+
+            string emailBody = $@"
+            <div style='font-family: sans-serif; max-width: 600px; margin: 0 auto;'>
+                <h1 style='color: #2c3e50;'>Olá, {model.Name}!</h1>
+                <p>Seu cadastro no nosso <strong>App de Agendamento</strong> foi concluído com sucesso.</p>
+                <p>Agora você já pode acessar sua conta utilizando seu e-mail: <strong>{model.Email}</strong>.</p>
+                <br>
+                <p>Seja muito bem-vindo(a)!</p>
+            </div>";
+
+
+            _ = _emailSender.SendEmailAsync(user.Email, "Bem-vindo ao nosso Agendamento!", emailBody);
+
+            if (isFirstUser)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            else
+            {
+                return RedirectToAction("Index", "Account");
+            }
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
         }
 
         return View(model);
