@@ -35,23 +35,24 @@ Para rodar o projeto localmente na sua máquina, siga os passos abaixo:
 
 ### 1. Clonar o repositório
 ```bash
-git clone [https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git](https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git)
-cd NOME_DO_REPOSITORIO
+git clone https://github.com/JulioCSSousa/appointmentApp.git
 
-2. Configurar as credenciais (appsettings.Development.json)
-Crie ou ajuste o arquivo de configuração local incluindo suas credenciais de teste:
+### 2. Configurar as variáveis de ambiente locais (.env)
+Na raiz do projeto, certifique-se de ter um arquivo `.env` configurado com as credenciais do seu banco de dados local (MySQL/MariaDB) e do serviço de e-mail:
 
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=AppointmentDb;Trusted_Connection=True;MultipleActiveResultSets=true"
-  },
-  "EmailSettings": {
-    "SmtpHost": "smtp.gmail.com",
-    "SmtpPort": 587,
-    "SmtpUser": "seu-email@gmail.com",
-    "SmtpPass": "sua-senha-de-app-do-google"
-  }
-}
+```env
+# Banco de Dados Local
+LOCAL_HOST=localhost
+LOCAL_PORT=3306
+LOCAL_USER=root
+LOCAL_PASSWORD=seupassword
+LOCAL=appointmentappdb
+
+# Configurações de E-mail
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=seu-email@gmail.com
+SMTP_PASS=sua-senha-de-app-do-google
 
 3. Executar as Migrations do Banco de Dados
 No Console do Gerenciador de Pacotes ou terminal, rode os comandos para estruturar o banco:
@@ -61,3 +62,22 @@ dotnet ef database update
 4. Rodar a aplicação
 
 dotnet run
+
+🌐 Deploy & Variáveis de Ambiente (Produção)
+O projeto foi desenhado para seguir as boas práticas de segurança, mantendo credenciais fora do código-fonte. Em ambiente de produção (como o Render), as chaves do arquivo .env local devem ser cadastradas diretamente no painel de controle da hospedagem na aba Environment Variables:
+
+LOCAL_HOST (Endereço do banco de dados de produção)
+
+LOCAL_PORT (Porta do banco de dados de produção)
+
+LOCAL_USER (Usuário do banco de dados)
+
+LOCAL_PASSWORD (Senha do banco de dados)
+
+LOCAL (Nome do banco de dados)
+
+SMTP_HOST
+
+SMTP_PORT
+
+SMTP_USER
