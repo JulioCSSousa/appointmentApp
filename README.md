@@ -10,6 +10,7 @@ Um sistema completo de gerenciamento e agendamento de horários desenvolvido em 
 * **Controle de Acesso por Níveis (RBAC):** * **Admin:** Dashboard administrativo completo para gerenciamento de profissionais, serviços e horários. O primeiro usuário cadastrado no sistema herda automaticamente o papel de Administrador.
   * **Cliente:** Área logada para visualizar horários disponíveis e realizar agendamentos.
   * Worker: ** Área com login de colaborador para ver uma fila de atendimento com visual KANBAN e atualizar o status do atendimento
+  * Você pode acessar a área de admin com o email: julio.sousa1993@gmail.com; senha: 1559753 - A senha não está padronizada para os moldes de verificação de digitos, quantidades de caracteres, etc, por comodidade no desenvolvimento, mas há um sistema de segurança para a versão final
 * **Segurança e Validação de Dados:** * Validação em dupla camada (Front-end com JavaScript/HTML5 e Back-end via *Data Annotations* / `ModelState`).
   * Proteção contra ataques com uso de tokens anti-falsificação (`[ValidateAntiForgeryToken]`).
 * **Comunicação por E-mail:** Fluxo automatizado para envio de e-mails de boas-vindas assíncrono (disparado em background), integrado ao servidor SMTP do Gmail utilizando **MailKit**.
