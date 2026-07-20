@@ -152,11 +152,6 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
 
             return View(clients);
         }
-        [AllowAnonymous]
-        public ActionResult OfflineDbError()
-        {
-            return View();
-        }
 
 
     }

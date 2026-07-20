@@ -7,16 +7,13 @@ using appointmentApp.Services.AppointmentServices;
 using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
-using AppointmentAppMvc.ApplicationSeed;
 using AppointmentAppMvc.Hubs;
-using AppointmentAppMvc.Middlewares;
+
 using DotNetEnv;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,17 +21,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Carregar variáveis de ambiente do arquivo .env
 Env.Load();
 
-// Agora você pode acessar as variáveis de ambiente com `Environment.GetEnvironmentVariable`
-var dbHost = Environment.GetEnvironmentVariable("LOCAL_HOST") ?? Environment.GetEnvironmentVariable("AIVEN_HOST");
-var dbPort = Environment.GetEnvironmentVariable("LOCAL_PORT") ?? Environment.GetEnvironmentVariable("AIVEN_PORT");
-var dbUser = Environment.GetEnvironmentVariable("LOCAL_USER") ?? Environment.GetEnvironmentVariable("AIVEN_USER");
-var dbPassword = Environment.GetEnvironmentVariable("LOCAL_PASSWORD") ?? Environment.GetEnvironmentVariable("AIVEN_PASSWORD");
-var dbName = Environment.GetEnvironmentVariable("LOCAL") ?? Environment.GetEnvironmentVariable("AIVEN_DB");
+// 1. Tenta ler o que o Docker Compose injetou. Se não existir, pega do seu .env local.
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? Environment.GetEnvironmentVariable("LOCAL_HOST") ?? Environment.GetEnvironmentVariable("AIVEN_HOST");
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? Environment.GetEnvironmentVariable("LOCAL_PORT") ?? Environment.GetEnvironmentVariable("AIVEN_PORT");
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? Environment.GetEnvironmentVariable("LOCAL_USER") ?? Environment.GetEnvironmentVariable("AIVEN_USER");
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? Environment.GetEnvironmentVariable("LOCAL_PASSWORD") ?? Environment.GetEnvironmentVariable("AIVEN_PASSWORD");
+var dbName = Environment.GetEnvironmentVariable("DB") ?? Environment.GetEnvironmentVariable("LOCAL_DB") ?? Environment.GetEnvironmentVariable("AIVEN_DB");
 
-// Criar a string de conexão
-var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword}";
+var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};Uid={dbUser};Pwd={dbPassword};";
+
 // Configurar DbContext
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 30));
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 37)); 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, serverVersion));
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion, mysqlOptions =>
         mysqlOptions.EnableRetryOnFailure(
@@ -42,12 +41,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorNumbersToAdd: null
         )));
-// Configuração de logging (opcional)
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// Adicionar serviços de autenticação e identidade
 builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 {
     options.Password.RequireDigit = false;
@@ -96,16 +93,14 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
 builder.Services.AddSignalR();
+
 // Construir a aplicação
 var app = builder.Build();
-
-
-if (!app.Environment.IsDevelopment())
+app.UseDeveloperExceptionPage();
+if (app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/OfflineDbError");
 }
-
-
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
@@ -116,40 +111,56 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-// Mapeamento de rotas
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var logger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
-        //var userManager = services.GetRequiredService<UserManager<UserModel>>();
-        await context.Database.MigrateAsync();
-
-        await RoleInitializer.SeedRolesAsync(roleManager);
-
-        await SeedWorkSchedule.SeedWorkSchedules(context, logger);
-
-        //await UserInitializer.SeedMassUsersAsync(userManager); // O "povoamento" em massa
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Erro catastrófico no Seeding do banco de dados.");
-    }
-}
-
-// ... depois do build:
 app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseHttpsRedirection();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
 
-// Executar a aplicação
+    int retries = 10; 
+    while (retries > 0)
+    {
+        try
+        {
+            var context = services.GetRequiredService<AppDbContext>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var seedLogger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
+
+            logger.LogInformation("--> Connecting to MySQL...");
+
+            await context.Database.MigrateAsync();
+            logger.LogInformation("--> Migrations successfull applied");
+
+            logger.LogInformation("--> Seeds Executing...");
+            await RoleInitializer.SeedRolesAsync(roleManager);
+            await SeedWorkSchedule.SeedWorkSchedules(context, seedLogger);
+            // await UserInitializer.SeedMassUsersAsync(userManager); <= populate Database with random test users
+
+            logger.LogInformation("--> Database configured and successfully seeded!");
+            break; 
+        }
+        catch (Exception ex)
+        {
+            retries--;
+            logger.LogWarning($"--> MySQL inicialization... (Try {11 - retries}/10). Error: {ex.Message}");
+
+            if (retries == 0)
+            {
+                logger.LogError(ex, "Database Seeding or Conection error.");
+                throw;
+            }
+
+            await Task.Delay(5000); 
+        }
+    }
+}
+
 app.Run();

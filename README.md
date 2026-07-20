@@ -35,8 +35,40 @@ Due to its generic and flexible core, this system can be easily customized for *
 
 ## ⚙️ Local Setup
 
-Follow the steps below to get the project running locally on your machine:
+Follow the steps below to get the project running on your machine:
 
-### 1. Clone the repository
-```bash
-git clone [https://github.com/YourUsername/appointmentApp.git](https://github.com/YourUsername/appointmentApp.git)
+### 1. Get the Source Code
+* **Option A (Gumroad Download):** Download the `.zip` file from your Gumroad library and extract it to a folder of your choice.
+* **Option B (Git):** Clone the repository via terminal:
+git clone [https://github.com/JulioCSSousa/appointmentApp.git](https://github.com/JulioCSSousa/appointmentApp.git) || Extract the project Zip
+
+🛠️ Choose How to Run
+You can run this application using Docker (recommended, as it sets up the environment and database automatically) or Locally via the .NET SDK.
+
+🐳 Option 1: Running with Docker (Recommended)
+You only need Docker Desktop installed. No need to install the .NET SDK or a local database server.
+
+Open your terminal in the root folder of the project (where docker-compose.yml is located) and run:
+
+Bash
+docker compose up --build -d
+Apply the database migrations directly into the running container to create the tables:
+
+Bash
+docker compose exec web-app dotnet ef database update
+
+#### 💻 Option 2: Running Locally (.NET SDK)
+If you prefer to run it natively without Docker, ensure you have the **.NET 8 SDK** and **MySQL Server** installed.
+
+1. Locate the `.env.example` file in the root directory, duplicate it, and rename the copy to `.env`.
+2. Update the environment variables with your local MySQL database credentials:
+   ```env
+   LOCAL_HOST=localhost
+   LOCAL_PORT=3306
+   LOCAL_USER=root
+   LOCAL_PASSWORD=YourPassword
+   LOCAL_DATABASE=db_appointment
+   
+   dotnet ef database update
+
+   dotnet run

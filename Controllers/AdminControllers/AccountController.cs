@@ -77,10 +77,6 @@ namespace AppointmentAppMvc.Controllers
                 return RedirectToAction(isFirstUser ? "Login" : "Index");
             }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
 
             return View(model);
         }
