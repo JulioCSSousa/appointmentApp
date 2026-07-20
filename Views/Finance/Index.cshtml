@@ -1,17 +1,17 @@
 ﻿@using AppointmentAppMvc.Models.ViewModels.Finance
 @{
-    ViewData["Title"] = "Dashboard Financeiro";
+    ViewData["Title"] = "Financial Dashboard";
 }
 @model List<FinanceViewModel>
 
 <a asp-action="IndexAdm" asp-controller="Home"
    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-    ⬅ Retornar
+    ⬅ Return
 </a>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Gestão Financeira</h2>
-        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">Baixar Relatório</button>
+        <h2 class="fw-bold">Financial Management</h2>
+        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">Download Report</button>
     </div>
 
     @if (Model != null && Model.Any())
@@ -22,8 +22,8 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="mb-1 opacity-75">Saldo Total</p>
-                                <h3 class="fw-bold">@Model.Sum(x => x.ServicePrice).ToString("C2")</h3>
+                                <p class="mb-1 opacity-75">Total Balance</p>
+                                <h3 class="fw-bold">@Model.Sum(x => x.ServicePrice).ToString("C2", new System.Globalization.CultureInfo("en-US"))</h3>
                             </div>
                             <div class="icon-shape"><i class="bi bi-wallet2"></i></div>
                         </div>
@@ -36,7 +36,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between text-dark">
                             <div>
-                                <p class="mb-1 text-muted">Serviços Concluídos</p>
+                                <p class="mb-1 text-muted">Completed Services</p>
                                 <h3 class="fw-bold">@Model.Count()</h3>
                             </div>
                             <div class="icon-shape text-primary bg-light"><i class="bi bi-scissors"></i></div>
@@ -50,8 +50,8 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between text-dark">
                             <div>
-                                <p class="mb-1 text-muted">Ticket Médio</p>
-                                <h3 class="fw-bold">@( (Model.Sum(x => x.ServicePrice) / Model.Count()).ToString("C2") )</h3>
+                                <p class="mb-1 text-muted">Average Ticket</p>
+                                <h3 class="fw-bold">@( (Model.Sum(x => x.ServicePrice) / Model.Count()).ToString("C2", new System.Globalization.CultureInfo("en-US")) )</h3>
                             </div>
                             <div class="icon-shape text-success bg-light"><i class="bi bi-graph-up"></i></div>
                         </div>
@@ -64,14 +64,14 @@
     <div class="row">
         <div class="col-lg-8 mb-4">
             <div class="card border-0 shadow-sm p-4 h-100">
-                <h5 class="fw-bold mb-4">Desempenho Semanal</h5>
+                <h5 class="fw-bold mb-4">Weekly Performance</h5>
                 <canvas id="financeChart" height="150"></canvas>
             </div>
         </div>
 
         <div class="col-lg-4 mb-4">
             <div class="card border-0 shadow-sm p-4 h-100">
-                <h5 class="fw-bold mb-4">Últimos Ganhos</h5>
+                <h5 class="fw-bold mb-4">Latest Earnings</h5>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <tbody>
@@ -80,17 +80,17 @@
                                 <tr>
                                     <td>
                                         <div class="fw-bold mb-0">@item.ClientName</div>
-                                        <small class="text-muted">@item.Date.ToString("dd/MM")</small>
+                                        <small class="text-muted">@item.Date.ToString("MM/dd")</small>
                                     </td>
                                     <td class="text-end text-success fw-bold">
-                                        + @item.ServicePrice.ToString("C2")
+                                        + @item.ServicePrice.ToString("C2", new System.Globalization.CultureInfo("en-US"))
                                     </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
-                <a href="#" class="btn btn-light btn-sm w-100 mt-auto">Ver tudo</a>
+                <a href="#" class="btn btn-light btn-sm w-100 mt-auto">View All</a>
             </div>
         </div>
     </div>
@@ -102,9 +102,11 @@
         border-radius: 15px;
         transition: transform 0.3s ease;
     }
-    .finance-card:hover {
-        transform: translateY(-5px);
-    }
+
+        .finance-card:hover {
+            transform: translateY(-5px);
+        }
+
     .icon-shape {
         width: 48px;
         height: 48px;
@@ -114,37 +116,39 @@
         justify-content: center;
         border-radius: 12px;
     }
+
     .table-container {
         border-radius: 15px;
         overflow: hidden;
     }
 </style>
-<!-- Importando Chart.js para o gráfico -->
+
+<!-- Importing Chart.js for the graph -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // 1. Extrair os dados do Model C# para variáveis JS
-    // Usamos o mapeamento do Razor para criar arrays de strings e números
-    const labelsFinance = @Html.Raw(Json.Serialize(Model.Select(x => x.Date.ToString("dd/MM"))));
+    // 1. Extract data from C# Model to JS variables
+    // Format dates to MM/dd standard for the chart labels
+    const labelsFinance = @Html.Raw(Json.Serialize(Model.Select(x => x.Date.ToString("MM/dd"))));
     const dataReceitas = @Html.Raw(Json.Serialize(Model.Select(x => x.ServicePrice)));
 
-    // Se você ainda não tem despesas reais, podemos deixar zerado ou mapear se existirem
+    // Fallback array for expenses
     const dataDespesas = @Html.Raw(Json.Serialize(Model.Select(x => 0)));
 
     var ctx = document.getElementById('financeChart').getContext('2d');
     var financeChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labelsFinance, // Datas vindas do banco
+            labels: labelsFinance,
             datasets: [
                 {
-                    label: 'Receitas',
+                    label: 'Revenue',
                     backgroundColor: 'rgba(0, 128, 0, 0.5)',
                     borderColor: 'rgba(0, 128, 0, 1)',
                     borderWidth: 1,
-                    data: dataReceitas // Preços vindos do banco
+                    data: dataReceitas
                 },
                 {
-                    label: 'Despesas',
+                    label: 'Expenses',
                     backgroundColor: 'rgba(255, 0, 0, 0.5)',
                     borderColor: 'rgba(255, 0, 0, 1)',
                     borderWidth: 1,
@@ -159,7 +163,7 @@
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return 'R$ ' + value; // Adiciona o prefixo de real no gráfico
+                            return '$' + value; // Dynamic currency symbol translation for the chart axis
                         }
                     }
                 }

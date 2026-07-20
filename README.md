@@ -1,84 +1,42 @@
-# 🗓️ Sistema de Agendamento para Barbearia
+# 🗓️ Multi-Purpose Booking & Appointment Management System
 
-Um sistema completo de gerenciamento e agendamento de horários desenvolvido em **ASP.NET Core MVC**. A aplicação foi construída focando em uma arquitetura limpa, segurança de dados e separação de permissões entre administradores e clientes.
+A complete, production-ready management and appointment scheduling system developed using **ASP.NET Core MVC**. Built with a clean architecture focus, high data security, and Role-Based Access Control (RBAC) to manage administrators, staff, and clients seamlessly.
 
----
-
-## 🚀 Funcionalidades Principais
-
-* **Autenticação e Autorização Robusta:** Sistema de login e registro de usuários gerenciado via **ASP.NET Core Identity**.
-* **Controle de Acesso por Níveis (RBAC):** * **Admin:** Dashboard administrativo completo para gerenciamento de profissionais, serviços e horários. O primeiro usuário cadastrado no sistema herda automaticamente o papel de Administrador.
-  * **Cliente:** Área logada para visualizar horários disponíveis e realizar agendamentos.
-  * Worker: ** Área com login de colaborador para ver uma fila de atendimento com visual KANBAN e atualizar o status do atendimento
-  * Você pode acessar a área de admin com o email: julio.sousa1993@gmail.com; senha: 1559753 - A senha não está padronizada para os moldes de verificação de digitos, quantidades de caracteres, etc, por comodidade no desenvolvimento, mas há um sistema de segurança para a versão final
-* **Segurança e Validação de Dados:** * Validação em dupla camada (Front-end com JavaScript/HTML5 e Back-end via *Data Annotations* / `ModelState`).
-  * Proteção contra ataques com uso de tokens anti-falsificação (`[ValidateAntiForgeryToken]`).
-* **Comunicação por E-mail:** Fluxo automatizado para envio de e-mails de boas-vindas assíncrono (disparado em background), integrado ao servidor SMTP do Gmail utilizando **MailKit**.
-* **Configurações Seguras:** Isolamento completo de credenciais sensíveis (chaves de API e senhas de banco) utilizando variáveis de ambiente, preparado para deploy seguro.
+Due to its generic and flexible core, this system can be easily customized for **any appointment-based business**, such as Barber Shops, Beauty Salons, Tattoo Studios, Pet Shops/Grooming, and private clinics.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🚀 Key Features
+
+* **Robust Authentication & Authorization:** Secure user login and registration powered by **ASP.NET Core Identity**.
+* **Role-Based Access Control (RBAC):**
+  * **Admin:** Full administrative dashboard to manage professionals, services, pricing, schedules, and financial revenue insights. 
+  * **Client:** Dedicated logged-in area to view available time slots and book appointments.
+  * **Worker/Staff:** Exclusive staff view featuring a dynamic **KANBAN Board** to monitor the real-time waiting queue and smoothly update appointment statuses (e.g., *Waiting*, *In Progress*, *Completed*).
+* **Double-Layer Data Validation & Security:**
+  * Strict validation on both Front-end (JavaScript/HTML5) and Back-end (`ModelState` / Data Annotations).
+  * Built-in protection against cross-site request forgery using Anti-Forgery Tokens (`[ValidateAntiForgeryToken]`).
+* **Asynchronous Email Communication:** Automated welcome and notification emails triggered in the background using **MailKit**, keeping the UI fast and responsive.
+* **Environment-Driven Configuration:** Complete isolation of sensitive data (API keys, SMTP credentials, and database strings) using environment variables, fully prepared for safe cloud deployment.
+
+---
+
+## 🛠️ Tech Stack
 
 * **Back-End:** .NET 8 / C#
-* **Framework Web:** ASP.NET Core MVC
-* **Persistência de Dados:** Entity Framework Core
-* **Banco de Dados:** SQL Server / PostgreSQL (Pronto para produção)
-* **Autenticação:** ASP.NET Core Identity
-* **Serviço de E-mail:** MailKit / MimeKit (Integração SMTP Gmail via App Password)
+* **Web Framework:** ASP.NET Core MVC
+* **Data Persistence:** Entity Framework Core (Code-First)
+* **Database:** SQL Server / PostgreSQL / MySQL (Production-ready)
+* **Authentication:** ASP.NET Core Identity
+* **Email Service:** MailKit / MimeKit (SMTP Integration)
 * **Front-End:** Razor Views, Bootstrap 5, JavaScript, CSS3
 
 ---
 
-## ⚙️ Configuração Local
+## ⚙️ Local Setup
 
-Para rodar o projeto localmente na sua máquina, siga os passos abaixo:
+Follow the steps below to get the project running locally on your machine:
 
-### 1. Clonar o repositório
+### 1. Clone the repository
 ```bash
-git clone https://github.com/JulioCSSousa/appointmentApp.git
-
-### 2. Configurar as variáveis de ambiente locais (.env)
-Na raiz do projeto, certifique-se de ter um arquivo `.env` configurado com as credenciais do seu banco de dados local (MySQL/MariaDB) e do serviço de e-mail:
-
-```env
-# Banco de Dados Local
-LOCAL_HOST=localhost
-LOCAL_PORT=3306
-LOCAL_USER=root
-LOCAL_PASSWORD=seupassword
-LOCAL=appointmentappdb
-
-# Configurações de E-mail
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=seu-email@gmail.com
-SMTP_PASS=sua-senha-de-app-do-google
-
-3. Executar as Migrations do Banco de Dados
-No Console do Gerenciador de Pacotes ou terminal, rode os comandos para estruturar o banco:
-
-dotnet ef database update
-
-4. Rodar a aplicação
-
-dotnet run
-
-🌐 Deploy & Variáveis de Ambiente (Produção)
-O projeto foi desenhado para seguir as boas práticas de segurança, mantendo credenciais fora do código-fonte. Em ambiente de produção (como o Render), as chaves do arquivo .env local devem ser cadastradas diretamente no painel de controle da hospedagem na aba Environment Variables:
-
-LOCAL_HOST (Endereço do banco de dados de produção)
-
-LOCAL_PORT (Porta do banco de dados de produção)
-
-LOCAL_USER (Usuário do banco de dados)
-
-LOCAL_PASSWORD (Senha do banco de dados)
-
-LOCAL (Nome do banco de dados)
-
-SMTP_HOST
-
-SMTP_PORT
-
-SMTP_USER
+git clone [https://github.com/YourUsername/appointmentApp.git](https://github.com/YourUsername/appointmentApp.git)

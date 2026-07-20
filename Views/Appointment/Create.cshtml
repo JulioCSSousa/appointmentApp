@@ -5,22 +5,22 @@
 @model AppointmentViewModel
 
 @{
-    ViewData["Title"] = "Agendamento";
+    ViewData["Title"] = "Appointment";
 }
 
 <div class="container py-4">
     <div class="card border-0 shadow-lg rounded-4">
         <div class="card-header bg-dark text-white p-4 rounded-top-4">
-            <h3 class="mb-0"><i class="bi bi-calendar2-check me-2"></i>Novo Agendamento</h3>
+            <h3 class="mb-0"><i class="bi bi-calendar2-check me-2"></i>New Appointment</h3>
         </div>
         <div class="card-body p-4">
             <form asp-action="Create" asp-controller="Appointment" method="post" id="mainForm">
 
                 <div class="row g-4 mb-5">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold"><i class="bi bi-tools me-1"></i> Escolha o Serviço</label>
+                        <label class="form-label fw-bold"><i class="bi bi-tools me-1"></i> Choose the Service</label>
                         <select class="form-select form-select-lg shadow-sm border-2" id="serviceSelect" name="SelectedServiceId" required>
-                            <option selected disabled>Selecione um serviço...</option>
+                            <option selected disabled>Select a service...</option>
                             @foreach (var service in Model.Services)
                             {
                                 @* Usando CultureInfo.InvariantCulture para evitar erros de formatação no data-attribute *@
@@ -34,11 +34,11 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label fw-bold"><i class="bi bi-person-badge me-1"></i> Selecione o Profissional</label>
+                        <label class="form-label fw-bold"><i class="bi bi-person-badge me-1"></i> Select the Professional</label>
                         @if (Model.Workers.Any())
                         {
                             <select asp-for="WorkerId" class="form-select form-select-lg shadow-sm border-2" id="workerSelect" required>
-                                <option selected disabled>Selecione um Funcionário...</option>
+                                <option selected disabled>Select a staff member...</option>
                                 @foreach (var worker in Model.Workers)
                                 {
                                     <option value="@worker.Id" data-name="@worker.Name">@worker.Name</option>
@@ -47,7 +47,7 @@
                         }
                         else
                         {
-                            <div>Não há colaboradores</div>
+                            <div>No staff members available</div>
                         }
 
                     </div>
@@ -56,12 +56,12 @@
                         <div id="serviceDetails" class="d-none animate__animated animate__fadeIn">
                             <div class="alert alert-secondary d-flex align-items-center mb-0 border-0 shadow-sm rounded-3">
                                 <div class="me-4">
-                                    <small class="text-muted d-block">Preço:</small>
-                                    <strong class="fs-5 text-dark">R$ <span id="priceDisplay">-</span></strong>
+                                    <small class="text-muted d-block">Price:</small>
+                                    <strong class="fs-5 text-dark">$ <span id="priceDisplay">-</span></strong>
                                 </div>
                                 <div class="border-start ps-4">
-                                    <small class="text-muted d-block">Duração:</small>
-                                    <strong class="fs-5 text-dark"><span id="durationDisplay">-</span> minutos</strong>
+                                    <small class="text-muted d-block">Duration:</small>
+                                    <strong class="fs-5 text-dark"><span id="durationDisplay">-</span> minutes</strong>
                                 </div>
                             </div>
                         </div>
@@ -81,7 +81,7 @@
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
                     <button type="submit" id="bookButton" class="btn btn-success btn-lg px-5 shadow rounded-pill" disabled>
-                        <i class="bi bi-calendar-check-fill me-2"></i>Confirmar Agendamento
+                        <i class="bi bi-calendar-check-fill me-2"></i>Confirm Appointment
                     </button>
                 </div>
             </form>

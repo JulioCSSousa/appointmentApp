@@ -2,7 +2,7 @@
 @model IEnumerable<ServiceModel>
 
 @{
-    ViewData["Title"] = "Controle de Serviços";
+    ViewData["Title"] = "Service Management";
 }
 
 <div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
@@ -10,14 +10,14 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
         <div>
             <a asp-action="IndexAdm" asp-controller="Home" class="btn btn-link text-decoration-none text-muted p-0 mb-1">
-                <i class="bi bi-arrow-left"></i> Voltar ao Painel
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
-            <h2 class="fw-bold text-dark m-0">Catálogo de Serviços</h2>
-            <p class="text-muted small">Gerencie os serviços, preços e durações oferecidos.</p>
+            <h2 class="fw-bold text-dark m-0">Service Catalog</h2>
+            <p class="text-muted small">Manage the services, prices, and durations offered.</p>
         </div>
 
         <a asp-controller="Service" asp-action="Create" class="btn btn-custom-indigo shadow-sm px-4">
-            <i class="bi bi-plus-lg me-2"></i>Novo Serviço
+            <i class="bi bi-plus-lg me-2"></i>New Service
         </a>
     </div>
 
@@ -30,11 +30,11 @@
                             <i class="bi bi-search"></i>
                         </span>
                         <input type="text" name="txt" class="form-control border-start-0 ps-2"
-                               placeholder="Digite o nome do serviço..." value="@Context.Request.Query["txt"]">
+                               placeholder="Search by service name..." value="@Context.Request.Query["txt"]">
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-dark w-100 fw-bold">Buscar</button>
+                    <button type="submit" class="btn btn-dark w-100 fw-bold">Search</button>
                 </div>
             </form>
         </div>
@@ -45,11 +45,11 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Serviço</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Duração</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Categoria</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Preço</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Ações</th>
+                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Service</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Duration</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Category</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Price</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,12 +78,12 @@
                                 <td class="text-end pe-4">
                                     <div class="btn-group shadow-sm rounded-3">
                                         <a asp-action="Edit" asp-route-id="@service.ServiceId"
-                                           class="btn btn-sm btn-white border-end" title="Editar">
+                                           class="btn btn-sm btn-white border-end" title="Edit">
                                             <i class="bi bi-pencil-square text-primary"></i>
                                         </a>
                                         <button class="btn btn-sm btn-white"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#confirmDeleteModal-@service.ServiceId" title="Excluir">
+                                                data-bs-target="#confirmDeleteModal-@service.ServiceId" title="Delete">
                                             <i class="bi bi-trash3 text-danger"></i>
                                         </button>
                                     </div>
@@ -97,13 +97,13 @@
                                             <div class="mb-4">
                                                 <i class="bi bi-trash3 text-danger" style="font-size: 4rem;"></i>
                                             </div>
-                                            <h4 class="fw-bold text-dark">Excluir Serviço?</h4>
-                                            <p class="text-muted">Você está prestes a remover o serviço <strong>@service.ServiceName</strong>.</p>
+                                            <h4 class="fw-bold text-dark">Delete Service?</h4>
+                                            <p class="text-muted">You are about to remove the service <strong>@service.ServiceName</strong>.</p>
                                             <div class="d-flex justify-content-center gap-2 mt-4">
-                                                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
                                                 <form method="post" action="@Url.Action("Delete", "Service", new { id = service.ServiceId })">
                                                     @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-danger px-4 fw-bold">Confirmar Exclusão</button>
+                                                    <button type="submit" class="btn btn-danger px-4 fw-bold">Confirm Delete</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -117,7 +117,7 @@
                         <tr>
                             <td colspan="5" class="text-center py-5">
                                 <i class="bi bi-search text-muted display-4 mb-3 d-block"></i>
-                                <p class="text-muted">Nenhum serviço encontrado com esse nome.</p>
+                                <p class="text-muted">No services found matching that name.</p>
                             </td>
                         </tr>
                     }
@@ -176,7 +176,7 @@
         letter-spacing: 0.05em;
     }
 
-    /* Estilo do Modal */
+    /* Modal Style */
     .modal-content {
         border-radius: 20px;
     }

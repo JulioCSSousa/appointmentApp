@@ -2,13 +2,13 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<h2 class="fw-bold m-0">Olá! @ViewBag.UserName</h2>
+<h2 class="fw-bold m-0">Hello! @ViewBag.UserName</h2>
 <div class="container-fluid py-5 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
-    
+
     <div class="row mb-5">
         <div class="col-12 text-center text-md-start">
-            <h1 class="fw-bold text-dark mb-1" style="letter-spacing: -1px;">Dashboard Administrativo</h1>
-            <p class="text-muted">Bem-vindo de volta! Aqui está o resumo operacional do seu negócio.</p>
+            <h1 class="fw-bold text-dark mb-1" style="letter-spacing: -1px;">Administrative Dashboard</h1>
+            <p class="text-muted">Welcome back! Here is your business operational overview.</p>
         </div>
     </div>
 
@@ -20,10 +20,10 @@
                         <div class="icon-shape bg-indigo-soft text-indigo">
                             <i class="bi bi-people-fill fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Usuários</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Users</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Gerencie permissões, roles e acessos administrativos de forma centralizada.</p>
-                    <a asp-controller="Account" asp-action="Index" class="btn btn-custom-dark w-100">Gerenciar Painel</a>
+                    <p class="card-text text-muted mb-4">Manage permissions, roles, and administrative access from a centralized location.</p>
+                    <a asp-controller="Account" asp-action="Index" class="btn btn-custom-dark w-100">Manage Panel</a>
                 </div>
             </div>
         </div>
@@ -35,10 +35,10 @@
                         <div class="icon-shape bg-emerald-soft text-emerald">
                             <i class="bi bi-calendar-week-fill fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Agenda & Horários</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Schedules & Hours</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Acompanhe o fluxo de agendamentos e configure o horário de funcionamento.</p>
-                    <a asp-controller="WorkSchedule" asp-action="WorkSchedule" class="btn btn-custom-dark w-100">Ver Agenda</a>
+                    <p class="card-text text-muted mb-4">Track the booking flow and configure your business operational hours.</p>
+                    <a asp-controller="WorkSchedule" asp-action="WorkSchedule" class="btn btn-custom-dark w-100">View Calendar</a>
                 </div>
             </div>
         </div>
@@ -50,10 +50,10 @@
                         <div class="icon-shape bg-amber-soft text-amber">
                             <i class="bi bi-scissors fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Catálogo de Serviços</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Service Catalog</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Edite preços, descrições e categorias dos serviços ofertados.</p>
-                    <a asp-controller="Service" asp-action="Index" class="btn btn-custom-dark w-100">Editar Catálogo</a>
+                    <p class="card-text text-muted mb-4">Edit prices, descriptions, and categories of the services offered.</p>
+                    <a asp-controller="Service" asp-action="Index" class="btn btn-custom-dark w-100">Edit Catalog</a>
                 </div>
             </div>
         </div>
@@ -65,10 +65,10 @@
                         <div class="icon-shape bg-rose-soft text-rose">
                             <i class="bi bi-person-heart fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Base de Clientes</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Client Base</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Histórico completo de atendimentos e dados de contato dos seus clientes.</p>
-                    <a asp-controller="ClientBase" asp-action="Index" class="btn btn-custom-dark w-100">Acessar CRM</a>
+                    <p class="card-text text-muted mb-4">Full booking history and contact details of all your registered clients.</p>
+                    <a asp-controller="ClientBase" asp-action="Index" class="btn btn-custom-dark w-100">Access CRM</a>
                 </div>
             </div>
         </div>
@@ -78,9 +78,9 @@
                 <div class="card-body p-4 d-flex flex-column justify-content-center">
                     <div class="row align-items-center">
                         <div class="col-md-7">
-                            <h3 class="fw-bold mb-2">Relatórios Financeiros</h3>
-                            <p class="text-white-50">Monitore sua receita mensal, despesas e a saúde financeira do negócio em tempo real.</p>
-                            <a asp-controller="Finance" asp-action="Index" class="btn btn-light fw-bold px-4 py-2 mt-2">Visualizar Lucros</a>
+                            <h3 class="fw-bold mb-2">Financial Reports</h3>
+                            <p class="text-white-50">Monitor your monthly revenue, expenses, and business financial health in real time.</p>
+                            <a asp-controller="Finance" asp-action="Index" class="btn btn-light fw-bold px-4 py-2 mt-2">View Profits</a>
                         </div>
                         <div class="col-md-5 d-none d-md-block text-end">
                             <i class="bi bi-graph-up-arrow display-1 opacity-25"></i>
@@ -93,7 +93,7 @@
 </div>
 
 <style>
-    /* Variáveis de Cores "Não-IA" */
+    /* Color Variables */
     :root {
         --indigo: #6366f1;
         --indigo-soft: #eef2ff;
@@ -128,7 +128,7 @@
         border-radius: 12px;
     }
 
-    /* Estilização das cores customizadas */
+    /* Custom Color Layouts */
     .bg-indigo-soft {
         background-color: var(--indigo-soft);
     }

@@ -3,27 +3,27 @@
 @using appointmentApp.Services.Utilities
 @model List<ClientIndexViewModel>
 @{
-    ViewData["Title"] = "Gerenciamento de Fluxo";
+    ViewData["Title"] = "Flow Management";
 }
-<h2 class="fw-bold m-0">Olá! @ViewBag.UserName</h2>
+<h2 class="fw-bold m-0">Hello! @ViewBag.UserName</h2>
 <div class="container-fluid py-4 px-lg-5" style="background-color: #f1f5f9; min-height: 100vh;">
-    
+
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 gap-3">
         <div>
-            <h2 class="fw-bold text-dark m-0"><i class="bi bi-layout-kanban me-2"></i>Painel de Operações</h2>
-            <p class="text-muted">Gerencie o fluxo de clientes de hoje e próximos dias.</p>
+            <h2 class="fw-bold text-dark m-0"><i class="bi bi-layout-kanban me-2"></i>Operations Board</h2>
+            <p class="text-muted">Manage today's and upcoming client flows.</p>
         </div>
         <div class="d-flex gap-2">
             <a asp-action="Index"
                asp-route-searchDate="@DateTime.Today.ToString("yyyy-MM-dd")"
                class="btn btn-white shadow-sm rounded-pill">
-                <i class="bi bi-calendar-event me-2 text-primary"></i>Hoje
+                <i class="bi bi-calendar-event me-2 text-primary"></i>Today
             </a>
 
             <a asp-action="Create"
                asp-controller="Appointment"
                class="btn btn-custom-indigo shadow-sm rounded-pill">
-                <i class="bi bi-plus-lg me-2"></i>Novo Agendamento
+                <i class="bi bi-plus-lg me-2"></i>New Appointment
             </a>
         </div>
     </div>
@@ -32,7 +32,7 @@
         <div class="col-12 col-xl-4">
             <div class="column-header mb-3 d-flex align-items-center">
                 <span class="badge bg-amber me-2 p-2">@Model.Count(x => x.Appointment.Status == "Waiting")</span>
-                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Aguardando</h5>
+                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Waiting</h5>
             </div>
 
             <div class="kanban-column">
@@ -49,8 +49,7 @@
 
                             <h6 class="fw-bold text-dark mb-1">@item.User?.Name</h6>
                             <p class="text-muted small mb-3">@item.Service?.ServiceName</p>
-                            <p class="text-muted small mb-3">Atendente: @item.WorkerName</p>
-
+                            <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
 
                             <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
                                 <div class="btn-group w-100">
@@ -59,7 +58,7 @@
                                         <input type="hidden" name="id" value="@item.Appointment.Id" />
                                         <input type="hidden" name="newStatus" value="InProgress" />
                                         <button type="submit" class="btn btn-sm btn-emerald w-100 rounded-3 text-white fw-bold">
-                                            Próximo
+                                            Next
                                         </button>
                                     </form>
                                     <form asp-action="UpdateStatus" asp-controller="Appointment" method="post" class="w-100">
@@ -67,7 +66,7 @@
                                         <input type="hidden" name="id" value="@item.Appointment.Id" />
                                         <input type="hidden" name="newStatus" value="Canceled" />
                                         <button type="submit" class="btn btn-sm btn-outline-rose w-100 rounded-3 fw-bold">
-                                            Cancelar
+                                            Cancel
                                         </button>
                                     </form>
                                 </div>
@@ -77,10 +76,11 @@
                 }
             </div>
         </div>
+
         <div class="col-12 col-xl-4">
             <div class="column-header mb-3 d-flex align-items-center">
                 <span class="badge bg-emerald me-2 p-2">@Model.Count(x => x.Appointment.Status == "InProgress")</span>
-                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Em Progresso</h5>
+                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">In Progress</h5>
             </div>
             <div class="kanban-column bg-light-soft rounded-3 p-2">
                 @foreach (var item in Model.Where(x => x.Appointment.Status == "InProgress").OrderByDescending(x => x.Appointment.Day))
@@ -92,18 +92,18 @@
                                 <div class="flex-grow-1">
                                     <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
                                     <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
-                                    <p class="text-muted small mb-3">Atendente: @item.WorkerName</p>
+                                    <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
                                 </div>
                             </div>
 
-                            <!-- BOTÃO PARA MANDAR PARA O STATUS "Finished" -->
+                            <!-- BUTTON TO CHANGE STATUS TO "Finished" -->
                             <div class="border-top pt-3 mt-2">
                                 <form asp-action="UpdateStatus" asp-controller="Appointment" method="post" class="w-100">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@item.Appointment.Id" />
                                     <input type="hidden" name="newStatus" value="Finished" />
                                     <button type="submit" class="btn btn-sm btn-success w-100 rounded-3 text-white fw-bold">
-                                        <i class="bi bi-check2 me-1"></i> Finalizar Atendimento
+                                        <i class="bi bi-check2 me-1"></i> Complete Service
                                     </button>
                                 </form>
                             </div>
@@ -112,10 +112,11 @@
                 }
             </div>
         </div>
+
         <div class="col-12 col-xl-4">
             <div class="column-header mb-3 d-flex align-items-center">
                 <span class="badge bg-emerald me-2 p-2">@Model.Count(x => x.Appointment.Status == "Finished")</span>
-                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Finalizados</h5>
+                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Completed</h5>
             </div>
             <div class="kanban-column bg-light-soft rounded-3 p-2">
                 @foreach (var item in Model.Where(x => x.Appointment.Status == "Finished").OrderByDescending(x => x.Appointment.Day))
@@ -127,7 +128,7 @@
                                 <div class="flex-grow-1">
                                     <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
                                     <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
-                                    <p class="text-muted small mb-3">Atendente: @item.WorkerName</p>
+                                    <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
                                 </div>
                                 <span class="fw-bold text-dark small">@item.Service?.Price.ToString("C")</span>
                             </div>
@@ -140,7 +141,7 @@
         <div class="col-12 col-xl-4">
             <div class="column-header mb-3 d-flex align-items-center">
                 <span class="badge bg-rose me-2 p-2">@Model.Count(x => x.Appointment.Status == "Canceled")</span>
-                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Cancelados</h5>
+                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Canceled</h5>
             </div>
             <div class="kanban-column opacity-50">
                 @foreach (var item in Model.Where(x => x.Appointment.Status == "Canceled"))
@@ -149,7 +150,7 @@
                         <div class="flex-grow-1">
                             <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
                             <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
-                            <p class="text-muted small mb-3">Atendente: @item.WorkerName</p>
+                            <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
                         </div>
                     </div>
                 }
@@ -174,7 +175,7 @@
         padding-right: 5px;
     }
 
-        /* Estilização da barra de rolagem */
+        /* Scrollbar Styling */
         .kanban-column::-webkit-scrollbar {
             width: 5px;
         }

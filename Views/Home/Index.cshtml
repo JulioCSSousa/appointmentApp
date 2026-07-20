@@ -3,29 +3,29 @@
 @using appointmentApp.Services.Utilities
 @model List<ClientIndexViewModel>
 @{
-    ViewData["Title"] = "Agendamentos";
+    ViewData["Title"] = "Appointments";
 
-    // Lógica para verificar se existe algum agendamento "Waiting" na lista
+    // Logic to check if there is any "Waiting" appointment in the list
     bool hasWaiting = Model?.Any(x => x?.Appointment != null && x.Appointment.Status.ToString() == "Waiting") ?? false;
 
-    // Tradutor utilizando a Switch Expression que explicamos antes (mais limpo)
-    string ToPortuguese(string txt) => txt switch
+    // Status mapping using Switch Expression
+    string ToEnglish(string txt) => txt switch
     {
-        "Waiting" => "Aguardando",
-        "InProgress" => "Em Progresso",
-        "Finished" => "Concluído",
-        "Canceled" => "Cancelado",
+        "Waiting" => "Waiting",
+        "InProgress" => "In Progress",
+        "Finished" => "Completed",
+        "Canceled" => "Canceled",
         _ => ""
     };
 }
 
-<h2 class="fw-bold m-0">Olá! @ViewBag.UserName</h2>
+<h2 class="fw-bold m-0">Hello, @ViewBag.UserName!</h2>
 <div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
-    
+
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold text-dark m-0">Lista de Agendamentos</h2>
-            <p class="text-muted small">Acompanhe o status das reservas em tempo real.</p>
+            <h2 class="fw-bold text-dark m-0">Appointments List</h2>
+            <p class="text-muted small">Track booking statuses in real time.</p>
         </div>
         @if (Model != null && Model.Any())
         {
@@ -33,7 +33,7 @@
                 <div class="d-flex justify-content-end gap-2">
                     <a asp-action="Update" asp-controller="Account" asp-route-id="@Model.FirstOrDefault().User.Id"
                        class="btn btn-sm btn-light border shadow-sm d-inline-flex align-items-center justify-content-center"
-                       style="width: 35px; height: 35px;" title="Editar Usuário">
+                       style="width: 35px; height: 35px;" title="Edit User">
                         <i class="bi bi-pencil-fill text-indigo"></i>
                     </a>
                 </div>
@@ -41,10 +41,10 @@
         }
 
         <div class="d-flex gap-2">
-            @* LÓGICA: Se tiver "Waiting", adiciona a classe 'disabled' e impede o clique *@
+            @* LOGIC: If "Waiting" exists, adds 'disabled' class to block clicks *@
             <a asp-controller="Appointment" asp-action="Create"
-               class="btn btn-custom-indigo shadow-sm rounded-3 @(hasWaiting ? "disabled" : "")
-                <i class="bi bi-calendar-plus me-2"></i>Novo Agendamento
+               class="btn btn-custom-indigo shadow-sm rounded-3 @(hasWaiting ? "disabled" : "")">
+                <i class="bi bi-calendar-plus me-2"></i>New Appointment
             </a>
         </div>
     </div>
@@ -53,7 +53,7 @@
     {
         <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Você possui um agendamento <strong>Aguardando</strong> Cancele-o para realizar uma nova reserva.
+            You currently have a <strong>Waiting</strong> appointment. Cancel it to make a new reservation.
         </div>
     }
 
@@ -62,13 +62,13 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Data e Hora</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Cliente</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Serviço</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Valor</th>
+                        <th class="ps-4 py-3 text-uppercase fs-xs fw-bold text-muted">Date & Time</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Client</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Service</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Price</th>
                         <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Status</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Proffessional</th>
-                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Ações</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Professional</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -88,7 +88,7 @@
                                             <span class="month">@item.Appointment.Day.ToString("MMM").ToUpper()</span>
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark">@DayOfWeekHelper.ToPortuguese(item.Appointment.Day.DayOfWeek)</div>
+                                            <div class="fw-bold text-dark">@item.Appointment.Day.DayOfWeek.ToString()</div>
                                             <div class="text-muted small"><i class="bi bi-clock me-1"></i>@item.Appointment.Day.ToString(@"HH\:mm")</div>
                                         </div>
                                     </div>
@@ -99,25 +99,23 @@
                                 </td>
                                 <td>
                                     <div class="text-dark fw-medium">@item.Service?.ServiceName</div>
-                                    <div class="text-muted small">Duração: @item.Service?.Duration.ToString(@"hh\:mm")</div>
+                                    <div class="text-muted small">Duration: @item.Service?.Duration.ToString(@"hh\:mm")</div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="fw-bold text-dark">@item.Service?.Price.ToString("C")</span>
+                                    <span class="fw-bold text-dark">@item.Service?.Price.ToString("C", new System.Globalization.CultureInfo("en-US"))</span>
                                 </td>
                                 <td>
-                                    @* Badge colorida baseada no status *@
                                     <span class="badge @(statusStr switch { "Waiting" => "bg-warning text-dark", "InProgress" => "bg-primary text-dark", "Finished" => "bg-success", "Canceled" => "bg-danger", _ => "bg-secondary" })">
-                                        @ToPortuguese(statusStr)
+                                        @ToEnglish(statusStr)
                                     </span>
                                 </td>
                                 <td>
                                     <span class="fw-bold text-dark">@item.WorkerName</span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    @* LÓGICA: Se cancelado, desabilita o botão da lixeira *@
                                     @if (isCanceled || iSfinished)
                                     {
-                                        <button class="btn btn-sm btn-outline-secondary border-0 rounded-circle p-2" disabled title="Já cancelado">
+                                        <button class="btn btn-sm btn-outline-secondary border-0 rounded-circle p-2" disabled title="Already processed">
                                             <i class="bi bi-trash3 fs-5"></i>
                                         </button>
                                     }
@@ -125,7 +123,7 @@
                                     {
                                         <a asp-action="CancelAppointment" asp-controller="Appointment" asp-route-id="@item.Appointment.Id"
                                            class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2"
-                                           onclick="return confirm('Tem certeza que deseja cancelar este agendamento?');">
+                                           onclick="return confirm('Are you sure you want to cancel this appointment?');">
                                             <i class="bi bi-trash3 fs-5"></i>
                                         </a>
                                     }
@@ -136,9 +134,9 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                            <td colspan="7" class="text-center py-5">
                                 <i class="bi bi-calendar-x text-muted display-4"></i>
-                                <p class="text-muted mt-2">Nenhum agendamento encontrado.</p>
+                                <p class="text-muted mt-2">No appointments found.</p>
                             </td>
                         </tr>
                     }
@@ -146,40 +144,38 @@
             </table>
         </div>
     </div>
-    @* ... (resto da paginação permanece igual) ... *@
-</div>
-</>
-@if (ViewBag.TotalPages > 1)
-{
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 mb-5 gap-3 px-4">
-        <div class="text-muted small">
-            Mostrando página <span class="fw-bold text-dark">@ViewBag.CurrentPage</span> de <span class="fw-bold text-dark">@ViewBag.TotalPages</span>
-        </div>
 
-        <nav>
-            <ul class="pagination shadow-sm mb-0">
-                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                    <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)">
-                        <i class="bi bi-chevron-left"></i>
-                    </a>
-                </li>
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 mb-5 gap-3 px-4">
+            <div class="text-muted small">
+                Showing page <span class="fw-bold text-dark">@ViewBag.CurrentPage</span> of <span class="fw-bold text-dark">@ViewBag.TotalPages</span>
+            </div>
 
-                @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                {
-                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                        <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@i">@i</a>
+            <nav>
+                <ul class="pagination shadow-sm mb-0">
+                    <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
                     </li>
-                }
 
-                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                    <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)">
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-}
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@i">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                        <a class="page-link border-0 px-3 py-2" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
 </div>
 
 <style>
@@ -279,7 +275,8 @@
     .table-hover tbody tr:hover {
         background-color: #f8fafc;
     }
-    /* Estilos Adicionais para a Paginação */
+
+    /* Pagination Styles */
     .pagination {
         border-radius: 12px;
         overflow: hidden;

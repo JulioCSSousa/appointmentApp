@@ -9,9 +9,9 @@
                 @foreach (var date in Model.HoursToSchedule.Keys)
                 {
                     <th class="text-center py-3">
-                        <span class="d-block small fw-normal">@date.ToString("MMMM", new CultureInfo("pt-BR"))</span>
+                        <span class="d-block small fw-normal">@date.ToString("MMMM", new CultureInfo("en-US"))</span>
                         <span class="fs-5">@date.Day</span>
-                        <span class="d-block small fw-normal">@date.ToString("ddd", new CultureInfo("pt-BR"))</span>
+                        <span class="d-block small fw-normal">@date.ToString("ddd", new CultureInfo("en-US"))</span>
                     </th>
                 }
             </tr>
@@ -27,13 +27,13 @@
                     <td class="@(isClosed ? "day-off-bg" : "") p-3">
                         @if (isClosed)
                         {
-                            <div class="text-center text-danger small fw-bold">FECHADO</div>
+                            <div class="text-center text-danger small fw-bold">CLOSED</div>
                         }
                         else
                         {
                             <select class="form-select time-select border-0 bg-light text-center"
                                     data-day="@date.ToShortDateString()">
-                                <option selected value="">Horários...</option>
+                                <option selected value="">Hours...</option>
                                 @foreach (var time in timeList)
                                 {
                                     <option value="@date.Add(time).ToString("yyyy-MM-dd HH:mm")">
