@@ -30,7 +30,6 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             ViewBag.Workers = workers;
             ViewBag.CurrentWorkerId = workerId;
 
-            // 1. Busca tudo o que já existe no banco para o período
             var schedules = await _scheduleService.GetAsync(startDate, endDate);
             List<DayScheduleViewModel> mappedSchedules;
 
@@ -47,6 +46,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
 
                     if (globalSchedules.Any())
                     {
+                        // Criamos a escala do trabalhador para a semana baseada na global
                         foreach (var globalDay in globalSchedules)
                         {
                             var newScheduleForWorker = new WorkScheduleModel(
@@ -59,6 +59,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                             await _scheduleService.Create(newScheduleForWorker);
                         }
 
+                        // Recarrega atualizado do banco para evitar duplicidade em F5/reloads rápidos
                         schedules = await _scheduleService.GetAsync(startDate, endDate);
                         workerSchedules = schedules.Where(ws => ws.WorkerId == workerId.Value).ToList();
                     }
@@ -69,7 +70,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                     .Select(ws => new DayScheduleViewModel
                     {
                         Id = ws.Id,
-                        WokerId = ws.WorkerId,
+                        WokerId = ws.WorkerId, // Mantido o padrão da sua propriedade do ViewModel
                         Day = ws.Day,
                         Start = ws.Start,
                         End = ws.End,
@@ -80,29 +81,25 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             else
             {
                 ViewBag.CurrentWorkerName = "Escala Padrão da Empresa";
-
                 var globalSchedules = schedules.Where(ws => ws.WorkerId == null).ToList();
 
-                // CORREÇÃO AQUI: Se a escala geral da empresa para essa semana não existe no banco, nós criamos!
                 if (!globalSchedules.Any())
                 {
                     for (int i = 0; i < 7; i++)
                     {
                         DateTime targetDay = startDate.AddDays(i);
 
-                        // Cria uma linha padrão desmarcada (ou ajuste os horários padrão da sua barbearia aqui)
                         var newGlobalDay = new WorkScheduleModel(
                             targetDay,
-                            false, // Inicialmente desmarcado (folga) até o admin ativar
-                            new TimeSpan(8, 0, 0),  // 08:00
-                            new TimeSpan(18, 0, 0), // 18:00
-                            null // WorkerId é null porque é a escala padrão da empresa
+                            false,
+                            new TimeSpan(8, 0, 0),
+                            new TimeSpan(18, 0, 0),
+                            null
                         );
 
                         await _scheduleService.Create(newGlobalDay);
                     }
 
-                    // Recarrega do banco após criar os 7 dias padrões
                     schedules = await _scheduleService.GetAsync(startDate, endDate);
                     globalSchedules = schedules.Where(ws => ws.WorkerId == null).ToList();
                 }
@@ -126,60 +123,59 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
 
             return View(mappedSchedules);
         }
+
         [HttpPost]
-        public async Task<IActionResult> WorkSchedule(
-            [Bind("Id,Day,Start,End,IsSelected")] List<DayScheduleViewModel> models,
-            Guid? WorkerId,
-            int offsetWeeks = 0)
+        public async Task<IActionResult> WorkSchedule(List<DayScheduleViewModel> models, Guid? workerId, int offsetWeeks = 0)
         {
-            if (models == null || models.Count == 0)
+            if (models == null || !models.Any())
             {
-                return BadRequest("Model inválido ou vazio.");
+                TempData["ErrorMessage"] = "Nenhum dado de escala foi recebido.";
+                return RedirectToAction(nameof(WorkSchedule), new { workerId, offsetWeeks });
             }
 
             foreach (var model in models)
             {
                 if (model.Start > model.End)
                 {
-                    return BadRequest($"Horário inválido para o dia {model.Day.ToShortDateString()}: O início não pode ser maior que o fim.");
+                    ModelState.AddModelError("", $"Horário inválido para o dia {model.Day.ToShortDateString()}: O início não pode ser após o fim.");
+
+                    ViewBag.Workers = await _userManager.GetUsersInRoleAsync("Worker");
+                    ViewBag.CurrentWorkerId = workerId;
+                    ViewBag.OffsetWeeks = offsetWeeks;
+                    ViewBag.StartDate = DateTime.Today.AddDays(offsetWeeks * 7);
+                    return View(models);
                 }
             }
 
             DateTime startDate = DateTime.Today.AddDays(offsetWeeks * 7);
             DateTime endDate = startDate.AddDays(6);
-
             var allSchedulesFromWeek = await _scheduleService.GetAsync(startDate, endDate);
 
             foreach (var model in models)
             {
-                WorkScheduleModel newschedule = null;
+                WorkScheduleModel existingSchedule = workerId.HasValue
+                    ? allSchedulesFromWeek.FirstOrDefault(d => d.Day.Date == model.Day.Date && d.WorkerId == workerId.Value)
+                    : allSchedulesFromWeek.FirstOrDefault(d => d.Day.Date == model.Day.Date && d.WorkerId == null);
 
-                if (WorkerId.HasValue)
+                if (existingSchedule != null)
                 {
-                    newschedule = allSchedulesFromWeek
-                        .FirstOrDefault(d => d.Day == model.Day && d.WorkerId == WorkerId.Value);
+                    existingSchedule.SetStart(model.Start);
+                    existingSchedule.SetEnd(model.End);
+                    existingSchedule.SetIsSelected(model.IsSelected);
+
+                    await _scheduleService.UpdateAsync(existingSchedule);
                 }
                 else
                 {
-                    newschedule = allSchedulesFromWeek
-                        .FirstOrDefault(d => d.Day == model.Day && d.WorkerId == null);
-                }
-
-                if (newschedule != null)
-                {
-                    newschedule.SetStart(model.Start);
-                    newschedule.SetEnd(model.End);
-                    newschedule.SetIsSelected(model.IsSelected);
-
-                    await _scheduleService.UpdateAsync(newschedule);
-                }
-                else
-                {
-                    return NotFound($"Nenhum horário encontrado para o dia {model.Day.ToShortDateString()} correspondente ao profissional selecionado.");
+                    ModelState.AddModelError("", $"A escala para o dia {model.Day.ToShortDateString()} não foi localizada no banco.");
+                    ViewBag.Workers = await _userManager.GetUsersInRoleAsync("Worker");
+                    return View(models);
                 }
             }
 
-            return RedirectToAction("IndexAdm", "Home");
+            TempData["SuccessMessage"] = "Escala de trabalho atualizada com sucesso!";
+
+            return RedirectToAction(nameof(WorkSchedule), new { workerId = workerId, offsetWeeks = offsetWeeks });
         }
     }
 }

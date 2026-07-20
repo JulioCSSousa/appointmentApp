@@ -139,7 +139,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 var selectedService = await _serviceManager.GetByIdAsync(model.SelectedServiceId);
                 if (selectedService == null)
                 {
-                    return BadRequest("Serviço não encontrado no banco de dados.");
+                    return BadRequest("Service not Found.");
                 }
 
                 var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, model.WorkerId, model.SelectedDayAndHour, "Waiting");

@@ -11,6 +11,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
     {
         private readonly IServiceManager _serviceManager;
         private readonly IAppointmentService _appointments;
+
         public ServiceController(IServiceManager serviceManager, IAppointmentService appointmentService)
         {
             _serviceManager = serviceManager;
@@ -18,10 +19,9 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServiceModel>>> Index(string? txt)
+        public async Task<IActionResult> Index(string? txt)
         {
             var services = await _serviceManager.GetAsync(txt);
-
             return View("Index", services);
         }
 
@@ -29,28 +29,38 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         public IActionResult Create() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateServiceViewModel model)
         {
-
-            if(model.Duration > new TimeSpan(6, 0, 0))
+            if (!ModelState.IsValid)
             {
-                TempData["durationExceed"] = "Não é possível criar um serviço tão longo";
+                return View(model);
             }
+
+            if (model.Duration > new TimeSpan(12, 0, 0))
+            {
+                ModelState.AddModelError("Duration", "Service duration cannot exceed 12 hours (maximum daily shift).");
+                return View(model);
+            }
+
             try
             {
                 var service = new ServiceModel(model.ServiceName, model.Price, model.Duration, model.Category);
-
                 await _serviceManager.CreateAsync(service);
 
+                TempData["SuccessMessage"] = "Service created successfully.";
                 return RedirectToAction("Index");
-
             }
             catch (ArgumentException ex)
             {
-                TempData["ErrorMessage"] = "This field is required " ;
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while creating the service.");
             }
 
-            return View();
+            return View(model);
         }
 
         [HttpGet]
@@ -58,94 +68,100 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         {
             var dbService = await _serviceManager.GetByIdAsync(id);
             if (dbService == null)
-                return View("Error");
+            {
+                TempData["ErrorMessage"] = "Service not found.";
+                return RedirectToAction("Index");
+            }
 
             var model = new UpdateServiceViewModel
             {
                 ServiceId = dbService.ServiceId,
                 ServiceName = dbService.ServiceName,
                 Category = dbService.Category,
-                Duration = dbService.Duration
+                Duration = dbService.Duration,
+                Price = dbService.Price
             };
 
             return View(model);
         }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, UpdateServiceViewModel serviceView)
         {
             var appointmentExists = await _appointments.GetByServiceId(id);
-            if (appointmentExists != null)
+            if (appointmentExists != null && appointmentExists.Status != "Canceled" && appointmentExists.Status != "Completed")
             {
-                TempData["AppointmentExists"] = "Existe um agendamento para este serviço, não pode Modificar";
-                return RedirectToAction("index");
-
-            }
-            else
-            {
-                var dbService = await _serviceManager.GetByIdAsync(id);
-
-                if (!string.IsNullOrEmpty(serviceView.ServiceName))
-                {
-                    dbService.SetServiceName(serviceView.ServiceName);
-                }
-                if (serviceView.Price != null)
-                {
-                    dbService.SetPrice((double)serviceView.Price);
-                }
-                if (serviceView.Duration != null)
-                {
-                    dbService.SetDuration((TimeSpan)serviceView.Duration);
-                }
-                if (!string.IsNullOrEmpty(serviceView.Category))
-                {
-                    dbService.SetCategory(serviceView.Category);
-                }
-                try
-                {
-                    await _serviceManager.UpdateAsync(dbService);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest($"Error to update service {ex}{dbService}");
-                }
-
-
+                TempData["ErrorMessage"] = "Cannot edit this service because there is an active appointment linked to it.";
                 return RedirectToAction("Index");
-            }
-            
-
-        }
-        [HttpGet]
-        public async Task<IActionResult> Delete()
-        {
-            return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var appointmentExists = await _appointments.GetByServiceId(id);
-            if (appointmentExists != null)
-            {
-                TempData["AppointmentExists"] = "Existe um agendamento para este serviço, não pode deletar";
-                return RedirectToAction("index");
-                
             }
 
             var dbService = await _serviceManager.GetByIdAsync(id);
-            
-            
+            if (dbService == null)
+            {
+                TempData["ErrorMessage"] = "Service not found.";
+                return RedirectToAction("Index");
+            }
+
+            if (!string.IsNullOrEmpty(serviceView.ServiceName))
+            {
+                dbService.SetServiceName(serviceView.ServiceName);
+            }
+            if (serviceView.Price != null)
+            {
+                dbService.SetPrice((double)serviceView.Price);
+            }
+            if (serviceView.Duration != null)
+            {
+                dbService.SetDuration((TimeSpan)serviceView.Duration);
+            }
+            if (!string.IsNullOrEmpty(serviceView.Category))
+            {
+                dbService.SetCategory(serviceView.Category);
+            }
+
             try
             {
-                await _serviceManager.DeleteAsync(dbService);
-
+                await _serviceManager.UpdateAsync(dbService);
+                TempData["SuccessMessage"] = "Service updated successfully.";
                 return RedirectToAction("Index");
-                
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest($"Erro ao Deletar o serviço {ex}{dbService}");
+                TempData["ErrorMessage"] = "An error occurred while trying to update the service. Please try again.";
+                return RedirectToAction("Index");
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var appointmentExists = await _appointments.GetByServiceId(id);
+            if (appointmentExists != null && appointmentExists.Status != "Canceled" && appointmentExists.Status != "Completed")
+            {
+                TempData["ErrorMessage"] = "Cannot delete this service because there is an active appointment linked to it.";
+                return RedirectToAction("Index");
+            }
+
+            var dbService = await _serviceManager.GetByIdAsync(id);
+            if (dbService == null)
+            {
+                TempData["ErrorMessage"] = "Service not found.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                await _serviceManager.DeleteAsync(dbService);
+                TempData["SuccessMessage"] = "Service deleted successfully.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "An error occurred while trying to delete the service. Please try again.";
+                return RedirectToAction("Index");
+            }
+        }
     }
 }
