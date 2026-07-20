@@ -112,14 +112,14 @@
 <script>
     const bookButton = document.getElementById("bookButton");
     const hiddenTime = document.getElementById("hiddenSelectedDayAndHour");
-    const hiddenServiceName = document.getElementById("hiddenServiceName"); // Corrigido o ID aqui para bater com o HTML
+    const hiddenServiceName = document.getElementById("hiddenServiceName"); 
 
     function checkFormCompletion() {
         const serviceSelect = document.getElementById("serviceSelect");
         const workerSelect = document.getElementById("workerSelect");
 
         const serviceId = serviceSelect ? serviceSelect.value : "";
-        // Garante que não vai quebrar se o value for a opção desabilitada padrão
+
         const isServiceValid = serviceId && serviceSelect.selectedIndex > 0;
 
         const workerId = workerSelect ? workerSelect.value : "";
@@ -127,7 +127,6 @@
 
         const timeValue = hiddenTime.value;
 
-        // O botão só ativa se tiver Serviço, Profissional E Horário válidos escolhidos
         bookButton.disabled = !(isServiceValid && isWorkerValid && timeValue);
     }
 
@@ -142,39 +141,36 @@
         document.getElementById("hiddenPrice").value = selectedOption.getAttribute("data-price");
         document.getElementById("hiddenDuration").value = selectedOption.getAttribute("data-duration");
 
-        // Armazena o ID do serviço selecionado
+
         hiddenServiceName.value = this.value;
 
         checkFormCompletion();
     });
 
-    // ESCUTADOR DINÂMICO PARA SELEÇÃO DO COLABORADOR
     const workerSelectElement = document.getElementById("workerSelect");
     if (workerSelectElement) {
         workerSelectElement.addEventListener("change", function() {
             const workerId = this.value;
 
-            // Se resetar para a opção padrão "Selecione...", limpa o horário e desabilita o botão
+
             if (!workerId || this.selectedIndex === 0) {
                 hiddenTime.value = "";
                 checkFormCompletion();
                 return;
             }
 
-            // Faz a chamada assíncrona ao controller passando o Id do colaborador selecionado
+
             fetch(`/Appointment/GetAvailableHours?workerId=${workerId}`)
                 .then(response => {
                     if (!response.ok) throw new Error("Erro ao carregar os horários.");
-                    return response.text(); // Esperamos HTML como resposta (a partial view)
+                    return response.text(); 
                 })
                 .then(htmlHeaders => {
-                    // Injeta o HTML novo dentro do container estável da tabela
+
                     document.getElementById("hoursTableContainer").innerHTML = htmlHeaders;
 
-                    // Como a tabela foi recriada, precisamos reatribuir os eventos de escuta aos novos 'selects' de horas
                     attachTimeSelectEvents();
 
-                    // Reseta a escolha anterior de horário para o cliente ter que escolher de novo
                     hiddenTime.value = "";
                     checkFormCompletion();
                 })
@@ -182,11 +178,10 @@
         });
     }
 
-    // Encapsula a lógica dos seletores de hora para facilitar o re-vínculo dinâmico
     function attachTimeSelectEvents() {
         document.querySelectorAll(".time-select").forEach(function(select) {
             select.addEventListener("change", function() {
-                // Limpa os outros selects de hora se o usuário mudar de ideia e escolher outra coluna/dia
+
                 document.querySelectorAll(".time-select").forEach(s => { if(s !== select) s.value = ""; });
 
                 hiddenTime.value = this.value;
@@ -195,6 +190,5 @@
         });
     }
 
-    // Executa na primeira carga da página para a tabela inicial funcionar
     attachTimeSelectEvents();
 </script>

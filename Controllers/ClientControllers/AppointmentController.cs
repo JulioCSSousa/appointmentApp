@@ -93,8 +93,8 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 isDayOpenList.Add(workSchedule.IsSelected);
             }
 
-            // ... Resto do seu código para buscar colaboradores (Workers) ...
-            var usersWithRoles = await _userManager.GetUsersInRoleAsync("Colaborador");
+
+            var usersWithRoles = await _userManager.GetUsersInRoleAsync("Worker");
             var workersModel = usersWithRoles.Select(item => new UserWithRolesViewModel
             {
                 Id = item.Id,
@@ -242,7 +242,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
         public async Task<IActionResult> GetAvailableHours(string workerId, int offsetWeeks = 0, string userTimeZoneId = "E. South America Standard Time")
         {
             if (string.IsNullOrEmpty(workerId))
-                return BadRequest("Colaborador não especificado.");
+                return BadRequest("Worker not specified.");
 
             // Define o fuso horário correto para a busca
             TimeZoneInfo targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(userTimeZoneId);

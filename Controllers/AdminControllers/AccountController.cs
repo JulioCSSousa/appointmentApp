@@ -62,7 +62,7 @@ public class AccountController : Controller
             }
             else
             {
-                await _userManager.AddToRoleAsync(user, "Cliente");
+                await _userManager.AddToRoleAsync(user, "Client");
             }
 
             string emailBody = $@"
@@ -129,7 +129,8 @@ public class AccountController : Controller
                     return RedirectToAction("IndexAdm", "Home");
 
                 }
-                else if (roles.FirstOrDefault("Colaborador") == "Colaborador"){
+                else if (roles.FirstOrDefault("Worker") == "Worker")
+                {
                     return RedirectToAction("IndexWorker", "Home");
                 }
                 else

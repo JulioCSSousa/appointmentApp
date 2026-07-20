@@ -29,12 +29,10 @@ namespace AppointmentAppMvc.ApplicationSeed
                         "119" + random.Next(10000000, 99999999).ToString()
                     );
 
-                    // Criando com uma senha padrão para todos os testes
                     var result = await userManager.CreateAsync(user, "159753");
 
                     if (result.Succeeded)
                     {
-                        // Todos entram como Clientes para testar a sua lógica de Roles
                         await userManager.AddToRoleAsync(user, appointmentApp.Constants.Roles.User);
                     }
                 }

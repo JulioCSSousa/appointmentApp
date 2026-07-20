@@ -20,29 +20,26 @@ namespace appointmentApp.ApplicationSeed
                 DateTime today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone).Date;
                 DateTime limitDate = today.AddDays(SCHEDULE_WINDOW_DAYS);
 
-                // 1. Descobre o ID da Role "Colaborador" no sistema
-                var colaboradorRoleId = await context.Roles
-                    .Where(r => r.Name == "Colaborador")
+                var workerRoleId = await context.Roles
+                    .Where(r => r.Name == "Worker")
                     .Select(r => r.Id)
                     .FirstOrDefaultAsync();
 
                 // 2. Busca os IDs de todos os usuários que estão vinculados a essa Role
                 var activeWorkerIds = new List<string>();
 
-                if (!string.IsNullOrEmpty(colaboradorRoleId))
+                if (!string.IsNullOrEmpty(workerRoleId))
                 {
                     activeWorkerIds = await context.UserRoles
-                        .Where(ur => ur.RoleId == colaboradorRoleId)
+                        .Where(ur => ur.RoleId == workerRoleId)
                         .Select(ur => ur.UserId)
                         .ToListAsync();
                 }
 
                 bool hasChanges = false;
 
-                // 3. Loop para preencher os dias do calendário
                 for (DateTime currentDay = today; currentDay <= limitDate; currentDay = currentDay.AddDays(1))
                 {
-                    // SE NÃO HÁ USUÁRIOS COM A ROLE "COLABORADOR": Escala Geral (WorkerId = null)
                     if (!activeWorkerIds.Any())
                     {
                         bool existsGlobal = await context.WorkSchedules
@@ -62,13 +59,10 @@ namespace appointmentApp.ApplicationSeed
                             hasChanges = true;
                         }
                     }
-                    // SE EXISTEM COLABORADORES: Gera a escala individual para cada UserId encontrado
                     else
                     {
                         foreach (var workerId in activeWorkerIds)
                         {
-                            // Nota: Se o seu WorkerId na tabela WorkSchedules for do tipo Guid, 
-                            // precisamos dar um Guid.Parse(workerId) aqui. Se for string, passa direto.
                             var targetId = Guid.Parse(workerId);
 
                             bool existsForWorker = await context.WorkSchedules

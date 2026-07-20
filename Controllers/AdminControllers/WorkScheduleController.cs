@@ -26,7 +26,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             DateTime startDate = DateTime.Today.AddDays(offsetWeeks * 7);
             DateTime endDate = startDate.AddDays(6);
 
-            var workers = await _userManager.GetUsersInRoleAsync("Colaborador");
+            var workers = await _userManager.GetUsersInRoleAsync("Worker");
             ViewBag.Workers = workers;
             ViewBag.CurrentWorkerId = workerId;
 
@@ -41,7 +41,6 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
 
                 var workerSchedules = schedules.Where(ws => ws.WorkerId == workerId.Value).ToList();
 
-                // Se o colaborador não tem agenda na semana, mas a empresa tem, copia da empresa
                 if (!workerSchedules.Any())
                 {
                     var globalSchedules = schedules.Where(ws => ws.WorkerId == null).ToList();

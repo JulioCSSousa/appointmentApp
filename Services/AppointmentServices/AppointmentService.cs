@@ -19,7 +19,7 @@ namespace appointmentApp.Services.AppointmentServices
             if (existingAppointment != null)
             {
                 // Lança uma exceção com a mensagem apropriada
-                throw new InvalidOperationException("Já existe um agendamento para este cliente.");
+                throw new InvalidOperationException("Appointment alread existis for this client.");
             }*/
 
             await _repository.Create(appointment);

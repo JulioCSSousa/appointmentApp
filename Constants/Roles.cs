@@ -3,8 +3,8 @@
     public static class Roles
     {
         public const string Admin = "Admin";
-        public const string User = "Cliente";
-        public const string Worker = "Colaborador";
+        public const string User = "Client";
+        public const string Worker = "Worker";
 
         public static readonly string[] AllRoles = { Admin, User, Worker };
     }
