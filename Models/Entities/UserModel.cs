@@ -1,6 +1,5 @@
 ﻿using AppointmentAppMvc.Models.ViewModels.Account;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
@@ -12,7 +11,6 @@ namespace appointmentApp.Models.Entities
 
         [Required]
         public string Name { get; protected set; }
-
         protected UserModel() { }
         
         public UserModel(string name, string email, string phoneNumber)

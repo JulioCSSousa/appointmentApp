@@ -26,30 +26,18 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             _serviceManager = serviceManager;
 
             //Task para impedir do banco desligar
-            if ((DateTime.Now - _lastKeepAlive).TotalHours > 24)
-            {
-                _lastKeepAlive = DateTime.Now;
-
-                Task.Run(async () =>
-                {
-                    try
-                    {
-
-                        await _userManager.Users.Take(1).ToListAsync();
-                    }
-                    catch
-                    {
-                        _lastKeepAlive = DateTime.MinValue;
-                    }
-                });
-            }
+            
         }
 
         [Authorize(Roles = "Admin")]
-        public ActionResult IndexAdm()
+        public async Task<ActionResult> IndexAdmAsync()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userName = _userManager.FindByIdAsync(userId).Result;
+            var userName = await _userManager.FindByIdAsync(userId);
+            if (userName == null)
+            {
+                return NotFound();
+            }
 
             ViewBag.UserName = userName.Name;
             return View();
@@ -58,8 +46,11 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         public async Task<IActionResult> Index(int page = 1)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userName = _userManager.FindByIdAsync(userId).Result;
-
+            var userName = await _userManager.FindByIdAsync(userId);
+            if (userName == null)
+            {
+                return NotFound();
+            }
             ViewBag.UserName = userName.Name;
 
             int pageSize = 10;
@@ -83,13 +74,28 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             foreach (var appointment in pagedAppointments)
             {
                 var findService = await _serviceManager.GetByIdAsync(appointment.ServiceId);
+                var proffissional = await _userManager.FindByIdAsync(appointment.WorkerId);
 
-                clients.Add(new ClientIndexViewModel
+                if(proffissional != null)
                 {
-                    Appointment = appointment,
-                    Service = findService,
-                    User = sessionUser
-                });
+                    clients.Add(new ClientIndexViewModel
+                    {
+                        Appointment = appointment,
+                        Service = findService,
+                        User = sessionUser,
+                        WorkerName = proffissional.Name
+                    });
+                }
+                else
+                {
+                    clients.Add(new ClientIndexViewModel
+                    {
+                        Appointment = appointment,
+                        Service = findService,
+                        User = sessionUser,
+                    });
+                }
+                
             }
 
             ViewBag.CurrentPage = page;
@@ -103,8 +109,11 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             int pageSize = 10;
             List<ClientIndexViewModel> clients = new List<ClientIndexViewModel>();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userName = _userManager.FindByIdAsync(userId).Result;
-
+            var userName = await _userManager.FindByIdAsync(userId);
+            if (userName == null)
+            {
+                return NotFound();
+            }
             ViewBag.UserName = userName.Name;
             var allAppointments = await _appointmentService.Get();
 

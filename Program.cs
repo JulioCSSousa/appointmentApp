@@ -33,7 +33,15 @@ var dbName = Environment.GetEnvironmentVariable("LOCAL") ?? Environment.GetEnvir
 
 // Criar a string de conexão
 var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword}";
-
+// Configurar DbContext
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 30));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, serverVersion, mysqlOptions =>
+        mysqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 1,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null
+        )));
 // Configuração de logging (opcional)
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -80,15 +88,7 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
-// Configurar DbContext
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 30));
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion, mysqlOptions =>
-        mysqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 1,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorNumbersToAdd: null
-        )));
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization(options =>
@@ -104,8 +104,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/OfflineDbError");
 }
-app.UseMiddleware<DatabaseExceptionMiddleware>();
-// Usar o middleware de exceção
+
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -115,6 +114,8 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 app.UseStaticFiles();
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
 // Mapeamento de rotas
 app.MapControllerRoute(
     name: "default",
@@ -148,7 +149,7 @@ using (var scope = app.Services.CreateScope())
 app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
+
 
 // Executar a aplicação
 app.Run();

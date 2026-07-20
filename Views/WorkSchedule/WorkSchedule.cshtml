@@ -230,7 +230,56 @@
 
 <script>
     function changeWorker(workerId) {
-        // Se selecionar a primeira opção (vazia), recarrega a escala padrão sem ID
-        window.location.href = '@Url.Action("WorkSchedule", "WorkSchedule")' + (workerId ? '?workerId=' + workerId : '');
+        // Se workerId for vazio ou nulo, redireciona puramente para a Action sem a QueryString de ID
+        if (!workerId) {
+            window.location.href = '@Url.Action("WorkSchedule", "WorkSchedule")';
+        } else {
+            window.location.href = '@Url.Action("WorkSchedule", "WorkSchedule")?workerId=' + workerId;
+        }
     }
+
+    // --- LÓGICA DE INTERAÇÃO DOS COMPONENTES DA TELA ---
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Ativar / Desativar inputs ao ligar/desligar o switch do dia
+        const switches = document.querySelectorAll('.individual-day');
+        switches.forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                const card = this.closest('.schedule-card');
+                const timeInputs = card.querySelectorAll('input[type="time"]');
+
+                if (this.checked) {
+                    card.classList.remove('card-disabled');
+                    timeInputs.forEach(input => input.disabled = false);
+                } else {
+                    card.classList.add('card-disabled');
+                    timeInputs.forEach(input => input.disabled = true);
+                }
+            });
+        });
+
+        // 2. Aplicar Horário em Lote para todos os dias ativos
+        const applyBtn = document.getElementById('applyDefault');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function () {
+                const defaultStart = document.getElementById('defaultStart').value;
+                const defaultEnd = document.getElementById('defaultEnd').value;
+
+                if (!defaultStart || !defaultEnd) {
+                    alert('Por favor, preencha os horários Inicial e Final padrão antes de aplicar.');
+                    return;
+                }
+
+                // Aplica apenas nos cards que não estão desativados (IsSelected == true)
+                const cards = document.querySelectorAll('.schedule-card:not(.card-disabled)');
+                cards.forEach(card => {
+                    const startInput = card.querySelector('.start-hour');
+                    const endInput = card.querySelector('.end-hour');
+
+                    if (startInput) startInput.value = defaultStart;
+                    if (endInput) endInput.value = defaultEnd;
+                });
+            });
+        }
+    });
 </script>

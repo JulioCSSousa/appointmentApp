@@ -241,7 +241,7 @@ public class AccountController : Controller
         int itemByPge = 10;
         int skip = (page - 1) * itemByPge;
 
-        var query = _userManager.Users.AsQueryable();
+        var query = _userManager.Users;
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
@@ -402,7 +402,7 @@ public class AccountController : Controller
         int skip = (page - 1) * itemByPge;
 
 
-        var users = _userManager.Users.AsQueryable();
+        var users = _userManager.Users;
         if (!string.IsNullOrEmpty(searchTerm))
         {
             users = users.Where(u => u.Name.Contains(searchTerm) || u.Email.Contains(searchTerm));

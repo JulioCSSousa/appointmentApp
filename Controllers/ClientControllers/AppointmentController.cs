@@ -37,18 +37,28 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             _userManager = userManager;
         }
 
-        private async Task<AppointmentViewModel> LoadAppointmentViewModelAsync(int offsetWeeks = 0)
+        private async Task<AppointmentViewModel> LoadAppointmentViewModelAsync(int offsetWeeks = 0, string userTimeZoneId = "E. South America Standard Time")
         {
-            // 0. Define o fuso horário de Brasília 
-            TimeZoneInfo brazilTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
-            DateTime todayInBrazil = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone).Date;
-            DateTime nowInBrazil = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, brazilTimeZone);
+            // 1. Tenta encontrar o fuso passado (ex: "Eastern Standard Time" para Nova York)
+            TimeZoneInfo targetTimeZone;
+            try
+            {
+                targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(userTimeZoneId);
+            }
+            catch
+            {
+                // Fallback caso venha um ID inválido
+                targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+            }
 
-            // Ajusta as datas de início e fim com base no dia correto do Brasil
-            DateTime startDate = todayInBrazil.AddDays(offsetWeeks * 7);
+            // 2. Calcula o "Agora" e o "Hoje" baseado no fuso de quem está agendando
+            DateTime nowInTargetZone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, targetTimeZone);
+            DateTime todayInTargetZone = nowInTargetZone.Date;
+
+            DateTime startDate = todayInTargetZone.AddDays(offsetWeeks * 7);
             DateTime endDate = startDate.AddDays(6);
 
-            // 1. Buscas
+            // Buscas
             var allServices = (await _serviceManager.GetAsync("")).ToList();
             var workSchedules = await _workSchedule.GetAsync(startDate, endDate);
             var appointments = await _appService.Get();
@@ -56,15 +66,14 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             var appointmentDateAndHourList = new Dictionary<DateTime, List<TimeSpan>>();
             var isDayOpenList = new List<bool>();
 
-            // 2. Filtrar os schedules que são de hoje em diante (baseado no Brasil)
+            // Filtrar os schedules usando a data correta do fuso alvo
             var schedulesConfigurados = workSchedules
-                .Where(ws => ws.Day.Date >= todayInBrazil)
+                .Where(ws => ws.Day.Date >= todayInTargetZone)
                 .OrderBy(ws => ws.Day.Date)
                 .ToList();
 
             foreach (var workSchedule in schedulesConfigurados)
             {
-                // Gerar os horários padrões do dia
                 var hoursInDay = SchedulesGeneratorService.GenerateHours(
                     workSchedule.Start,
                     workSchedule.End,
@@ -73,39 +82,31 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                     allServices
                 );
 
-                // Aplica o filtro de margem APENAS para o dia de HOJE
-                if (workSchedule.Day.Date == todayInBrazil)
+                if (workSchedule.Day.Date == todayInTargetZone)
                 {
-                    // Usa o horário atual do Brasil + 20 minutos de margem
-                    var margem = nowInBrazil.TimeOfDay.Add(TimeSpan.FromMinutes(20));
+                    // Aplica a margem de 20 minutos baseada no horário local do alvo
+                    var margem = nowInTargetZone.TimeOfDay.Add(TimeSpan.FromMinutes(20));
                     hoursInDay = hoursInDay.Where(h => h > margem).ToList();
                 }
 
-                // Adiciona ao dicionário usando a data limpa
                 appointmentDateAndHourList[workSchedule.Day.Date] = hoursInDay;
-
-                // Sincroniza se o dia está aberto (IsSelected == true significa Aberto)
                 isDayOpenList.Add(workSchedule.IsSelected);
             }
 
+            // ... Resto do seu código para buscar colaboradores (Workers) ...
             var usersWithRoles = await _userManager.GetUsersInRoleAsync("Colaborador");
-            var workersModel = new List<UserWithRolesViewModel>();
-
-            foreach (var item in usersWithRoles)
+            var workersModel = usersWithRoles.Select(item => new UserWithRolesViewModel
             {
-                workersModel.Add(new UserWithRolesViewModel
-                {
-                    Id = item.Id,
-                    Name = item.Name 
-                });
-            }
+                Id = item.Id,
+                Name = item.Name
+            }).ToList();
 
             return new AppointmentViewModel
             {
                 Services = allServices,
                 HoursToSchedule = appointmentDateAndHourList,
                 IsDayClosed = isDayOpenList,
-                Workers = workersModel 
+                Workers = workersModel
             };
         }
 
@@ -210,7 +211,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             TempData["SuccessMessage"] = "Status atualizado com sucesso!";
 
             // Redireciona para onde o usuário estava (ex: IndexAdm da Home)
-            return Ok();
+            return RedirectToAction("Index", "Home");
         }
 
         public async Task<IActionResult> Delete(Guid id)
@@ -238,55 +239,50 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAvailableHours(string workerId, int offsetWeeks = 0)
+        public async Task<IActionResult> GetAvailableHours(string workerId, int offsetWeeks = 0, string userTimeZoneId = "E. South America Standard Time")
         {
             if (string.IsNullOrEmpty(workerId))
-            {
                 return BadRequest("Colaborador não especificado.");
-            }
 
-            DateTime startDate = DateTime.Today.AddDays(offsetWeeks * 7);
+            // Define o fuso horário correto para a busca
+            TimeZoneInfo targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(userTimeZoneId);
+            DateTime nowInTargetZone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, targetTimeZone);
+            DateTime todayInTargetZone = nowInTargetZone.Date;
+
+            DateTime startDate = todayInTargetZone.AddDays(offsetWeeks * 7);
             DateTime endDate = startDate.AddDays(6);
 
-            // 1. Buscas obrigatórias para gerar os horários
             var allServices = await _serviceManager.GetAsync("");
-
-            // FILTRO 1: Ajuste aqui se o seu repositório aceitar o ID do worker por parâmetro,
-            // caso contrário, filtramos com .Where() logo abaixo.
             var workSchedules = await _workSchedule.GetAsync(startDate, endDate);
-
-            // FILTRO 2: Buscando os agendamentos já existentes
             var appointments = await _appService.Get();
 
-            // Aplicando os filtros baseados no barbeiro selecionado
             var schedulesDoTrabalhador = workSchedules
-                .Where(ws => ws.WorkerId.ToString() == workerId) // Substitua 'UserId' ou 'WorkerId' pela propriedade real do seu WorkSchedule
-                .Where(ws => ws.Day >= DateTime.Today)
+                .Where(ws => ws.WorkerId.ToString() == workerId)
+                .Where(ws => ws.Day.Date >= todayInTargetZone) // Corrigido para usar o fuso correto
                 .OrderBy(ws => ws.Day.Date)
                 .ToList();
 
             var appointmentsDoTrabalhador = appointments
-                .Where(ap => ap.WorkerId == workerId) // Substitua 'WorkerId' ou 'UserId' pela propriedade real do seu Appointment
+                .Where(ap => ap.WorkerId == workerId)
                 .ToList();
 
             var appointmentDateAndHourList = new Dictionary<DateTime, List<TimeSpan>>();
             var isDayOpenList = new List<bool>();
 
-            // 2. Processamento dos horários específicos do colaborador
             foreach (var workSchedule in schedulesDoTrabalhador)
             {
                 var hoursInDay = SchedulesGeneratorService.GenerateHours(
                     workSchedule.Start,
                     workSchedule.End,
                     DateOnly.FromDateTime(workSchedule.Day),
-                    appointmentsDoTrabalhador, // Passa apenas os agendamentos dele
+                    appointmentsDoTrabalhador,
                     allServices.ToList()
                 );
 
-                // Filtro para o dia de hoje (evita mostrar horários passados)
-                if (workSchedule.Day.Date == DateTime.Today)
+                if (workSchedule.Day.Date == todayInTargetZone)
                 {
-                    var margem = DateTime.Now.TimeOfDay.Add(TimeSpan.FromMinutes(20));
+                    // Margem usando o horário local do usuário e não do servidor de hospedagem
+                    var margem = nowInTargetZone.TimeOfDay.Add(TimeSpan.FromMinutes(20));
                     hoursInDay = hoursInDay.Where(h => h > margem).ToList();
                 }
 
@@ -294,14 +290,12 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 isDayOpenList.Add(workSchedule.IsSelected);
             }
 
-            // 3. Monta o ViewModel simplificado apenas com o que a Partial View da tabela precisa
             var viewModel = new AppointmentViewModel
             {
                 HoursToSchedule = appointmentDateAndHourList,
                 IsDayClosed = isDayOpenList
             };
 
-            // Retorna apenas o pedaço de HTML correspondente à tabela
             return PartialView("_HoursTablePartial", viewModel);
         }
     }

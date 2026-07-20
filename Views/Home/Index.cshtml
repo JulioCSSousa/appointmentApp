@@ -67,6 +67,7 @@
                         <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Serviço</th>
                         <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-center">Valor</th>
                         <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Status</th>
+                        <th class="py-3 text-uppercase fs-xs fw-bold text-muted">Proffessional</th>
                         <th class="py-3 text-uppercase fs-xs fw-bold text-muted text-end pe-4">Ações</th>
                     </tr>
                 </thead>
@@ -108,6 +109,9 @@
                                     <span class="badge @(statusStr switch { "Waiting" => "bg-warning text-dark", "InProgress" => "bg-primary text-dark", "Finished" => "bg-success", "Canceled" => "bg-danger", _ => "bg-secondary" })">
                                         @ToPortuguese(statusStr)
                                     </span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark">@item.WorkerName</span>
                                 </td>
                                 <td class="text-end pe-4">
                                     @* LÓGICA: Se cancelado, desabilita o botão da lixeira *@
