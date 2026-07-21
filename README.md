@@ -1,4 +1,4 @@
-# 🗓️ Multi-Purpose Booking & Appointment Management System
+🗓️ Multi-Purpose Booking & Appointment Management System
 
 A complete, production-ready management and appointment scheduling system developed using **ASP.NET Core MVC**. Built with a clean architecture focus, high data security, and Role-Based Access Control (RBAC) to manage administrators, staff, and clients seamlessly.
 
@@ -40,38 +40,45 @@ Follow the steps below to get the project running on your machine:
 ### 1. Get the Source Code
 * **Option A (Gumroad Download):** Download the `.zip` file from your Gumroad library and extract it to a folder of your choice.
 * **Option B (Git):** Clone the repository via terminal:
-git clone [https://github.com/JulioCSSousa/appointmentApp.git](https://github.com/JulioCSSousa/appointmentApp.git) || Extract the project Zip
-
+  ```bash
+  git clone [https://github.com/JulioCSSousa/appointmentApp.git](https://github.com/JulioCSSousa/appointmentApp.git)
 🛠️ Choose How to Run
-You can run this application using Docker (recommended, as it sets up the environment and database automatically) or Locally via the .NET SDK.
+You can run this application using Docker (recommended for quick zero-config setup) or Locally via the .NET SDK.
 
 🐳 Option 1: Running with Docker (Recommended)
-You only need Docker Desktop installed. No need to install the .NET SDK or a local database server.
+You only need Docker Desktop installed. No .NET SDK or local database installation is required!
 
-Open your terminal in the root folder of the project (where docker-compose.yml is located) and run:
+Open your terminal in the root folder of the project (where docker-compose.yml is located).
+
+Start the containers and build the environment:
 
 Bash
-```docker run --rm -v "${PWD}:/app" -w /app mcr.microsoft.com/dotnet/sdk:8.0 bash -c "dotnet tool install --global dotnet-ef --version 8.* ; /root/.dotnet/tools/dotnet-ef migrations add InitialCreate"```
+docker compose up --build -d
+Open your browser and navigate to:
+
+HTTP
+http://localhost:8081
+The database schema, tables, and initial seed data will be applied automatically on the first boot.
+
+💻 Option 2: Running Locally (.NET SDK)
+If you prefer to run it natively without Docker, ensure you have .NET 8 SDK and a MySQL Server installed.
+
+Locate the .env.example file in the root directory, duplicate it, and rename the copy to .env.
+
+Update the environment variables with your local MySQL database credentials:
+
+Snippet de código
+LOCAL_HOST=localhost
+LOCAL_PORT=3306
+LOCAL_USER=root
+LOCAL_PASSWORD=YourPassword
+LOCAL_DATABASE=appointmentappdb
+Apply database migrations to your local MySQL:
 
 Bash
-```docker compose up --build -d```
-Apply the database migrations directly into the running container to create the tables:
+dotnet ef database update
+Run the application:
 
-Go to localhost:8081 
-Enjoy it
-
-#### 💻 Option 2: Running Locally (.NET SDK)
-If you prefer to run it natively without Docker, ensure you have the **.NET 8 SDK** and **MySQL Server** installed.
-
-1. Locate the `.env.example` file in the root directory, duplicate it, and rename the copy to `.env`.
-2. Update the environment variables with your local MySQL database credentials:
-   ```env
-   LOCAL_HOST=localhost
-   LOCAL_PORT=3306
-   LOCAL_USER=root
-   LOCAL_PASSWORD=YourPassword
-   LOCAL_DATABASE=db_appointment
-   
-   dotnet ef database update
-
-   dotnet run
+Bash
+dotnet run
+Access http://localhost:7153 (or the port specified in your console output).
