@@ -51,12 +51,14 @@ You only need Docker Desktop installed. No need to install the .NET SDK or a loc
 Open your terminal in the root folder of the project (where docker-compose.yml is located) and run:
 
 Bash
-docker run --rm -v "${PWD}:/app" -w /app mcr.microsoft.com/dotnet/sdk:8.0 bash -c "dotnet tool install --global dotnet-ef --version 8.* ; /root/.dotnet/tools/dotnet-ef migrations add InitialCreate"
-
+```docker run --rm -v "${PWD}:/app" -w /app mcr.microsoft.com/dotnet/sdk:8.0 bash -c "dotnet tool install --global dotnet-ef --version 8.* ; /root/.dotnet/tools/dotnet-ef migrations add InitialCreate"```
 
 Bash
-docker compose up --build -d
+```docker compose up --build -d```
 Apply the database migrations directly into the running container to create the tables:
+
+Go to localhost:8081 
+Enjoy it
 
 #### 💻 Option 2: Running Locally (.NET SDK)
 If you prefer to run it natively without Docker, ensure you have the **.NET 8 SDK** and **MySQL Server** installed.
