@@ -13,8 +13,10 @@ using DotNetEnv;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -120,6 +122,16 @@ app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseHttpsRedirection();
 
+var defaultCulture = new CultureInfo("en-US"); 
+
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(defaultCulture),
+    SupportedCultures = new List<CultureInfo> { defaultCulture },
+    SupportedUICultures = new List<CultureInfo> { defaultCulture }
+};
+
+app.UseRequestLocalization(localizationOptions);
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
