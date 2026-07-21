@@ -140,8 +140,18 @@ using (var scope = app.Services.CreateScope())
             logger.LogInformation("--> Migrations successfull applied");
 
             logger.LogInformation("--> Seeds Executing...");
-            await RoleInitializer.SeedRolesAsync(roleManager);
-            await SeedWorkSchedule.SeedWorkSchedules(context, seedLogger);
+            // Exemplo de boa prática dentro do método de Seed:
+            if (!context.WorkSchedules.Any())
+            {
+                // Só insere se o banco estiver vazio!
+                await SeedWorkSchedule.SeedWorkSchedules(context, seedLogger);
+                await context.SaveChangesAsync();
+            }
+            if (!context.WorkSchedules.Any())
+            {
+                await RoleInitializer.SeedRolesAsync(roleManager);
+            }
+            
             // await UserInitializer.SeedMassUsersAsync(userManager); <= populate Database with random test users
 
             logger.LogInformation("--> Database configured and successfully seeded!");
