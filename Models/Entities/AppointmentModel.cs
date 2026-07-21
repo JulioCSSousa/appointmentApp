@@ -12,19 +12,23 @@ namespace appointmentApp.Models.Entities
         public string ClientId { get; private set; }
         public int ServiceId { get; private set; }
         public string? WorkerId { get; private set; }
-        
+        public string ServiceName { get; set; } = string.Empty; 
+        public double ServicePrice { get; set; }
         public DateTime Day { get; private set; }
         public string Status { get; private set; }
 
         private AppointmentModel() { }
-        public AppointmentModel(Guid id, string clientId, int serviceId, string? workerId, DateTime day, string status)
+        public AppointmentModel(Guid id, string clientId, int serviceId, string serviceName, double servicePrice, string? workerId, DateTime day, string status)
         {
             Id = id;
             ClientId = clientId;
             ServiceId = serviceId;
+            ServiceName = serviceName;
+            ServicePrice = servicePrice;
             WorkerId = workerId;
             Day = day;
             Status = status;
+
         }
 
         public void SetClientId(string id)

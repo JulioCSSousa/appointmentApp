@@ -188,6 +188,13 @@ namespace AppointmentAppMvc.Migrations
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("ServicePrice")
+                        .HasColumnType("double");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("longtext");

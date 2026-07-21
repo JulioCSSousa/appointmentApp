@@ -125,6 +125,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 return BadRequest("Client ID não encontrado");
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (string.IsNullOrEmpty(userId))
                 return BadRequest("User ID não encontrado");
 
@@ -141,8 +142,9 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 {
                     return BadRequest("Service not Found.");
                 }
-
-                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, model.WorkerId, model.SelectedDayAndHour, "Waiting");
+                string serviceName = selectedService.ServiceName;
+                double servicePrice = selectedService.Price;
+                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, serviceName,servicePrice, model.WorkerId, model.SelectedDayAndHour, "Waiting");
 
                 await _appService.Create(newAppointment);
                 TempData["SuccessMessage"] = "Agendamento realizado com sucesso!";

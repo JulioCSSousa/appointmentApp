@@ -36,24 +36,20 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                 var getClientById = await _userManager.FindByIdAsync(item.ClientId);
                 if (getClientById == null)
                 {
-                    return NotFound("Client was not found");
+                    return View();
                 }
-                var getServiceById = await _service.GetByIdAsync(item.ServiceId);
-                if (getServiceById == null)
-                {
-                    return NotFound("Service was not found");
-                }
-                var price = getServiceById.Price;
 
+                var price = item.ServicePrice;
+                var serviceName = item.ServiceName;
                 profit += price;
 
                 model.Add(new FinanceViewModel
                 {
                     ClientName = getClientById.Name,
-                    ServiceName = getServiceById.ServiceName,
+                    ServiceName = serviceName,
                     Date = item.Day,
                     Profits = profit,
-                    ServicePrice = getServiceById.Price
+                    ServicePrice = price
                 });
             }
 

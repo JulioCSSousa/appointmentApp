@@ -11,6 +11,8 @@ namespace AppointmentAppMvc.Models.ViewModels.Appointment
         [Required]
         public int SelectedServiceId { get; set; }
         [Required]
+        public ServiceModel? Service { get; set; }
+        [Required]
         public string? ClientId { get; set; }
 
         public string? WorkerId { get; set; }
