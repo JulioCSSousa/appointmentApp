@@ -140,14 +140,14 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             var appointmentExists = await _appointments.GetByServiceId(id);
             if (appointmentExists != null && appointmentExists.Status != "Canceled" && appointmentExists.Status != "Completed")
             {
-                TempData["ErrorMessage"] = "Cannot delete this service because there is an active appointment linked to it.";
+                TempData["DeleteError"] = "Cannot delete this service because there is an active appointment linked to it.";
                 return RedirectToAction("Index");
             }
 
             var dbService = await _serviceManager.GetByIdAsync(id);
             if (dbService == null)
             {
-                TempData["ErrorMessage"] = "Service not found.";
+                TempData["DeleteError"] = "Service not found.";
                 return RedirectToAction("Index");
             }
 

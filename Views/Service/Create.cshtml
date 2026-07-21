@@ -2,61 +2,72 @@
 @using AppointmentAppMvc.Models.ViewModels.Services
 @model CreateServiceViewModel
 
+@{
+    ViewData["Title"] = "Create Service";
+}
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-@if (TempData["durationExceed"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["durationExceed"]
+<div class="container mt-5">
+    @if (TempData["durationExceed"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            @TempData["durationExceed"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <a asp-action="Index" class="btn btn-outline-secondary mb-4">
+        <i class="bi bi-arrow-left"></i> ⬅ Back
+    </a>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h2 class="text-center mb-4 fw-bold">New Service</h2>
+
+        <form asp-controller="Service" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="ServiceName" class="form-label fw-semibold">Service Name</label>
+                <input asp-for="ServiceName" class="form-control" />
+                <span asp-validation-for="ServiceName" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Price" class="form-label fw-semibold">Price</label>
+
+                <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                <span asp-validation-for="Price" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Duration" class="form-label fw-semibold">Duration (e.g. 01:00:00 or minutes)</label>
+                <input asp-for="Duration" class="form-control" />
+                <span asp-validation-for="Duration" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Category" class="form-label fw-semibold">Category</label>
+                <input asp-for="Category" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Category" class="text-danger small"></span>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary fw-bold py-2">Register</button>
+            </div>
+        </form>
     </div>
-}
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
-    </div>
-}
-
-<a asp-action="Index"
-   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-    ⬅ Back
-</a>
-
-<div class="container mt-5 top-0 bottom-20">
-    <h2 class="text-center mb-4">New Service</h2>
-    <form asp-action="Create" method="post" class="needs-validation" novalidate>
-        <div class="mb-3">
-            <label asp-for="ServiceName" class="form-label">Service Name</label>
-            <input asp-for="ServiceName" class="form-control" required />
-            <div class="text-danger">
-                <span asp-validation-for="ServiceName">This field is required</span>
-            </div>
-        </div>
-        <div class="mb-3">
-            <label asp-for="Price" class="form-label">Price</label>
-            <input asp-for="Price" type="currency" class="form-control" required />
-            <div class="text-danger">
-                <span asp-validation-for="Price">This field is required</span>
-            </div>
-        </div>
-        <div class="mb-3">
-            <label asp-for="Duration" class="form-label">Duration</label>
-            <input asp-for="Duration" class="form-control" />
-            <div class="text-danger">
-                <span asp-validation-for="Duration">This field is required</span>
-            </div>
-        </div>
-        <div class="mb-3">
-            <label asp-for="Category" class="form-label">Category</label>
-            <input asp-for="Category" class="form-control" autocomplete="off" />
-            <div class="text-danger">
-                <span asp-validation-for="Category">This field is required</span>
-            </div>
-        </div>
-
-        <div class="d">
-            <button type="submit" class="btn btn-primary">Register</button>
-        </div>
-    </form>
 </div>
+
+@section Scripts {
+    <!-- Scripts de validação no lado do cliente (Client-side validation) -->
+    <partial name="_ValidationScriptsPartial" />
+}

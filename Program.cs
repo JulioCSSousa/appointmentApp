@@ -10,6 +10,7 @@ using appointmentApp.Services.WorkScheduleService;
 using AppointmentAppMvc.Hubs;
 
 using DotNetEnv;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -20,10 +21,10 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Carregar variáveis de ambiente do arquivo .env
+
 Env.Load();
 
-// 1. Tenta ler o que o Docker Compose injetou. Se não existir, pega do seu .env local.
+// 1. connection strings
 var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? Environment.GetEnvironmentVariable("LOCAL_HOST") ?? Environment.GetEnvironmentVariable("AIVEN_HOST");
 var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? Environment.GetEnvironmentVariable("LOCAL_PORT") ?? Environment.GetEnvironmentVariable("AIVEN_PORT");
 var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? Environment.GetEnvironmentVariable("LOCAL_USER") ?? Environment.GetEnvironmentVariable("AIVEN_USER");
@@ -32,20 +33,24 @@ var dbName = Environment.GetEnvironmentVariable("DB") ?? Environment.GetEnvironm
 
 var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};Uid={dbUser};Pwd={dbPassword};";
 
-// Configurar DbContext
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 37)); 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion));
+
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 37));
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion, mysqlOptions =>
         mysqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 1,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
             errorNumbersToAdd: null
         )));
+
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"./temp-keys"));
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+
 
 builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 {
@@ -59,14 +64,17 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication("CookieAuth")
-    .AddCookie("CookieAuth", options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-    });
+// login routes
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.Cookie.Name = "AppointmentApp_Auth";
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
 
-// Adicionar a configuração de e-mail
+// email config
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IEmailSender>(provider =>
 {
@@ -79,15 +87,13 @@ builder.Services.AddTransient<IEmailSender>(provider =>
     );
 });
 
-// Adicionar repositórios e serviços
+// repositories
 builder.Services.AddScoped<IWorkScheduleRepository, WorkScheduleRepository>();
 builder.Services.AddScoped<IWorkScheduleService, WorkScheduleService>();
 builder.Services.AddScoped<IServiceManagerRepository, ServiceManagerRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
-
-
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization(options =>
@@ -96,19 +102,39 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddSignalR();
 
-// Construir a aplicação
+// ----------------------------------------------------------------------
+// BUILD and MIDDLEWARES
+// ----------------------------------------------------------------------
 var app = builder.Build();
-app.UseDeveloperExceptionPage();
-if (app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/OfflineDbError");
-}
+
+// 5. Configuração de Proxy/Headers para o Render
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/OfflineDbError");
+    app.UseHsts();
+}
+
 app.UseStaticFiles();
+
+// 6. Find Coins
+var defaultCulture = new CultureInfo("en-US");
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(defaultCulture),
+    SupportedCultures = new List<CultureInfo> { defaultCulture },
+    SupportedUICultures = new List<CultureInfo> { defaultCulture }
+};
+app.UseRequestLocalization(localizationOptions);
+
 app.UseRouting();
 
 app.UseAuthentication();
@@ -120,24 +146,13 @@ app.MapControllerRoute(
 
 app.MapHub<NotificationHub>("/notificationHub");
 
-app.UseHttpsRedirection();
-
-var defaultCulture = new CultureInfo("en-US"); 
-
-var localizationOptions = new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture(defaultCulture),
-    SupportedCultures = new List<CultureInfo> { defaultCulture },
-    SupportedUICultures = new List<CultureInfo> { defaultCulture }
-};
-
-app.UseRequestLocalization(localizationOptions);
+// 7. Seeds
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
 
-    int retries = 10; 
+    int retries = 10;
     while (retries > 0)
     {
         try
@@ -149,38 +164,34 @@ using (var scope = app.Services.CreateScope())
             logger.LogInformation("--> Connecting to MySQL...");
 
             await context.Database.MigrateAsync();
-            logger.LogInformation("--> Migrations successfull applied");
+            logger.LogInformation("--> Migrations successfully applied");
 
             logger.LogInformation("--> Seeds Executing...");
-            // Exemplo de boa prática dentro do método de Seed:
             if (!context.WorkSchedules.Any())
             {
-                // Só insere se o banco estiver vazio!
                 await SeedWorkSchedule.SeedWorkSchedules(context, seedLogger);
                 await context.SaveChangesAsync();
             }
-            if (!context.WorkSchedules.Any())
+            if (!await roleManager.Roles.AnyAsync())
             {
                 await RoleInitializer.SeedRolesAsync(roleManager);
             }
-            
-            // await UserInitializer.SeedMassUsersAsync(userManager); <= populate Database with random test users
 
             logger.LogInformation("--> Database configured and successfully seeded!");
-            break; 
+            break;
         }
         catch (Exception ex)
         {
             retries--;
-            logger.LogWarning($"--> MySQL inicialization... (Try {11 - retries}/10). Error: {ex.Message}");
+            logger.LogWarning($"--> MySQL initialization... (Try {11 - retries}/10). Error: {ex.Message}");
 
             if (retries == 0)
             {
-                logger.LogError(ex, "Database Seeding or Conection error.");
+                logger.LogError(ex, "Database Seeding or Connection error.");
                 throw;
             }
 
-            await Task.Delay(5000); 
+            await Task.Delay(5000);
         }
     }
 }
