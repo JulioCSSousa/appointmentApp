@@ -138,7 +138,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         public async Task<IActionResult> Delete(int id)
         {
             var appointmentExists = await _appointments.GetByServiceId(id);
-            if (appointmentExists != null && appointmentExists.Status != "Canceled" && appointmentExists.Status != "Completed")
+            if (appointmentExists != null && appointmentExists.Status != "Canceled" && appointmentExists.Status != "Finished")
             {
                 TempData["DeleteError"] = "Cannot delete this service because there is an active appointment linked to it.";
                 return RedirectToAction("Index");

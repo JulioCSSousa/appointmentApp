@@ -3,15 +3,15 @@
 @using appointmentApp.Services.Utilities
 @model List<ClientIndexViewModel>
 @{
-    ViewData["Title"] = "Workflow Management";
+    ViewData["Title"] = "Flow Management";
 }
-
+<h2 class="fw-bold m-0">Hello! @ViewBag.UserName</h2>
 <div class="container-fluid py-4 px-lg-5" style="background-color: #f1f5f9; min-height: 100vh;">
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 gap-3">
         <div>
-            <h2 class="fw-bold text-dark m-0"><i class="bi bi-layout-kanban me-2"></i>Operations Dashboard</h2>
-            <p class="text-muted">Manage the client flow for today and upcoming days.</p>
+            <h2 class="fw-bold text-dark m-0"><i class="bi bi-layout-kanban me-2"></i>Operations Board</h2>
+            <p class="text-muted">Manage today's and upcoming client flows.</p>
         </div>
         <div class="d-flex gap-2">
             <a asp-action="Index"
@@ -44,20 +44,21 @@
                                 <span class="badge bg-indigo-soft text-indigo rounded-pill">
                                     <i class="bi bi-clock me-1"></i> @item.Appointment.Day.ToString(@"HH\:mm")
                                 </span>
-                                <span class="text-muted small">@item.Appointment.Day.ToString("MM/dd")</span>
+                                <span class="text-muted small">@item.Appointment.Day.ToString("dd/MM")</span>
                             </div>
 
                             <h6 class="fw-bold text-dark mb-1">@item.User?.Name</h6>
                             <p class="text-muted small mb-3">@item.Service?.ServiceName</p>
+                            <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
 
                             <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
                                 <div class="btn-group w-100">
                                     <form asp-action="UpdateStatus" asp-controller="Appointment" method="post" class="w-100 me-2">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@item.Appointment.Id" />
-                                        <input type="hidden" name="newStatus" value="Finished" />
+                                        <input type="hidden" name="newStatus" value="InProgress" />
                                         <button type="submit" class="btn btn-sm btn-emerald w-100 rounded-3 text-white fw-bold">
-                                            Complete
+                                            Next
                                         </button>
                                     </form>
                                     <form asp-action="UpdateStatus" asp-controller="Appointment" method="post" class="w-100">
@@ -69,6 +70,42 @@
                                         </button>
                                     </form>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-4">
+            <div class="column-header mb-3 d-flex align-items-center">
+                <span class="badge bg-emerald me-2 p-2">@Model.Count(x => x.Appointment.Status == "InProgress")</span>
+                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">In Progress</h5>
+            </div>
+            <div class="kanban-column bg-light-soft rounded-3 p-2">
+                @foreach (var item in Model.Where(x => x.Appointment.Status == "InProgress").OrderByDescending(x => x.Appointment.Day))
+                {
+                    <div class="card mb-3 border-0 shadow-sm hover-card border-start border-4 border-success">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-play-circle-fill text-success me-3 fs-4"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
+                                    <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
+                                    <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
+                                </div>
+                            </div>
+
+                            <!-- BUTTON TO CHANGE STATUS TO "Finished" -->
+                            <div class="border-top pt-3 mt-2">
+                                <form asp-action="UpdateStatus" asp-controller="Appointment" method="post" class="w-100">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.Appointment.Id" />
+                                    <input type="hidden" name="newStatus" value="Finished" />
+                                    <button type="submit" class="btn btn-sm btn-success w-100 rounded-3 text-white fw-bold">
+                                        <i class="bi bi-check2 me-1"></i> Complete Service
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -91,8 +128,9 @@
                                 <div class="flex-grow-1">
                                     <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
                                     <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
+                                    <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
                                 </div>
-                                <span class="fw-bold text-dark small">@item.Service?.Price.ToString("C", new System.Globalization.CultureInfo("en-US"))</span>
+                                <span class="fw-bold text-dark small">@item.Service?.Price.ToString("C")</span>
                             </div>
                         </div>
                     </div>
@@ -109,9 +147,10 @@
                 @foreach (var item in Model.Where(x => x.Appointment.Status == "Canceled"))
                 {
                     <div class="card mb-2 border-0 p-2 shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center px-2">
-                            <span class="text-muted small text-decoration-line-through">@item.User?.Name</span>
-                            <span class="badge bg-light text-muted">@item.Appointment.Day.ToString("MM/dd")</span>
+                        <div class="flex-grow-1">
+                            <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
+                            <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
+                            <p class="text-muted small mb-3">Staff: @item.WorkerName</p>
                         </div>
                     </div>
                 }
