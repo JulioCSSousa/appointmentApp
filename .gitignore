@@ -1,7 +1,6 @@
 # Pastas do build
 bin/
 obj/
-Migrations/
 # Configuração do usuário
 .vs/
 [Bb]in/
