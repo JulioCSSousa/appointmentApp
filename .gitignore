@@ -9,7 +9,6 @@ obj/
 
 # Configuração do ambiente
 .env
-appsettings
-appsettings-prod.json
+appsettings*.json
 # Dependências do sistema
 
