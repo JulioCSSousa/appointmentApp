@@ -3,36 +3,42 @@
 @using appointmentApp.Services.Utilities
 @model List<ClientIndexViewModel>
 @{
-    ViewData["Title"] = "Flow Management";
+    ViewData["Title"] = "Gerenciamento de fluxo";
 }
 <h2 class="fw-bold m-0">Hello! @ViewBag.UserName</h2>
 <div class="container-fluid py-4 px-lg-5" style="background-color: #f1f5f9; min-height: 100vh;">
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 gap-3">
         <div>
-            <h2 class="fw-bold text-dark m-0"><i class="bi bi-layout-kanban me-2"></i>Operations Board</h2>
-            <p class="text-muted">Manage today's and upcoming client flows.</p>
+            <h2 class="fw-bold text-dark m-0"><i class="bi bi-layout-kanban me-2"></i>Painel de operações</h2>
+            <p class="text-muted">Gerencie os fluxos de clientes de hoje e dos próximos dias.</p>
         </div>
+
         <div class="d-flex gap-2">
+            <button type="button" id="enableSoundAlerts" class="btn btn-outline-primary shadow-sm rounded-pill">
+                Ativar som dos agendamentos
+            </button>
             <a asp-action="Index"
                asp-route-searchDate="@DateTime.Today.ToString("yyyy-MM-dd")"
                class="btn btn-white shadow-sm rounded-pill">
-                <i class="bi bi-calendar-event me-2 text-primary"></i>Today
+                <i class="bi bi-calendar-event me-2 text-primary"></i>Hoje
             </a>
 
             <a asp-action="Create"
                asp-controller="Appointment"
                class="btn btn-custom-indigo shadow-sm rounded-pill">
-                <i class="bi bi-plus-lg me-2"></i>New Appointment
+                <i class="bi bi-plus-lg me-2"></i>Novo agendamento
             </a>
         </div>
     </div>
+
+    <div id="appointmentNotification" class="alert alert-info d-none" role="alert" aria-live="assertive"></div>
 
     <div class="row g-4">
         <div class="col-12 col-xl-4">
             <div class="column-header mb-3 d-flex align-items-center">
                 <span class="badge bg-amber me-2 p-2">@Model.Count(x => x.Appointment.Status == "Waiting")</span>
-                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Waiting</h5>
+                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Aguardando</h5>
             </div>
 
             <div class="kanban-column">
@@ -58,7 +64,7 @@
                                         <input type="hidden" name="id" value="@item.Appointment.Id" />
                                         <input type="hidden" name="newStatus" value="InProgress" />
                                         <button type="submit" class="btn btn-sm btn-emerald w-100 rounded-3 text-white fw-bold">
-                                            Next
+                                            Próximo
                                         </button>
                                     </form>
                                     <form asp-action="UpdateStatus" asp-controller="Appointment" method="post" class="w-100">
@@ -66,7 +72,7 @@
                                         <input type="hidden" name="id" value="@item.Appointment.Id" />
                                         <input type="hidden" name="newStatus" value="Canceled" />
                                         <button type="submit" class="btn btn-sm btn-outline-rose w-100 rounded-3 fw-bold">
-                                            Cancel
+                                            Cancelar
                                         </button>
                                     </form>
                                 </div>
@@ -80,7 +86,7 @@
         <div class="col-12 col-xl-4">
             <div class="column-header mb-3 d-flex align-items-center">
                 <span class="badge bg-emerald me-2 p-2">@Model.Count(x => x.Appointment.Status == "InProgress")</span>
-                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">In Progress</h5>
+                <h5 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">Em andamento</h5>
             </div>
             <div class="kanban-column bg-light-soft rounded-3 p-2">
                 @foreach (var item in Model.Where(x => x.Appointment.Status == "InProgress").OrderByDescending(x => x.Appointment.Day))
@@ -103,7 +109,7 @@
                                     <input type="hidden" name="id" value="@item.Appointment.Id" />
                                     <input type="hidden" name="newStatus" value="Finished" />
                                     <button type="submit" class="btn btn-sm btn-success w-100 rounded-3 text-white fw-bold">
-                                        <i class="bi bi-check2 me-1"></i> Complete Service
+                                        <i class="bi bi-check2 me-1"></i> Concluir serviço
                                     </button>
                                 </form>
                             </div>
@@ -237,3 +243,13 @@
         font-weight: 600;
     }
 </style>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.AppointmentNotifications) {
+                window.AppointmentNotifications.startWorkerAlerts();
+            }
+        });
+    </script>
+}

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\AppointmentAppMvc.csproj": {}
+    "C:\\Users\\julio\\source\\repos\\appointmentApp\\AppointmentAppMvc.csproj": {}
   },
   "projects": {
-    "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\AppointmentAppMvc.csproj": {
+    "C:\\Users\\julio\\source\\repos\\appointmentApp\\AppointmentAppMvc.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\AppointmentAppMvc.csproj",
+        "projectUniqueName": "C:\\Users\\julio\\source\\repos\\appointmentApp\\AppointmentAppMvc.csproj",
         "projectName": "AppointmentAppMvc",
-        "projectPath": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\AppointmentAppMvc.csproj",
+        "projectPath": "C:\\Users\\julio\\source\\repos\\appointmentApp\\AppointmentAppMvc.csproj",
         "packagesPath": "C:\\Users\\julio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\julio\\Source\\Repos\\appointmentApp\\obj\\",
+        "outputPath": "C:\\Users\\julio\\source\\repos\\appointmentApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -30,6 +30,7 @@
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -44,16 +45,13 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
-            "DotNetEnv": {
-              "target": "Package",
-              "version": "[3.1.1, )"
-            },
             "MailKit": {
               "target": "Package",
               "version": "[4.16.0, )"
@@ -112,7 +110,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.316/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

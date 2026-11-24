@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Painel do administrador";
 }
 
 <h2 class="fw-bold m-0">Hello! @ViewBag.UserName</h2>
@@ -7,8 +7,8 @@
 
     <div class="row mb-5">
         <div class="col-12 text-center text-md-start">
-            <h1 class="fw-bold text-dark mb-1" style="letter-spacing: -1px;">Administrative Dashboard</h1>
-            <p class="text-muted">Welcome back! Here is your business operational overview.</p>
+            <h1 class="fw-bold text-dark mb-1" style="letter-spacing: -1px;">Painel administrativo</h1>
+            <p class="text-muted">Bem-vindo de volta! Este é o resumo operacional do seu negócio.</p>
         </div>
     </div>
 
@@ -20,10 +20,10 @@
                         <div class="icon-shape bg-indigo-soft text-indigo">
                             <i class="bi bi-people-fill fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Users</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Usuários</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Manage permissions, roles, and administrative access from a centralized location.</p>
-                    <a asp-controller="Account" asp-action="Index" class="btn btn-custom-dark w-100">Manage Panel</a>
+                    <p class="card-text text-muted mb-4">Gerencie permissões, funções e acessos administrativos em um só lugar.</p>
+                    <a asp-controller="Account" asp-action="Index" class="btn btn-custom-dark w-100">Gerenciar painel</a>
                 </div>
             </div>
         </div>
@@ -35,10 +35,10 @@
                         <div class="icon-shape bg-emerald-soft text-emerald">
                             <i class="bi bi-calendar-week-fill fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Schedules & Hours</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Agendas e horários</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Track the booking flow and configure your business operational hours.</p>
-                    <a asp-controller="WorkSchedule" asp-action="WorkSchedule" class="btn btn-custom-dark w-100">View Calendar</a>
+                    <p class="card-text text-muted mb-4">Acompanhe os agendamentos e configure o horário de funcionamento.</p>
+                    <a asp-controller="WorkSchedule" asp-action="WorkSchedule" class="btn btn-custom-dark w-100">Ver calendário</a>
                 </div>
             </div>
         </div>
@@ -50,10 +50,10 @@
                         <div class="icon-shape bg-amber-soft text-amber">
                             <i class="bi bi-scissors fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Service Catalog</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Catálogo de serviços</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Edit prices, descriptions, and categories of the services offered.</p>
-                    <a asp-controller="Service" asp-action="Index" class="btn btn-custom-dark w-100">Edit Catalog</a>
+                    <p class="card-text text-muted mb-4">Edite preços, descrições e categorias dos serviços oferecidos.</p>
+                    <a asp-controller="Service" asp-action="Index" class="btn btn-custom-dark w-100">Editar catálogo</a>
                 </div>
             </div>
         </div>
@@ -65,10 +65,10 @@
                         <div class="icon-shape bg-rose-soft text-rose">
                             <i class="bi bi-person-heart fs-3"></i>
                         </div>
-                        <h5 class="card-title mb-0 ms-3 fw-bold">Client Base</h5>
+                        <h5 class="card-title mb-0 ms-3 fw-bold">Base de clientes</h5>
                     </div>
-                    <p class="card-text text-muted mb-4">Full booking history and contact details of all your registered clients.</p>
-                    <a asp-controller="ClientBase" asp-action="Index" class="btn btn-custom-dark w-100">Access CRM</a>
+                    <p class="card-text text-muted mb-4">Histórico completo de agendamentos e contatos dos clientes cadastrados.</p>
+                    <a asp-controller="ClientBase" asp-action="Index" class="btn btn-custom-dark w-100">Acessar CRM</a>
                 </div>
             </div>
         </div>
@@ -78,9 +78,9 @@
                 <div class="card-body p-4 d-flex flex-column justify-content-center">
                     <div class="row align-items-center">
                         <div class="col-md-7">
-                            <h3 class="fw-bold mb-2">Financial Reports</h3>
-                            <p class="text-white-50">Monitor your monthly revenue, expenses, and business financial health in real time.</p>
-                            <a asp-controller="Finance" asp-action="Index" class="btn btn-light fw-bold px-4 py-2 mt-2">View Profits</a>
+                            <h3 class="fw-bold mb-2">Relatórios financeiros</h3>
+                            <p class="text-white-50">Monitore sua receita mensal, despesas e saúde financeira em tempo real.</p>
+                            <a asp-controller="Finance" asp-action="Index" class="btn btn-light fw-bold px-4 py-2 mt-2">Ver lucros</a>
                         </div>
                         <div class="col-md-5 d-none d-md-block text-end">
                             <i class="bi bi-graph-up-arrow display-1 opacity-25"></i>

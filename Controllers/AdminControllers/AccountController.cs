@@ -38,13 +38,19 @@ namespace AppointmentAppMvc.Controllers
                 return View(model);
             }
 
+            var normalizedPhoneNumber = UserModel.NormalizePhoneNumber(model.PhoneNumber);
+            if (await _userManager.Users.AnyAsync(u => u.PhoneNumberNormalized == normalizedPhoneNumber))
+            {
+                ModelState.AddModelError(nameof(model.PhoneNumber), "Este número de telefone já está cadastrado.");
+                return View(model);
+            }
+
             var isFirstUser = !await _userManager.Users.AnyAsync();
 
             var user = new UserModel(model.Name, model.Email, model.PhoneNumber)
             {
                 UserName = model.Email,
                 Email = model.Email,
-                PhoneNumber = model.PhoneNumber,
                 EmailConfirmed = true
             };
 
@@ -93,17 +99,17 @@ namespace AppointmentAppMvc.Controllers
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var normalizedPhoneNumber = UserModel.NormalizePhoneNumber(model.PhoneNumber);
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.PhoneNumberNormalized == normalizedPhoneNumber);
+
+            var result = user == null
+                ? Microsoft.AspNetCore.Identity.SignInResult.Failed
+                : await _signInManager.PasswordSignInAsync(
+                    user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null)
-                {
-                    return RedirectToAction("Login");
-                }
-
                 if (await _userManager.IsInRoleAsync(user, "Admin"))
                 {
                     return RedirectToAction("IndexAdm", "Home");
@@ -118,6 +124,7 @@ namespace AppointmentAppMvc.Controllers
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            ViewData["InvalidLogin"] = "Login ou Senha inválidos";
             return View(model);
         }
 
@@ -297,7 +304,20 @@ namespace AppointmentAppMvc.Controllers
             }
 
             if (!string.IsNullOrEmpty(model.Name)) user.SetName(model.Name);
-            if (!string.IsNullOrEmpty(model.PhoneNumber)) user.PhoneNumber = model.PhoneNumber;
+            if (!string.IsNullOrEmpty(model.PhoneNumber))
+            {
+                var normalizedPhoneNumber = UserModel.NormalizePhoneNumber(model.PhoneNumber);
+                var phoneAlreadyUsed = await _userManager.Users
+                    .AnyAsync(u => u.Id != user.Id && u.PhoneNumberNormalized == normalizedPhoneNumber);
+
+                if (phoneAlreadyUsed)
+                {
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "Este número de telefone já está cadastrado.");
+                    return View(model);
+                }
+
+                user.SetPhoneNumber(model.PhoneNumber);
+            }
 
             if (!string.IsNullOrEmpty(model.Email) && !string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
             {

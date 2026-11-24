@@ -5,8 +5,8 @@ namespace AppointmentAppMvc.Models.ViewModels.Account
     public class LoginViewModel
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        [DataType(DataType.PhoneNumber)]
+        public string PhoneNumber { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

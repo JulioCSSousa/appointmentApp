@@ -2,49 +2,59 @@
 @using AppointmentAppMvc.Models.ViewModels.Appointment
 @model AppointmentViewModel
 
-<div class="table-responsive rounded-3 border">
-    <table class="table table-hover align-middle mb-0">
-        <thead class="table-dark">
-            <tr>
-                @foreach (var date in Model.HoursToSchedule.Keys)
-                {
-                    <th class="text-center py-3">
-                        <span class="d-block small fw-normal">@date.ToString("MMMM", new CultureInfo("en-US"))</span>
-                        <span class="fs-5">@date.Day</span>
-                        <span class="d-block small fw-normal">@date.ToString("ddd", new CultureInfo("en-US"))</span>
-                    </th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                @for (int i = 0; i < Model.HoursToSchedule.Count; i++)
-                {
-                    var date = Model.HoursToSchedule.Keys.ElementAt(i);
-                    var timeList = Model.HoursToSchedule[date];
-                    bool isClosed = !Model.IsDayClosed[i];
+@if (!Model.HoursToSchedule.Any() || !Model.HoursToSchedule.Values.SelectMany(hours => hours).Any())
+{
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-clock me-2"></i>
+        Não há horários disponíveis para este profissional no período selecionado. Por favor, escolha outro profissional ou tente novamente mais tarde.
+    </div>
+}
+else
+{
+    <div class="table-responsive rounded-3 border">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    @foreach (var date in Model.HoursToSchedule.Keys)
+                    {
+                        <th class="text-center py-3">
+                            <span class="d-block small fw-normal">@date.ToString("MMMM", new CultureInfo("pt-BR"))</span>
+                            <span class="fs-5">@date.Day</span>
+                            <span class="d-block small fw-normal">@date.ToString("ddd", new CultureInfo("pt-BR"))</span>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    @for (int i = 0; i < Model.HoursToSchedule.Count; i++)
+                    {
+                        var date = Model.HoursToSchedule.Keys.ElementAt(i);
+                        var timeList = Model.HoursToSchedule[date];
+                        bool isClosed = !Model.IsDayClosed[i];
 
-                    <td class="@(isClosed ? "day-off-bg" : "") p-3">
-                        @if (isClosed)
-                        {
-                            <div class="text-center text-danger small fw-bold">CLOSED</div>
-                        }
-                        else
-                        {
-                            <select class="form-select time-select border-0 bg-light text-center"
-                                    data-day="@date.ToShortDateString()">
-                                <option selected value="">Hours...</option>
-                                @foreach (var time in timeList)
-                                {
-                                    <option value="@date.Add(time).ToString("yyyy-MM-dd HH:mm")">
-                                        @time.ToString(@"hh\:mm")
-                                    </option>
-                                }
-                            </select>
-                        }
-                    </td>
-                }
-            </tr>
-        </tbody>
-    </table>
-</div>
+                        <td class="@(isClosed ? "day-off-bg" : "") p-3">
+                            @if (isClosed)
+                            {
+                                <div class="text-center text-danger small fw-bold">FECHADO</div>
+                            }
+                            else
+                            {
+                                <select class="form-select time-select border-0 bg-light text-center"
+                                        data-day="@date.ToShortDateString()">
+                                    <option selected value="">Horários...</option>
+                                    @foreach (var time in timeList)
+                                    {
+                                        <option value="@date.Add(time).ToString("yyyy-MM-dd HH:mm")">
+                                            @time.ToString(@"hh\:mm")
+                                        </option>
+                                    }
+                                </select>
+                            }
+                        </td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}

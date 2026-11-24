@@ -1,19 +1,19 @@
 ﻿@using AppointmentAppMvc.Models.ViewModels.Finance
 @{
-    ViewData["Title"] = "Financial Dashboard";
+    ViewData["Title"] = "Painel financeiro";
     var hasData = Model != null && Model.Any();
 }
 @model List<FinanceViewModel>
 
 <a asp-action="IndexAdm" asp-controller="Home"
    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300">
-    ⬅ Return
+    ⬅ Voltar
 </a>
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Financial Management</h2>
-        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" @(hasData ? "" : "disabled")>Download Report</button>
+        <h2 class="fw-bold">Gestão financeira</h2>
+        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" @(hasData ? "" : "disabled")>Baixar relatório</button>
     </div>
 
     @if (hasData)
@@ -25,8 +25,8 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p class="mb-1 opacity-75">Total Balance</p>
-                                <h3 class="fw-bold">@Model.Sum(x => x.ServicePrice).ToString("C2", new System.Globalization.CultureInfo("en-US"))</h3>
+                                <p class="mb-1 opacity-75">Saldo total</p>
+                                <h3 class="fw-bold">@Model.Sum(x => x.ServicePrice).ToString("C2", new System.Globalization.CultureInfo("pt-BR"))</h3>
                             </div>
                             <div class="icon-shape"><i class="bi bi-wallet2"></i></div>
                         </div>
@@ -39,7 +39,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between text-dark">
                             <div>
-                                <p class="mb-1 text-muted">Completed Services</p>
+                                <p class="mb-1 text-muted">Serviços concluídos</p>
                                 <h3 class="fw-bold">@Model.Count()</h3>
                             </div>
                             <div class="icon-shape text-primary bg-light"><i class="bi bi-scissors"></i></div>
@@ -53,11 +53,11 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between text-dark">
                             <div>
-                                <p class="mb-1 text-muted">Average Ticket</p>
+                                <p class="mb-1 text-muted">Ticket médio</p>
                                 @{
                                     var average = Model.Count > 0 ? Model.Average(x => x.ServicePrice) : 0;
                                 }
-                                <h3 class="fw-bold">@average.ToString("C2", new System.Globalization.CultureInfo("en-US"))</h3>
+                                <h3 class="fw-bold">@average.ToString("C2", new System.Globalization.CultureInfo("pt-BR"))</h3>
                             </div>
                             <div class="icon-shape text-success bg-light"><i class="bi bi-graph-up"></i></div>
                         </div>
@@ -70,14 +70,14 @@
         <div class="row">
             <div class="col-lg-8 mb-4">
                 <div class="card border-0 shadow-sm p-4 h-100">
-                    <h5 class="fw-bold mb-4">Weekly Performance</h5>
+                    <h5 class="fw-bold mb-4">Desempenho semanal</h5>
                     <canvas id="financeChart" height="150"></canvas>
                 </div>
             </div>
 
             <div class="col-lg-4 mb-4">
                 <div class="card border-0 shadow-sm p-4 h-100">
-                    <h5 class="fw-bold mb-4">Latest Earnings</h5>
+                    <h5 class="fw-bold mb-4">Receitas recentes</h5>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <tbody>
@@ -89,14 +89,14 @@
                                             <small class="text-muted">@item.Date.ToString("MM/dd")</small>
                                         </td>
                                         <td class="text-end text-success fw-bold">
-                                            + @item.ServicePrice.ToString("C2", new System.Globalization.CultureInfo("en-US"))
+                                            + @item.ServicePrice.ToString("C2", new System.Globalization.CultureInfo("pt-BR"))
                                         </td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
-                    <a href="#" class="btn btn-light btn-sm w-100 mt-auto">View All</a>
+                    <a href="#" class="btn btn-light btn-sm w-100 mt-auto">Ver tudo</a>
                 </div>
             </div>
         </div>
@@ -108,8 +108,8 @@
             <div class="mb-3 text-muted">
                 <i class="bi bi-inbox fs-1"></i>
             </div>
-            <h4 class="fw-bold text-secondary">No Financial Data Available</h4>
-            <p class="text-muted">There are no records to display at this moment.</p>
+            <h4 class="fw-bold text-secondary">Nenhum dado financeiro disponível</h4>
+            <p class="text-muted">Não há registros para exibir neste momento.</p>
         </div>
     }
 </div>

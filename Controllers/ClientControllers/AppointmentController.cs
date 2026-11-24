@@ -37,6 +37,64 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             _userManager = userManager;
         }
 
+        private async Task<string?> SelectAvailableWorkerAsync(
+            DateTime appointmentDay,
+            TimeSpan serviceDuration,
+            string? preferredWorkerId,
+            IEnumerable<WorkScheduleModel> workSchedules,
+            IEnumerable<AppointmentModel> appointments,
+            IEnumerable<ServiceModel> services)
+        {
+            var workers = await _userManager.GetUsersInRoleAsync("Worker");
+            var candidates = workers
+                .Where(worker => string.IsNullOrEmpty(preferredWorkerId) || worker.Id == preferredWorkerId)
+                .Where(worker => workSchedules.Any(schedule =>
+                    schedule.WorkerId?.ToString() == worker.Id &&
+                    schedule.Day.Date == appointmentDay.Date &&
+                    schedule.IsSelected &&
+                    schedule.Start <= appointmentDay.TimeOfDay &&
+                    schedule.End >= appointmentDay.TimeOfDay.Add(serviceDuration)))
+                .Where(worker => !appointments.Any(appointment =>
+                    appointment.WorkerId == worker.Id &&
+                    appointment.Status != "Canceled" &&
+                    appointment.Status != "Finished" &&
+                    appointment.Day.Date == appointmentDay.Date &&
+                    appointment.Day < appointmentDay.Add(serviceDuration) &&
+                    appointmentDay < appointment.Day.Add(GetServiceDuration(appointment.ServiceId))))
+                .Select(worker => new
+                {
+                    worker.Id,
+                    ScheduledAppointments = appointments.Count(appointment =>
+                        appointment.WorkerId == worker.Id &&
+                        appointment.Status != "Canceled"),
+                    FinishedAppointments = appointments.Count(appointment =>
+                        appointment.WorkerId == worker.Id && appointment.Status == "Finished")
+                })
+                .ToList();
+
+            if (candidates.Count == 0)
+                return null;
+
+            var totalWeight = candidates.Sum(candidate =>
+                1d / (1 + candidate.ScheduledAppointments));
+            var randomValue = Random.Shared.NextDouble() * totalWeight;
+
+            foreach (var candidate in candidates)
+            {
+                randomValue -= 1d / (1 + candidate.ScheduledAppointments);
+                if (randomValue <= 0)
+                    return candidate.Id;
+            }
+
+            return candidates[^1].Id;
+
+            TimeSpan GetServiceDuration(int serviceId)
+            {
+                return services.FirstOrDefault(service => service.ServiceId == serviceId)?.Duration
+                    ?? TimeSpan.FromMinutes(30);
+            }
+        }
+
         private async Task<AppointmentViewModel> LoadAppointmentViewModelAsync(int offsetWeeks = 0, string userTimeZoneId = "E. South America Standard Time")
         {
             // 1. Tenta encontrar o fuso passado (ex: "Eastern Standard Time" para Nova York)
@@ -64,7 +122,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             var appointments = await _appService.Get();
 
             var appointmentDateAndHourList = new Dictionary<DateTime, List<TimeSpan>>();
-            var isDayOpenList = new List<bool>();
+            var isDayOpenByDate = new Dictionary<DateTime, bool>();
 
             // Filtrar os schedules usando a data correta do fuso alvo
             var schedulesConfigurados = workSchedules
@@ -74,11 +132,15 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
 
             foreach (var workSchedule in schedulesConfigurados)
             {
+                var workerId = workSchedule.WorkerId?.ToString();
+                var workerAppointments = string.IsNullOrEmpty(workerId)
+                    ? appointments.ToList()
+                    : appointments.Where(appointment => appointment.WorkerId == workerId).ToList();
                 var hoursInDay = SchedulesGeneratorService.GenerateHours(
                     workSchedule.Start,
                     workSchedule.End,
                     DateOnly.FromDateTime(workSchedule.Day),
-                    appointments.ToList(),
+                    workerAppointments,
                     allServices
                 );
 
@@ -89,8 +151,12 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                     hoursInDay = hoursInDay.Where(h => h > margem).ToList();
                 }
 
-                appointmentDateAndHourList[workSchedule.Day.Date] = hoursInDay;
-                isDayOpenList.Add(workSchedule.IsSelected);
+                appointmentDateAndHourList[workSchedule.Day.Date] =
+                    appointmentDateAndHourList.TryGetValue(workSchedule.Day.Date, out var existingHours)
+                        ? existingHours.Union(hoursInDay).OrderBy(hour => hour).ToList()
+                        : hoursInDay;
+                isDayOpenByDate[workSchedule.Day.Date] =
+                    isDayOpenByDate.GetValueOrDefault(workSchedule.Day.Date) || workSchedule.IsSelected;
             }
 
 
@@ -105,7 +171,9 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             {
                 Services = allServices,
                 HoursToSchedule = appointmentDateAndHourList,
-                IsDayClosed = isDayOpenList,
+                IsDayClosed = appointmentDateAndHourList.Keys
+                    .Select(date => isDayOpenByDate.GetValueOrDefault(date))
+                    .ToList(),
                 Workers = workersModel
             };
         }
@@ -142,13 +210,35 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                 {
                     return BadRequest("Service not Found.");
                 }
+
+                var workSchedules = await _workSchedule.GetAsync(
+                    model.SelectedDayAndHour.Date,
+                    model.SelectedDayAndHour.Date.AddDays(1).AddTicks(-1));
+                var appointments = await _appService.Get();
+                var allServices = await _serviceManager.GetAsync("");
+                var assignedWorkerId = await SelectAvailableWorkerAsync(
+                    model.SelectedDayAndHour,
+                    selectedService.Duration,
+                    model.WorkerId,
+                    workSchedules,
+                    appointments,
+                    allServices);
+
+                if (assignedWorkerId == null)
+                {
+                    ModelState.AddModelError("", "Não há profissional disponível para o horário selecionado.");
+                    var unavailableViewModel = await LoadAppointmentViewModelAsync();
+                    return View(unavailableViewModel);
+                }
+
                 string serviceName = selectedService.ServiceName;
                 double servicePrice = selectedService.Price;
-                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, serviceName,servicePrice, model.WorkerId, model.SelectedDayAndHour, "Waiting");
+                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, serviceName,servicePrice, assignedWorkerId, model.SelectedDayAndHour, "Waiting");
 
                 await _appService.Create(newAppointment);
                 TempData["SuccessMessage"] = "Agendamento realizado com sucesso!";
-                await _hubContext.Clients.All.SendAsync("ReceiveNewAppointment", "Novo agendamento realizado!");
+                await _hubContext.Clients.User(assignedWorkerId)
+                    .SendAsync("ReceiveNewAppointment", "Novo agendamento realizado!");
                 ViewBag.NewAppointment = "New";
                 return RedirectToAction("Index", "Home");
             }
@@ -241,11 +331,8 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAvailableHours(string workerId, int offsetWeeks = 0, string userTimeZoneId = "E. South America Standard Time")
+        public async Task<IActionResult> GetAvailableHours(string? workerId, int offsetWeeks = 0, string userTimeZoneId = "E. South America Standard Time")
         {
-            if (string.IsNullOrEmpty(workerId))
-                return BadRequest("Worker not specified.");
-
             // Define o fuso horário correto para a busca
             TimeZoneInfo targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById(userTimeZoneId);
             DateTime nowInTargetZone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, targetTimeZone);
@@ -259,25 +346,25 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             var appointments = await _appService.Get();
 
             var schedulesDoTrabalhador = workSchedules
-                .Where(ws => ws.WorkerId.ToString() == workerId)
+                .Where(ws => string.IsNullOrEmpty(workerId) || ws.WorkerId.ToString() == workerId)
                 .Where(ws => ws.Day.Date >= todayInTargetZone) // Corrigido para usar o fuso correto
                 .OrderBy(ws => ws.Day.Date)
                 .ToList();
 
-            var appointmentsDoTrabalhador = appointments
-                .Where(ap => ap.WorkerId == workerId)
-                .ToList();
-
             var appointmentDateAndHourList = new Dictionary<DateTime, List<TimeSpan>>();
-            var isDayOpenList = new List<bool>();
+            var isDayOpenByDate = new Dictionary<DateTime, bool>();
 
             foreach (var workSchedule in schedulesDoTrabalhador)
             {
+                var scheduleWorkerId = workSchedule.WorkerId?.ToString();
+                var workerAppointments = string.IsNullOrEmpty(scheduleWorkerId)
+                    ? appointments.ToList()
+                    : appointments.Where(appointment => appointment.WorkerId == scheduleWorkerId).ToList();
                 var hoursInDay = SchedulesGeneratorService.GenerateHours(
                     workSchedule.Start,
                     workSchedule.End,
                     DateOnly.FromDateTime(workSchedule.Day),
-                    appointmentsDoTrabalhador,
+                    workerAppointments,
                     allServices.ToList()
                 );
 
@@ -288,14 +375,20 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
                     hoursInDay = hoursInDay.Where(h => h > margem).ToList();
                 }
 
-                appointmentDateAndHourList[workSchedule.Day.Date] = hoursInDay;
-                isDayOpenList.Add(workSchedule.IsSelected);
+                appointmentDateAndHourList[workSchedule.Day.Date] =
+                    appointmentDateAndHourList.TryGetValue(workSchedule.Day.Date, out var existingHours)
+                        ? existingHours.Union(hoursInDay).OrderBy(hour => hour).ToList()
+                        : hoursInDay;
+                isDayOpenByDate[workSchedule.Day.Date] =
+                    isDayOpenByDate.GetValueOrDefault(workSchedule.Day.Date) || workSchedule.IsSelected;
             }
 
             var viewModel = new AppointmentViewModel
             {
                 HoursToSchedule = appointmentDateAndHourList,
-                IsDayClosed = isDayOpenList
+                IsDayClosed = appointmentDateAndHourList.Keys
+                    .Select(date => isDayOpenByDate.GetValueOrDefault(date))
+                    .ToList()
             };
 
             return PartialView("_HoursTablePartial", viewModel);

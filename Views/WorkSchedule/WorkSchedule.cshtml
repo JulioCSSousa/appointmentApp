@@ -9,7 +9,7 @@
     var currentWorkerId = ViewBag.CurrentWorkerId;
     var currentWorkerName = ViewBag.CurrentWorkerName;
     var hasWorkers = ViewBag.Workers != null && ((IEnumerable<dynamic>)ViewBag.Workers).Any();
-    ViewData["Title"] = "Work Schedule";
+    ViewData["Title"] = "Horário de trabalho";
 }
 
 <div class="container-fluid py-4 px-lg-5" style="background-color: #f8fafc; min-height: 100vh;">
@@ -18,10 +18,10 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <a asp-action="IndexAdm" asp-controller="Home" class="btn btn-link text-decoration-none text-muted p-0 mb-2">
-                <i class="bi bi-arrow-left"></i> Administrative Panel
+                <i class="bi bi-arrow-left"></i> Painel administrativo
             </a>
-            <h2 class="fw-bold text-dark m-0">Work Schedule</h2>
-            <p class="text-muted small mb-0">Manage the working days and service hours of the barbershop.</p>
+            <h2 class="fw-bold text-dark m-0">Horário de trabalho</h2>
+            <p class="text-muted small mb-0">Gerencie os dias de trabalho e os horários de atendimento.</p>
         </div>
 
         <!-- Context alert badge -->
@@ -30,11 +30,11 @@
             <span class="small text-indigo-emphasis">
                 @if (currentWorkerId != null)
                 {
-                    <span>Configuring schedule for: <strong>@currentWorkerName</strong></span>
+                    <span>Configurando o horário de: <strong>@currentWorkerName</strong></span>
                 }
                 else
                 {
-                    <strong>General Barbershop Schedule (Default)</strong>
+                    <strong>Horário geral do estabelecimento (padrão)</strong>
                 }
             </span>
         </div>
@@ -47,9 +47,9 @@
             <div class="card-body p-4">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-dark mb-2">Select Team Member:</label>
+                        <label class="form-label fw-bold text-dark mb-2">Selecione o membro da equipe:</label>
                         <select id="workerSelector" class="form-select border rounded-3 p-2 fw-semibold text-muted" onchange="changeWorker(this.value)">
-                            <option value="">-- Company Default Schedule --</option>
+                            <option value="">-- Horário padrão da empresa --</option>
                             @foreach (var worker in ViewBag.Workers)
                             {
                                 <option value="@worker.Id" selected="@(worker.Id.ToString() == currentWorkerId?.ToString() ? "selected" : null)">
@@ -60,7 +60,7 @@
                     </div>
                     <div class="col-md-6 text-md-end mt-3 mt-md-0">
                         <span class="badge bg-light text-dark border p-2 rounded-3 small">
-                            <i class="bi bi-person-gear me-1 text-indigo"></i> Individual Schedule active
+                            <i class="bi bi-person-gear me-1 text-indigo"></i> Horário individual ativo
                         </span>
                     </div>
                 </div>
@@ -76,17 +76,17 @@
         <!-- BATCH ADJUSTMENT -->
         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
             <div class="card-body p-4">
-                <h6 class="text-uppercase fw-bold text-muted small mb-3">Batch Adjustment</h6>
+                <h6 class="text-uppercase fw-bold text-muted small mb-3">Ajuste em lote</h6>
                 <div class="row g-3 align-items-end">
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold small">Default Start Time</label>
+                        <label class="form-label fw-semibold small">Horário inicial padrão</label>
                         <div class="input-group border rounded-3 overflow-hidden">
                             <span class="input-group-text bg-light border-0"><i class="bi bi-clock"></i></span>
                             <input type="time" id="defaultStart" class="form-control border-0" />
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-semibold small">Default End Time</label>
+                        <label class="form-label fw-semibold small">Horário final padrão</label>
                         <div class="input-group border rounded-3 overflow-hidden">
                             <span class="input-group-text bg-light border-0"><i class="bi bi-clock-fill"></i></span>
                             <input type="time" id="defaultEnd" class="form-control border-0" />
@@ -94,7 +94,7 @@
                     </div>
                     <div class="col-md-3">
                         <button type="button" id="applyDefault" class="btn btn-indigo-soft w-100 fw-bold py-2">
-                            <i class="bi bi-magic me-2"></i>Apply to All
+                            <i class="bi bi-magic me-2"></i>Aplicar a todos
                         </button>
                     </div>
                 </div>
@@ -107,8 +107,7 @@
             {
                 var schedule = Model.ElementAt(i);
                 var isDisabled = !schedule.IsSelected;
-                // Formats the day name natively to English capitalization
-                var dayOfWeekName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(schedule.Day.ToString("dddd", System.Globalization.CultureInfo.InvariantCulture));
+                var dayOfWeekName = System.Globalization.CultureInfo.GetCultureInfo("pt-BR").TextInfo.ToTitleCase(schedule.Day.ToString("dddd", System.Globalization.CultureInfo.GetCultureInfo("pt-BR")));
                 var formattedDate = schedule.Day.ToString("dd/MM");
 
                 <div class="col-md-6 col-lg-3 mb-4">
@@ -133,7 +132,7 @@
                             <div class="row g-2">
                                 <!-- Start Time -->
                                 <div class="col-12 mb-2">
-                                    <label class="form-label small fw-bold text-muted mb-1">Start</label>
+                                    <label class="form-label small fw-bold text-muted mb-1">Início</label>
                                     <div class="input-group border rounded-3 overflow-hidden bg-light">
                                         <span class="input-group-text bg-transparent border-0 text-muted px-2"><i class="bi bi-clock"></i></span>
                                         <input type="time" class="form-control border-0 bg-transparent start-hour p-2 text-center font-monospace"
@@ -144,7 +143,7 @@
                                 </div>
                                 <!-- End Time -->
                                 <div class="col-12">
-                                    <label class="form-label small fw-bold text-muted mb-1">End</label>
+                                    <label class="form-label small fw-bold text-muted mb-1">Fim</label>
                                     <div class="input-group border rounded-3 overflow-hidden bg-light">
                                         <span class="input-group-text bg-transparent border-0 text-muted px-2"><i class="bi bi-clock-fill"></i></span>
                                         <input type="time" class="form-control border-0 bg-transparent end-hour p-2 text-center font-monospace"
@@ -163,9 +162,9 @@
         <!-- STICKY BOTTOM SAVE BAR -->
         <div class="sticky-bottom py-3 mt-4 bg-white border-top shadow-lg mx-n4 px-4 rounded-top-4">
             <div class="d-flex justify-content-between align-items-center container-fluid">
-                <span class="text-muted small d-none d-md-inline">Modify the hours and click save to apply changes.</span>
+                <span class="text-muted small d-none d-md-inline">Altere os horários e clique em salvar para aplicar as mudanças.</span>
                 <button type="submit" id="savebtn" class="btn btn-dark px-5 py-2 fw-bold rounded-pill">
-                    <i class="bi bi-cloud-check me-2"></i>Save Schedule
+                    <i class="bi bi-cloud-check me-2"></i>Salvar horário
                 </button>
             </div>
         </div>

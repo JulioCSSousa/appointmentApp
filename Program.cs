@@ -9,7 +9,7 @@ using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
 using AppointmentAppMvc.Hubs;
 
-using DotNetEnv;
+// removed DotNetEnv usage - connection strings now come from appsettings.json
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -22,16 +22,18 @@ using System.Globalization;
 var builder = WebApplication.CreateBuilder(args);
 
 
-Env.Load();
-
-// 1. connection strings
-var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? Environment.GetEnvironmentVariable("LOCAL_HOST") ?? Environment.GetEnvironmentVariable("AIVEN_HOST");
-var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? Environment.GetEnvironmentVariable("LOCAL_PORT") ?? Environment.GetEnvironmentVariable("AIVEN_PORT");
-var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? Environment.GetEnvironmentVariable("LOCAL_USER") ?? Environment.GetEnvironmentVariable("AIVEN_USER");
-var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? Environment.GetEnvironmentVariable("LOCAL_PASSWORD") ?? Environment.GetEnvironmentVariable("AIVEN_PASSWORD");
-var dbName = Environment.GetEnvironmentVariable("DB") ?? Environment.GetEnvironmentVariable("LOCAL_DB") ?? Environment.GetEnvironmentVariable("AIVEN_DB");
-
-var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};Uid={dbUser};Pwd={dbPassword};";
+// 1. connection strings: usa credenciais locais em Development, caso contrário usa Aiven
+string connectionString;
+if (builder.Environment.IsDevelopment())
+{
+    connectionString = builder.Configuration.GetConnectionString("Local")
+        ?? throw new InvalidOperationException("Connection string 'Local' not found. Configure it in appsettings.Development.json or appsettings.json.");
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("Aiven")
+        ?? throw new InvalidOperationException("Connection string 'Aiven' not found. Configure it in appsettings.json or via environment variables.");
+}
 
 
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 37));
@@ -95,7 +97,11 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
-builder.Services.AddControllersWithViews();
+builder.Services
+    .AddLocalization(options => options.ResourcesPath = "Resources")
+    .AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
@@ -125,8 +131,8 @@ else
 
 app.UseStaticFiles();
 
-// 6. Find Coins
-var defaultCulture = new CultureInfo("en-US");
+// 6. Configuração de localização
+var defaultCulture = new CultureInfo("pt-BR");
 var localizationOptions = new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture(defaultCulture),
@@ -167,15 +173,13 @@ using (var scope = app.Services.CreateScope())
             logger.LogInformation("--> Migrations successfully applied");
 
             logger.LogInformation("--> Seeds Executing...");
-            if (!context.WorkSchedules.Any())
-            {
-                await SeedWorkSchedule.SeedWorkSchedules(context, seedLogger);
-                await context.SaveChangesAsync();
-            }
             if (!await roleManager.Roles.AnyAsync())
             {
                 await RoleInitializer.SeedRolesAsync(roleManager);
             }
+
+            await SeedWorkSchedule.SeedWorkSchedules(context, seedLogger);
+            await context.SaveChangesAsync();
 
             logger.LogInformation("--> Database configured and successfully seeded!");
             break;

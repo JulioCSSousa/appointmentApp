@@ -258,6 +258,9 @@ namespace AppointmentAppMvc.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("PhoneNumberNormalized")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
@@ -276,6 +279,9 @@ namespace AppointmentAppMvc.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("PhoneNumberNormalized")
+                        .IsUnique();
 
                     b.ToTable("AspNetUsers", (string)null);
                 });

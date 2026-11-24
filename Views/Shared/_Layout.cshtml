@@ -1,5 +1,7 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@inject IStringLocalizer<SharedResource> Localizer
+
+<!DOCTYPE html>
+<html lang="pt-BR">
 
 <head>
     <meta charset="utf-8" />
@@ -24,11 +26,11 @@
                         <form asp-controller="Account" asp-action="Logout" method="post">
                             <!-- Button visible on small screens (mobile) -->
                             <button class="btn btn-danger d-block d-sm-none">
-                                <i class="bi bi-box-arrow-right"></i> Log Out
+                                <i class="bi bi-box-arrow-right"></i> @Localizer["LogOut"]
                             </button>
                             <!-- Button visible on large screens (desktop) -->
                             <button class="btn btn-danger d-none d-sm-block">
-                                <i class="bi bi-box-arrow-right"></i> Log Out
+                                <i class="bi bi-box-arrow-right"></i> @Localizer["LogOut"]
                             </button>
                         </form>
                     </li>
@@ -44,10 +46,10 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

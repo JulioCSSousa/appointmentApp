@@ -11,6 +11,8 @@ namespace appointmentApp.Models.Entities
 
         [Required]
         public string Name { get; protected set; }
+        public string? PhoneNumberNormalized { get; private set; }
+
         protected UserModel() { }
         
         public UserModel(string name, string email, string phoneNumber)
@@ -20,12 +22,23 @@ namespace appointmentApp.Models.Entities
             NormalizedEmail = email.ToUpper(); 
             UserName = email;                 
             NormalizedUserName = email.ToUpper();
-            PhoneNumber = phoneNumber;
+            SetPhoneNumber(phoneNumber);
         }
 
         public void SetName(string name)
         {
             Name = name;
+        }
+
+        public void SetPhoneNumber(string phoneNumber)
+        {
+            PhoneNumber = phoneNumber;
+            PhoneNumberNormalized = NormalizePhoneNumber(phoneNumber);
+        }
+
+        public static string NormalizePhoneNumber(string phoneNumber)
+        {
+            return string.Concat(phoneNumber.Where(char.IsDigit));
         }
 
         public static async Task<List<UserWithRolesViewModel>> UserWithRolesAsync(UserManager<UserModel> _userManager, string? searchTerm = null, int page = 1)
