@@ -1,0 +1,45 @@
+@model AppointmentAppMvc.Models.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = ViewData["LoginTitle"] ?? "Login";
+    var action = ViewData["LoginAction"]?.ToString() ?? "ClientLogin";
+}
+
+<div class="container py-5" style="max-width: 520px;">
+    <div class="card border-0 shadow rounded-4">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="mb-2">@ViewData["LoginTitle"]</h2>
+            <p class="text-muted mb-4">Entre usando seu número de telefone e sua senha.</p>
+
+            <form action="@Url.Action(action, "Account")" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="ReturnUrl" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label">Telefone</label>
+                    <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">Senha</label>
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-check mb-4">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label">Lembrar-me</label>
+                </div>
+                <button type="submit" class="btn btn-dark w-100">Entrar</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Account" asp-action="ClientLogin">Login do cliente</a>
+                <span class="mx-2">|</span>
+                <a asp-controller="Account" asp-action="AdminLogin">Login administrativo</a>
+                <span class="mx-2">|</span>
+                <a asp-controller="Account" asp-action="Register">Criar conta</a>
+                <span class="mx-2">|</span>
+                <a asp-controller="Appointment" asp-action="Create">Agendar sem login</a>
+            </div>
+        </div>
+    </div>
+</div>

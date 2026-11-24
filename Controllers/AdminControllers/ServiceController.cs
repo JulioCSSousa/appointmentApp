@@ -3,6 +3,7 @@ using appointmentApp.Services.ServiceManager;
 using AppointmentAppMvc.Models.ViewModels.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AppointmentAppMvc.Services.Stores;
 
 namespace AppointmentAppMvc.Controllers.AdminControllers
 {
@@ -11,11 +12,13 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
     {
         private readonly IServiceManager _serviceManager;
         private readonly IAppointmentService _appointments;
+        private readonly IStoreContext _storeContext;
 
-        public ServiceController(IServiceManager serviceManager, IAppointmentService appointmentService)
+        public ServiceController(IServiceManager serviceManager, IAppointmentService appointmentService, IStoreContext storeContext)
         {
             _serviceManager = serviceManager;
             _appointments = appointmentService;
+            _storeContext = storeContext;
         }
 
         [HttpGet]
@@ -46,6 +49,13 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             try
             {
                 var service = new ServiceModel(model.ServiceName, model.Price, model.Duration, model.Category);
+                var store = await _storeContext.GetCurrentStoreAsync();
+                if (store == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Nenhuma loja ativa foi configurada.");
+                    return View(model);
+                }
+                service.SetStore(store.Id);
                 await _serviceManager.CreateAsync(service);
 
                 TempData["SuccessMessage"] = "Service created successfully.";

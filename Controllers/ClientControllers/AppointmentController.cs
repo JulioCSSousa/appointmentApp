@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
+using AppointmentAppMvc.Services.Stores;
+using appointmentApp.Constants;
 
 namespace AppointmentAppMvc.Controllers.ClientControllers
 {
@@ -22,12 +24,14 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
         private readonly IWorkScheduleService _workSchedule;
         private readonly UserManager<UserModel> _userManager;
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly IStoreContext _storeContext;
 
         public AppointmentController(IAppointmentService appservice,
             IServiceManager serviceManager,
             IWorkScheduleService workschedule,
             IHubContext<NotificationHub> hubContext,
-            UserManager<UserModel> userManager)
+            UserManager<UserModel> userManager,
+            IStoreContext storeContext)
 
         {
             _appService = appservice;
@@ -35,6 +39,7 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             _workSchedule = workschedule;
             _hubContext = hubContext;
             _userManager = userManager;
+            _storeContext = storeContext;
         }
 
         private async Task<string?> SelectAvailableWorkerAsync(
@@ -45,7 +50,15 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             IEnumerable<AppointmentModel> appointments,
             IEnumerable<ServiceModel> services)
         {
-            var workers = await _userManager.GetUsersInRoleAsync("Worker");
+            var store = await _storeContext.GetCurrentStoreAsync();
+            if (store == null)
+            {
+                return null;
+            }
+
+            var workers = (await _userManager.GetUsersInRoleAsync(Roles.Worker))
+                .Where(worker => worker.StoreId == store.Id)
+                .ToList();
             var candidates = workers
                 .Where(worker => string.IsNullOrEmpty(preferredWorkerId) || worker.Id == preferredWorkerId)
                 .Where(worker => workSchedules.Any(schedule =>
@@ -160,7 +173,19 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
             }
 
 
-            var usersWithRoles = await _userManager.GetUsersInRoleAsync("Worker");
+            var store = await _storeContext.GetCurrentStoreAsync();
+            if (store == null)
+            {
+                return new AppointmentViewModel
+                {
+                    Services = allServices,
+                    HoursToSchedule = appointmentDateAndHourList,
+                    Workers = new List<UserWithRolesViewModel>()
+                };
+            }
+
+            var usersWithRoles = (await _userManager.GetUsersInRoleAsync(Roles.Worker))
+                .Where(worker => worker.StoreId == store.Id);
             var workersModel = usersWithRoles.Select(item => new UserWithRolesViewModel
             {
                 Id = item.Id,
@@ -181,6 +206,11 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
         [HttpGet]
         public async Task<ActionResult> Create()
         {
+            if (await _storeContext.GetCurrentStoreAsync() == null)
+            {
+                return NotFound("Loja não encontrada.");
+            }
+
             var appointmentsViewModel = await LoadAppointmentViewModelAsync();
             return View(appointmentsViewModel);
         }
@@ -189,19 +219,35 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(AppointmentViewModel model)
         {
-            if (string.IsNullOrEmpty(model.ClientId))
-                return BadRequest("Client ID não encontrado");
+            if (await _storeContext.GetCurrentStoreAsync() == null)
+            {
+                return NotFound("Loja não encontrada.");
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
-                return BadRequest("User ID não encontrado");
+            {
+                if (string.IsNullOrWhiteSpace(model.GuestName))
+                    ModelState.AddModelError(nameof(model.GuestName), "Informe seu nome.");
+
+                if (string.IsNullOrWhiteSpace(model.GuestPhone))
+                    ModelState.AddModelError(nameof(model.GuestPhone), "Informe seu telefone.");
+            }
 
             if (model.SelectedServiceId == null)
                 return BadRequest("Nenhum serviço foi selecionado.");
 
             if (model.SelectedDayAndHour == default)
                 return BadRequest("Nenhuma data e horário foram selecionados.");
+
+            if (!ModelState.IsValid)
+            {
+                var invalidViewModel = await LoadAppointmentViewModelAsync();
+                invalidViewModel.GuestName = model.GuestName;
+                invalidViewModel.GuestPhone = model.GuestPhone;
+                return View(invalidViewModel);
+            }
 
             try
             {
@@ -233,7 +279,25 @@ namespace AppointmentAppMvc.Controllers.ClientControllers
 
                 string serviceName = selectedService.ServiceName;
                 double servicePrice = selectedService.Price;
-                var newAppointment = new AppointmentModel(Guid.NewGuid(), userId, model.SelectedServiceId, serviceName,servicePrice, assignedWorkerId, model.SelectedDayAndHour, "Waiting");
+                var newAppointment = new AppointmentModel(
+                    Guid.NewGuid(),
+                    userId,
+                    model.SelectedServiceId,
+                    serviceName,
+                    servicePrice,
+                    assignedWorkerId,
+                    model.SelectedDayAndHour,
+                    "Waiting",
+                    userId == null ? model.GuestName!.Trim() : null,
+                    userId == null ? UserModel.NormalizePhoneNumber(model.GuestPhone!) : null);
+
+                var store = await _storeContext.GetCurrentStoreAsync();
+                if (store == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Nenhuma loja ativa foi configurada.");
+                    return View(await LoadAppointmentViewModelAsync());
+                }
+                newAppointment.SetStore(store.Id);
 
                 await _appService.Create(newAppointment);
                 TempData["SuccessMessage"] = "Agendamento realizado com sucesso!";

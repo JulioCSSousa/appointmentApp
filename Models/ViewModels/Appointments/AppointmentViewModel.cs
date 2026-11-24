@@ -12,8 +12,10 @@ namespace AppointmentAppMvc.Models.ViewModels.Appointment
         public int SelectedServiceId { get; set; }
         [Required]
         public ServiceModel? Service { get; set; }
-        [Required]
         public string? ClientId { get; set; }
+
+        public string? GuestName { get; set; }
+        public string? GuestPhone { get; set; }
 
         public string? WorkerId { get; set; }
         public List<UserWithRolesViewModel>? Workers { get; set; }

@@ -167,7 +167,12 @@ namespace AppointmentAppMvc.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<Guid?>("StoreId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("ServiceId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Services");
                 });
@@ -179,11 +184,16 @@ namespace AppointmentAppMvc.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ClientId")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("Day")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("GuestName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("GuestPhone")
+                        .HasColumnType("longtext");
 
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
@@ -199,6 +209,9 @@ namespace AppointmentAppMvc.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<Guid?>("StoreId")
+                        .HasColumnType("char(36)");
+
                     b.Property<int?>("WorkScheduleModelId")
                         .HasColumnType("int");
 
@@ -207,9 +220,78 @@ namespace AppointmentAppMvc.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("StoreId");
+
                     b.HasIndex("WorkScheduleModelId");
 
                     b.ToTable("Appointments");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.StoreModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ActivePlan")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<DateTime?>("PlanExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PlanStatus")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("Stores");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.TenantModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("Tenants");
                 });
 
             modelBuilder.Entity("appointmentApp.Models.Entities.UserModel", b =>
@@ -264,6 +346,9 @@ namespace AppointmentAppMvc.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
+                    b.Property<Guid?>("StoreId")
+                        .HasColumnType("char(36)");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -282,6 +367,8 @@ namespace AppointmentAppMvc.Migrations
 
                     b.HasIndex("PhoneNumberNormalized")
                         .IsUnique();
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -304,10 +391,15 @@ namespace AppointmentAppMvc.Migrations
                     b.Property<TimeSpan>("Start")
                         .HasColumnType("time(6)");
 
+                    b.Property<Guid?>("StoreId")
+                        .HasColumnType("char(36)");
+
                     b.Property<Guid?>("WorkerId")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("WorkSchedules");
                 });
@@ -363,11 +455,75 @@ namespace AppointmentAppMvc.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ServiceModel", b =>
+                {
+                    b.HasOne("appointmentApp.Models.Entities.StoreModel", "Store")
+                        .WithMany("Services")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
+                });
+
             modelBuilder.Entity("appointmentApp.Models.Entities.AppointmentModel", b =>
                 {
+                    b.HasOne("appointmentApp.Models.Entities.StoreModel", "Store")
+                        .WithMany("Appointments")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("appointmentApp.Models.Entities.WorkScheduleModel", null)
                         .WithMany("Appointments")
                         .HasForeignKey("WorkScheduleModelId");
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.StoreModel", b =>
+                {
+                    b.HasOne("appointmentApp.Models.Entities.TenantModel", "Tenant")
+                        .WithOne("Store")
+                        .HasForeignKey("appointmentApp.Models.Entities.StoreModel", "TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.UserModel", b =>
+                {
+                    b.HasOne("appointmentApp.Models.Entities.StoreModel", "Store")
+                        .WithMany("Users")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.WorkScheduleModel", b =>
+                {
+                    b.HasOne("appointmentApp.Models.Entities.StoreModel", "Store")
+                        .WithMany("WorkSchedules")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.StoreModel", b =>
+                {
+                    b.Navigation("Appointments");
+
+                    b.Navigation("Services");
+
+                    b.Navigation("Users");
+
+                    b.Navigation("WorkSchedules");
+                });
+
+            modelBuilder.Entity("appointmentApp.Models.Entities.TenantModel", b =>
+                {
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("appointmentApp.Models.Entities.WorkScheduleModel", b =>

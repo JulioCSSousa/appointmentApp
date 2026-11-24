@@ -1,4 +1,5 @@
 using appointmentApp.ApplicationSeed;
+using AppointmentAppMvc.ApplicationSeed;
 using appointmentApp.Models.Entities;
 using appointmentApp.Models.Repository.AppointmentRepository;
 using appointmentApp.Models.Repository.ServicesRepository;
@@ -8,6 +9,7 @@ using appointmentApp.Services.ServiceManager;
 using appointmentApp.Services.Utilities;
 using appointmentApp.Services.WorkScheduleService;
 using AppointmentAppMvc.Hubs;
+using AppointmentAppMvc.Services.Stores;
 
 // removed DotNetEnv usage - connection strings now come from appsettings.json
 using Microsoft.AspNetCore.DataProtection;
@@ -24,16 +26,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. connection strings: usa credenciais locais em Development, caso contrário usa Aiven
 string connectionString;
-if (builder.Environment.IsDevelopment())
-{
-    connectionString = builder.Configuration.GetConnectionString("Local")
-        ?? throw new InvalidOperationException("Connection string 'Local' not found. Configure it in appsettings.Development.json or appsettings.json.");
-}
-else
-{
+
     connectionString = builder.Configuration.GetConnectionString("Aiven")
         ?? throw new InvalidOperationException("Connection string 'Aiven' not found. Configure it in appsettings.json or via environment variables.");
-}
+
 
 
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 37));
@@ -69,7 +65,7 @@ builder.Services.AddIdentity<UserModel, IdentityRole>(options =>
 // login routes
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
+    options.LoginPath = "/Account/ClientLogin";
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.Cookie.Name = "AppointmentApp_Auth";
     options.Cookie.SameSite = SameSiteMode.Lax;
@@ -107,6 +103,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
 builder.Services.AddSignalR();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddScoped<IStoreContext, StoreContext>();
 
 // ----------------------------------------------------------------------
 // BUILD and MIDDLEWARES
@@ -147,8 +146,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "store",
+    pattern: "loja/{storeSlug}/{controller=Appointment}/{action=Create}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Home}/{id?}");
 
 app.MapHub<NotificationHub>("/notificationHub");
 
@@ -165,6 +168,7 @@ using (var scope = app.Services.CreateScope())
         {
             var context = services.GetRequiredService<AppDbContext>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = services.GetRequiredService<UserManager<UserModel>>();
             var seedLogger = services.GetRequiredService<ILogger<SeedWorkSchedule>>();
 
             logger.LogInformation("--> Connecting to MySQL...");
@@ -172,11 +176,37 @@ using (var scope = app.Services.CreateScope())
             await context.Database.MigrateAsync();
             logger.LogInformation("--> Migrations successfully applied");
 
-            logger.LogInformation("--> Seeds Executing...");
-            if (!await roleManager.Roles.AnyAsync())
+            var defaultStore = await context.Stores.SingleOrDefaultAsync(store => store.Slug == "loja-principal");
+            if (defaultStore == null)
             {
-                await RoleInitializer.SeedRolesAsync(roleManager);
+                var defaultTenant = new TenantModel("Tenant principal", "tenant-principal");
+                defaultStore = new StoreModel(defaultTenant.Id, "Loja principal", "loja-principal");
+                defaultTenant.SetStore(defaultStore);
+                context.Tenants.Add(defaultTenant);
+                context.Stores.Add(defaultStore);
+                await context.SaveChangesAsync();
             }
+
+            await context.Users
+                .IgnoreQueryFilters()
+                .Where(user => user.StoreId == null)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(user => user.StoreId, defaultStore.Id));
+            await context.Services
+                .IgnoreQueryFilters()
+                .Where(service => service.StoreId == null)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(service => service.StoreId, defaultStore.Id));
+            await context.WorkSchedules
+                .IgnoreQueryFilters()
+                .Where(schedule => schedule.StoreId == null)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(schedule => schedule.StoreId, defaultStore.Id));
+            await context.Appointments
+                .IgnoreQueryFilters()
+                .Where(appointment => appointment.StoreId == null)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(appointment => appointment.StoreId, defaultStore.Id));
+
+            logger.LogInformation("--> Seeds Executing...");
+            await RoleInitializer.SeedRolesAsync(roleManager);
+            await SuperAdminInitializer.SeedAsync(userManager, defaultStore);
 
             await SeedWorkSchedule.SeedWorkSchedules(context, seedLogger);
             await context.SaveChangesAsync();

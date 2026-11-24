@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AppointmentAppMvc.Services.Stores;
+using appointmentApp.Constants;
 
 namespace AppointmentAppMvc.Controllers.AdminControllers
 {
@@ -13,11 +15,13 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
     {
         private readonly IWorkScheduleService _scheduleService;
         private readonly UserManager<UserModel> _userManager;
+        private readonly IStoreContext _storeContext;
 
-        public WorkScheduleController(IWorkScheduleService scheduleService, UserManager<UserModel> userManager)
+        public WorkScheduleController(IWorkScheduleService scheduleService, UserManager<UserModel> userManager, IStoreContext storeContext)
         {
             _scheduleService = scheduleService;
             _userManager = userManager;
+            _storeContext = storeContext;
         }
 
         [HttpGet]
@@ -26,7 +30,15 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             DateTime startDate = DateTime.Today.AddDays(offsetWeeks * 7);
             DateTime endDate = startDate.AddDays(6);
 
-            var workers = await _userManager.GetUsersInRoleAsync("Worker");
+            var store = await _storeContext.GetCurrentStoreAsync();
+            if (store == null)
+            {
+                return NotFound("Loja não encontrada.");
+            }
+
+            var workers = (await _userManager.GetUsersInRoleAsync(Roles.Worker))
+                .Where(worker => worker.StoreId == store.Id)
+                .ToList();
             ViewBag.Workers = workers;
             ViewBag.CurrentWorkerId = workerId;
 
@@ -56,6 +68,11 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                                 globalDay.End,
                                 workerId.Value
                             );
+                            var currentStore = await _storeContext.GetCurrentStoreAsync();
+                            if (currentStore != null)
+                            {
+                                newScheduleForWorker.SetStore(currentStore.Id);
+                            }
                             await _scheduleService.Create(newScheduleForWorker);
                         }
 
@@ -96,6 +113,11 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                             new TimeSpan(18, 0, 0),
                             null
                         );
+                        var currentStore = await _storeContext.GetCurrentStoreAsync();
+                        if (currentStore != null)
+                        {
+                            newGlobalDay.SetStore(currentStore.Id);
+                        }
 
                         await _scheduleService.Create(newGlobalDay);
                     }
@@ -139,7 +161,12 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                 {
                     ModelState.AddModelError("", $"Horário inválido para o dia {model.Day.ToShortDateString()}: O início não pode ser após o fim.");
 
-                    ViewBag.Workers = await _userManager.GetUsersInRoleAsync("Worker");
+                    var store = await _storeContext.GetCurrentStoreAsync();
+                    ViewBag.Workers = store == null
+                        ? new List<UserModel>()
+                        : (await _userManager.GetUsersInRoleAsync(Roles.Worker))
+                            .Where(worker => worker.StoreId == store.Id)
+                            .ToList();
                     ViewBag.CurrentWorkerId = workerId;
                     ViewBag.OffsetWeeks = offsetWeeks;
                     ViewBag.StartDate = DateTime.Today.AddDays(offsetWeeks * 7);
@@ -168,7 +195,12 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                 else
                 {
                     ModelState.AddModelError("", $"A escala para o dia {model.Day.ToShortDateString()} não foi localizada no banco.");
-                    ViewBag.Workers = await _userManager.GetUsersInRoleAsync("Worker");
+                    var store = await _storeContext.GetCurrentStoreAsync();
+                    ViewBag.Workers = store == null
+                        ? new List<UserModel>()
+                        : (await _userManager.GetUsersInRoleAsync(Roles.Worker))
+                            .Where(worker => worker.StoreId == store.Id)
+                            .ToList();
                     return View(models);
                 }
             }

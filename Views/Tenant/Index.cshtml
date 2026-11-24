@@ -1,0 +1,119 @@
+@model AppointmentAppMvc.Models.ViewModels.Tenant.TenantDashboardViewModel
+@{
+    ViewData["Title"] = "Minha loja";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">Administração da loja</h1>
+            <p class="text-muted mb-0">Configure sua loja e acompanhe os usuários vinculados a ela.</p>
+        </div>
+        <a class="btn btn-outline-dark" href="/loja/@Model.StoreSlug/Appointment/Create" target="_blank" rel="noopener">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Abrir página da loja
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-xl-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-shop me-2"></i>Configurações</h5>
+                    <form asp-action="Update" method="post">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="TenantId" type="hidden" />
+                        <input asp-for="StoreId" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="TenantName" class="form-label"></label>
+                            <input asp-for="TenantName" class="form-control" />
+                            <span asp-validation-for="TenantName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="StoreName" class="form-label"></label>
+                            <input asp-for="StoreName" class="form-control" />
+                            <span asp-validation-for="StoreName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="StoreSlug" class="form-label"></label>
+                            <input asp-for="StoreSlug" class="form-control" />
+                            <div class="form-text">Use letras minúsculas, números e hífens.</div>
+                            <span asp-validation-for="StoreSlug" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100">
+                            <i class="bi bi-check2-circle me-1"></i> Salvar alterações
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-7">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0"><i class="bi bi-person-badge me-2"></i>Profissionais</h5>
+                                <span class="badge text-bg-dark">@Model.Workers.Count</span>
+                            </div>
+                            @if (Model.Workers.Count == 0)
+                            {
+                                <p class="text-muted mb-0">Nenhum profissional vinculado.</p>
+                            }
+                            else
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var worker in Model.Workers)
+                                    {
+                                        <div class="list-group-item px-0">
+                                            <div class="fw-semibold">@worker.Name</div>
+                                            <small class="text-muted">@(worker.PhoneNumber ?? worker.Email ?? "Contato não informado")</small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Clientes</h5>
+                                <span class="badge text-bg-secondary">@Model.Clients.Count</span>
+                            </div>
+                            @if (Model.Clients.Count == 0)
+                            {
+                                <p class="text-muted mb-0">Nenhum cliente vinculado.</p>
+                            }
+                            else
+                            {
+                                <div class="list-group list-group-flush">
+                                    @foreach (var client in Model.Clients)
+                                    {
+                                        <div class="list-group-item px-0">
+                                            <div class="fw-semibold">@client.Name</div>
+                                            <small class="text-muted">@(client.PhoneNumber ?? client.Email ?? "Contato não informado")</small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

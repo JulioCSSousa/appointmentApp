@@ -47,7 +47,7 @@
                                 <span class="text-muted small">@item.Appointment.Day.ToString("dd/MM")</span>
                             </div>
 
-                            <h6 class="fw-bold text-dark mb-1">@item.User?.Name</h6>
+                            <h6 class="fw-bold text-dark mb-1">@(item.User?.Name ?? item.Appointment.GuestName ?? "Cliente visitante")</h6>
                             <p class="text-muted small mb-3">@item.Service?.ServiceName</p>
                             <p class="text-muted small mb-3">Profissional: @item.WorkerName</p>
 
@@ -90,7 +90,7 @@
                             <div class="d-flex align-items-center mb-3">
                                 <i class="bi bi-play-circle-fill text-success me-3 fs-4"></i>
                                 <div class="flex-grow-1">
-                                    <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
+                                    <h6 class="text-dark mb-0 small fw-bold">@(item.User?.Name ?? item.Appointment.GuestName ?? "Cliente visitante")</h6>
                                     <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
                                     <p class="text-muted small mb-3">Profissional: @item.WorkerName</p>
                                 </div>
@@ -126,7 +126,7 @@
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-check-circle-fill text-emerald me-3 fs-4"></i>
                                 <div class="flex-grow-1">
-                                    <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
+                                    <h6 class="text-dark mb-0 small fw-bold">@(item.User?.Name ?? item.Appointment.GuestName ?? "Cliente visitante")</h6>
                                     <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
                                     <p class="text-muted small mb-3">Profissional: @item.WorkerName</p>
                                 </div>
@@ -148,7 +148,7 @@
                 {
                     <div class="card mb-2 border-0 p-2 shadow-sm">
                         <div class="flex-grow-1">
-                            <h6 class="text-dark mb-0 small fw-bold">@item.User?.Name</h6>
+                            <h6 class="text-dark mb-0 small fw-bold">@(item.User?.Name ?? item.Appointment.GuestName ?? "Cliente visitante")</h6>
                             <span class="text-muted" style="font-size: 0.7rem;">@item.Service?.ServiceName</span>
                             <p class="text-muted small mb-3">Profissional: @item.WorkerName</p>
                         </div>

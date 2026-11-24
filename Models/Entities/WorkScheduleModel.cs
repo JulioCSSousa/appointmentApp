@@ -3,6 +3,8 @@
     public class WorkScheduleModel
     {
         public int Id { get; private set; }
+        public Guid? StoreId { get; private set; }
+        public StoreModel? Store { get; private set; }
         public Guid? WorkerId { get; private set; } = Guid.Empty;
         public DateTime Day { get; private set; }
         public bool IsSelected { get; private set; }
@@ -18,6 +20,11 @@
             Start = start;
             End = end;
             WorkerId = workerId;
+        }
+
+        public void SetStore(Guid storeId)
+        {
+            StoreId = storeId;
         }
 
         public void SetWorkerId(Guid? id)

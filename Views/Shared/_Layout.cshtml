@@ -22,18 +22,20 @@
                 <!-- The navigation bar will now be properly visible -->
 
                 <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <form asp-controller="Account" asp-action="Logout" method="post">
-                            <!-- Button visible on small screens (mobile) -->
-                            <button class="btn btn-danger d-block d-sm-none">
-                                <i class="bi bi-box-arrow-right"></i> @Localizer["LogOut"]
-                            </button>
-                            <!-- Button visible on large screens (desktop) -->
-                            <button class="btn btn-danger d-none d-sm-block">
-                                <i class="bi bi-box-arrow-right"></i> @Localizer["LogOut"]
-                            </button>
-                        </form>
-                    </li>
+                    @if (User.Identity?.IsAuthenticated == true){
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                <!-- Button visible on small screens (mobile) -->
+                                <button class="btn btn-danger d-block d-sm-none">
+                                    <i class="bi bi-box-arrow-right"></i> @Localizer["LogOut"]
+                                </button>
+                                <!-- Button visible on large screens (desktop) -->
+                                <button class="btn btn-danger d-none d-sm-block">
+                                    <i class="bi bi-box-arrow-right"></i> @Localizer["LogOut"]
+                                </button>
+                            </form>
+                        </li>
+                    }
                 </ul>
             </div>
         </nav>

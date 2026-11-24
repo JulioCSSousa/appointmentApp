@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AppointmentAppMvc.Services.Stores;
+using appointmentApp.Constants;
 
 namespace AppointmentAppMvc.Controllers
 {
@@ -14,16 +16,38 @@ namespace AppointmentAppMvc.Controllers
         private readonly SignInManager<UserModel> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
+        private readonly IStoreContext _storeContext;
+
+        private async Task<StoreModel?> GetCurrentStoreAsync() =>
+            await _storeContext.GetCurrentStoreAsync();
+
+        private bool IsSuperAdmin() => User.IsInRole(Roles.SuperAdmin);
+
+        private async Task<UserModel?> FindTenantUserAsync(string id)
+        {
+            if (IsSuperAdmin())
+            {
+                return await _userManager.FindByIdAsync(id);
+            }
+
+            var store = await GetCurrentStoreAsync();
+            return store == null
+                ? null
+                : await _userManager.Users
+                    .SingleOrDefaultAsync(user => user.Id == id && user.StoreId == store.Id);
+        }
 
         public AccountController(UserManager<UserModel> userManager,
             SignInManager<UserModel> signInManager,
             RoleManager<IdentityRole> roleManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IStoreContext storeContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _emailSender = emailSender;
+            _storeContext = storeContext;
         }
 
         [HttpGet]
@@ -54,6 +78,12 @@ namespace AppointmentAppMvc.Controllers
                 EmailConfirmed = true
             };
 
+            var store = await _storeContext.GetCurrentStoreAsync();
+            if (store != null)
+            {
+                user.SetStore(store.Id);
+            }
+
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
@@ -80,7 +110,7 @@ namespace AppointmentAppMvc.Controllers
                 _ = _emailSender.SendEmailAsync(user.Email, "Welcome to our System!", emailBody);
 
                 TempData["SuccessMessage"] = "Account registered successfully.";
-                return RedirectToAction(isFirstUser ? "Login" : "Index");
+                return RedirectToAction(isFirstUser ? nameof(AdminLogin) : nameof(ClientLogin));
             }
 
 
@@ -88,44 +118,116 @@ namespace AppointmentAppMvc.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login() => RedirectToAction(nameof(AdminLogin));
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult AccessDenied(string? returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult AdminLogin() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> AdminLogin(EmailLoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View("AdminLogin", model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null ||
+                (!await _userManager.IsInRoleAsync(user, Roles.Admin) &&
+                 !await _userManager.IsInRoleAsync(user, Roles.SuperAdmin)))
+            {
+                ModelState.AddModelError(string.Empty, "E-mail ou senha inválidos.");
+                return View("AdminLogin", model);
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(
+                user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                if (await _userManager.IsInRoleAsync(user, Roles.SuperAdmin))
+                {
+                    return RedirectToAction("Index", "SuperAdmin");
+                }
+
+                return RedirectToAction("IndexAdm", "Home");
+            }
+
+            ModelState.AddModelError(string.Empty, "E-mail ou senha inválidos.");
+            return View("AdminLogin", model);
+        }
+
+        [HttpGet]
+        public IActionResult ProfessionalLogin()
+        {
+            ViewData["LoginTitle"] = "Login do profissional";
+            ViewData["LoginAction"] = nameof(ProfessionalLogin);
+            return View("PhoneLogin");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProfessionalLogin(LoginViewModel model)
+        {
+            return await PhoneLoginAsync(model, "Worker", "IndexWorker");
+        }
+
+        [HttpGet]
+        public IActionResult ClientLogin(string? returnUrl = null)
+        {
+            ViewData["LoginTitle"] = "Login do cliente";
+            ViewData["LoginAction"] = nameof(ClientLogin);
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClientLogin(LoginViewModel model)
+        {
+            return await PhoneLoginAsync(model, "Client", "Index");
+        }
+
+        private async Task<IActionResult> PhoneLoginAsync(LoginViewModel model, string role, string destinationAction)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewData["LoginTitle"] = role == "Worker" ? "Login do profissional" : "Login do cliente";
+                ViewData["LoginAction"] = role == "Worker" ? nameof(ProfessionalLogin) : nameof(ClientLogin);
+                return View(role == "Client" ? "ClientLogin" : "PhoneLogin", model);
             }
 
             var normalizedPhoneNumber = UserModel.NormalizePhoneNumber(model.PhoneNumber);
             var user = await _userManager.Users
                 .FirstOrDefaultAsync(u => u.PhoneNumberNormalized == normalizedPhoneNumber);
 
-            var result = user == null
+            var result = user == null || !await _userManager.IsInRoleAsync(user, role)
                 ? Microsoft.AspNetCore.Identity.SignInResult.Failed
                 : await _signInManager.PasswordSignInAsync(
-                    user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
+                    user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                if (role == "Client" && !string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                 {
-                    return RedirectToAction("IndexAdm", "Home");
+                    return Redirect(model.ReturnUrl);
                 }
 
-                if (await _userManager.IsInRoleAsync(user, "Worker"))
-                {
-                    return RedirectToAction("IndexWorker", "Home");
-                }
-
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(destinationAction, "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            ViewData["InvalidLogin"] = "Login ou Senha inválidos";
-            return View(model);
+            ModelState.AddModelError(string.Empty, "Telefone ou senha inválidos.");
+            ViewData["LoginTitle"] = role == "Worker" ? "Login do profissional" : "Login do cliente";
+            ViewData["LoginAction"] = role == "Worker" ? nameof(ProfessionalLogin) : nameof(ClientLogin);
+            return View(role == "Client" ? "ClientLogin" : "PhoneLogin", model);
         }
 
         [HttpGet]
@@ -222,6 +324,16 @@ namespace AppointmentAppMvc.Controllers
             int skip = (page - 1) * itemsPerPage;
 
             var query = _userManager.Users;
+            if (!IsSuperAdmin())
+            {
+                var store = await GetCurrentStoreAsync();
+                if (store == null)
+                {
+                    return NotFound("Loja não encontrada.");
+                }
+
+                query = query.Where(user => user.StoreId == store.Id);
+            }
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
@@ -262,7 +374,7 @@ namespace AppointmentAppMvc.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await FindTenantUserAsync(id);
             if (user == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
@@ -296,7 +408,7 @@ namespace AppointmentAppMvc.Controllers
                 return View(model);
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await FindTenantUserAsync(id);
             if (user == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
@@ -352,7 +464,7 @@ namespace AppointmentAppMvc.Controllers
                 return RedirectToAction("Index");
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await FindTenantUserAsync(id);
             if (user == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
@@ -380,6 +492,16 @@ namespace AppointmentAppMvc.Controllers
             int skip = (page - 1) * itemsPerPage;
 
             var query = _userManager.Users;
+            if (!IsSuperAdmin())
+            {
+                var store = await GetCurrentStoreAsync();
+                if (store == null)
+                {
+                    return NotFound("Loja não encontrada.");
+                }
+
+                query = query.Where(user => user.StoreId == store.Id);
+            }
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = query.Where(u => u.Name.Contains(searchTerm) || u.Email.Contains(searchTerm));
@@ -425,7 +547,7 @@ namespace AppointmentAppMvc.Controllers
                 return RedirectToAction("Index");
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await FindTenantUserAsync(id);
             if (user == null)
             {
                 TempData["ErrorMessage"] = "User not found.";

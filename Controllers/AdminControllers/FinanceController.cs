@@ -4,6 +4,10 @@ using appointmentApp.Services.ServiceManager;
 using AppointmentAppMvc.Models.ViewModels.Finance;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using AppointmentAppMvc.Services.Stores;
+using appointmentApp.Constants;
 
 namespace AppointmentAppMvc.Controllers.AdminControllers
 {
@@ -12,14 +16,17 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         private readonly IServiceManager _service;
         private readonly IAppointmentService _appointmentService;
         private readonly UserManager<UserModel> _userManager;
-        public FinanceController(IServiceManager service, IAppointmentService appointmentService, UserManager<UserModel> userManager)
+        private readonly IStoreContext _storeContext;
+        public FinanceController(IServiceManager service, IAppointmentService appointmentService, UserManager<UserModel> userManager, IStoreContext storeContext)
         {
             _service = service;
             _appointmentService = appointmentService;
             _userManager = userManager;
+            _storeContext = storeContext;
         }
 
         [HttpGet]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult> Index()
         {
             double profit = 0;
@@ -30,10 +37,18 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                 return View(model);
             }
             var filteredClients = clientsWithAppointments.Where(c => c.Status == "Finished");
+            var store = await _storeContext.GetCurrentStoreAsync();
+            if (store == null)
+            {
+                return NotFound("Loja não encontrada.");
+            }
 
             foreach (var item in filteredClients)
             {
-                var getClientById = await _userManager.FindByIdAsync(item.ClientId);
+                var getClientById = string.IsNullOrWhiteSpace(item.ClientId)
+                    ? null
+                    : await _userManager.Users
+                        .SingleOrDefaultAsync(user => user.Id == item.ClientId && user.StoreId == store.Id);
                 if (getClientById == null)
                 {
                     return View();

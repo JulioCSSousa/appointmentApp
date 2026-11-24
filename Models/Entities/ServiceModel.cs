@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 public class ServiceModel{
     [Key]
     public int ServiceId { get; private set; }
+    public Guid? StoreId { get; private set; }
+    public appointmentApp.Models.Entities.StoreModel? Store { get; private set; }
     [Required(ErrorMessage = "Este campo é obrigatório")]
     [StringLength(50)]
     public string ServiceName { get; private set; }
@@ -23,6 +25,11 @@ public class ServiceModel{
         Price = price;
         Duration = duration;
         Category = category;
+    }
+
+    public void SetStore(Guid storeId)
+    {
+        StoreId = storeId;
     }
 
     public void SetServiceName(string serviceName)

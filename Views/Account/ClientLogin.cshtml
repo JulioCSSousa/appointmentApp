@@ -1,0 +1,44 @@
+@model AppointmentAppMvc.Models.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = "Login do cliente";
+}
+
+<div class="container py-5" style="max-width: 520px;">
+    <div class="card border-0 shadow rounded-4">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="mb-2">Login do cliente</h2>
+            <p class="text-muted mb-4">Entre usando seu número de telefone e sua senha.</p>
+
+            <form asp-controller="Account" asp-action="ClientLogin" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="ReturnUrl" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label">Telefone</label>
+                    <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">Senha</label>
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label">Lembrar-me</label>
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100">Entrar como cliente</button>
+            </form>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Account" asp-action="Register">Ainda não tenho conta</a>
+                <span class="mx-2">|</span>
+                <a asp-controller="Appointment" asp-action="Create">Agendar sem login</a>
+            </div>
+        </div>
+    </div>
+</div>

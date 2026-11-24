@@ -1,0 +1,576 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Indie Cortes | Sistema de Agendamento e Gestão Kanban para Barbearias";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <meta name="description" content="Sistema completo para barbearias: agendamento online para clientes, quadro Kanban em tempo real para barbeiros e controle financeiro administrativo." />
+    <meta name="keywords" content="sistema para barbearia, app agendamento barbearia, kanban barbearia, gestão de barbearia, indie cortes" />
+
+    <!-- Fontes: Sora (Títulos) & Inter (Corpo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Sora', 'sans-serif'],
+                    },
+                    colors: {
+                        pitch: {
+                            950: '#05070B', // Preto profundo
+                            900: '#0B0F19', // Superfície escura
+                            800: '#131A2B', // Cards
+                            700: '#1E293B', // Bordas
+                        },
+                        electric: {
+                            400: '#38BDF8', // Azul ciano claro
+                            500: '#3B82F6', // Azul vibrante
+                            600: '#2563EB', // Azul principal
+                            700: '#1D4ED8', // Hover
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        .hero-glow {
+            background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.22) 0%, rgba(5, 7, 11, 0) 65%);
+        }
+        .blue-shadow {
+            box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.35);
+        }
+    </style>
+</head>
+<body class="bg-pitch-950 text-slate-200 font-sans antialiased selection:bg-electric-600 selection:text-white">
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-50 bg-pitch-950/90 backdrop-blur-md border-b border-pitch-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo Indie Cortes -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-electric-500 to-electric-700 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                        <i data-lucide="scissors" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display text-xl font-extrabold tracking-tight text-white">INDIE <span class="text-electric-400">CORTES</span></span>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400">Barber System</span>
+                    </div>
+                </a>
+
+                <!-- Menu Desktop -->
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                    <a href="#perfis" class="hover:text-electric-400 transition-colors">Como Funciona</a>
+                    <a href="#kanban" class="hover:text-electric-400 transition-colors">Painel Kanban</a>
+                    <a href="#recursos" class="hover:text-electric-400 transition-colors">Recursos</a>
+                    <a href="#planos" class="hover:text-electric-400 transition-colors">Planos</a>
+                    <a href="#faq" class="hover:text-electric-400 transition-colors">Dúvidas</a>
+                </nav>
+
+                <!-- Botões Ação -->
+                <div class="hidden md:flex items-center gap-3">
+                    <a href="/Account/AdminLogin" class="text-sm font-medium text-slate-300 hover:text-white px-4 py-2 transition-colors">
+                        Entrar
+                    </a>
+                    <a href="#demonstracao" 
+                       class="inline-flex items-center gap-2 bg-electric-600 hover:bg-electric-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all blue-shadow">
+                        Testar na Barbearia
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-btn" class="md:hidden text-slate-300 hover:text-white p-2" aria-label="Menu">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-pitch-900 border-b border-pitch-800 px-4 pt-2 pb-6 space-y-3">
+            <a href="#perfis" class="block py-2 text-slate-300 hover:text-electric-400 font-medium">Como Funciona</a>
+            <a href="#kanban" class="block py-2 text-slate-300 hover:text-electric-400 font-medium">Painel Kanban</a>
+            <a href="#recursos" class="block py-2 text-slate-300 hover:text-electric-400 font-medium">Recursos</a>
+            <a href="#planos" class="block py-2 text-slate-300 hover:text-electric-400 font-medium">Planos</a>
+            <a href="#demonstracao" class="mt-3 w-full inline-flex justify-center items-center bg-electric-600 text-white font-semibold text-sm py-3 rounded-xl">
+                Solicitar Demonstração
+            </a>
+        </div>
+    </header>
+
+    <!-- 1. HERO SECTION -->
+    <section class="relative pt-16 pb-24 lg:pt-24 lg:pb-32 hero-glow overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-4xl mx-auto space-y-6">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pitch-900 border border-electric-500/30 text-xs font-semibold text-electric-400">
+                    <span class="w-2 h-2 rounded-full bg-electric-400 animate-ping"></span>
+                    Agenda Online + Kanban de Atendimento + Financeiro
+                </div>
+
+                <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
+                    Sua barbearia no controle total: do <span class="text-transparent bg-clip-text bg-gradient-to-r from-electric-400 to-electric-600">agendamento do cliente</span> ao fechamento do caixa.
+                </h1>
+
+                <p class="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    Chega de perder horário no WhatsApp ou se perder na ordem de chegada. O <strong>Indie Cortes</strong> conecta o agendamento do cliente direto ao painel Kanban de cada barbeiro e calcula o faturamento automaticamente.
+                </p>
+
+                <div class="pt-4 flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#demonstracao" 
+                       class="inline-flex justify-center items-center gap-2.5 bg-electric-600 hover:bg-electric-500 text-white font-bold px-8 py-4 rounded-xl transition-all blue-shadow text-base">
+                        Quero Conhecer o Sistema
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </a>
+
+                    <a href="#kanban" 
+                       class="inline-flex justify-center items-center gap-2 bg-pitch-900 hover:bg-pitch-800 text-slate-200 border border-pitch-700 font-semibold px-8 py-4 rounded-xl transition-all text-base">
+                        <i data-lucide="kanban" class="w-5 h-5 text-electric-400"></i>
+                        Ver o Kanban na Prática
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. PREVIEW INTERATIVO DO SISTEMA (KANBAN DO BARBEIRO) -->
+            <div id="kanban" class="mt-16 lg:mt-20 bg-pitch-900 border border-pitch-700/80 rounded-3xl p-4 sm:p-8 shadow-2xl">
+                <!-- Barra Superior do Mockup -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-pitch-800">
+                    <div class="flex items-center gap-3">
+                        <div class="flex gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-slate-700"></span>
+                            <span class="w-3 h-3 rounded-full bg-slate-700"></span>
+                            <span class="w-3 h-3 rounded-full bg-slate-700"></span>
+                        </div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 ml-2">Painel do Profissional • Visão Kanban em Tempo Real</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="px-3 py-1 rounded-lg bg-electric-600/15 text-electric-400 border border-electric-500/30 font-medium">
+                            Hoje: 14 atendimentos
+                        </span>
+                        <span class="px-3 py-1 rounded-lg bg-pitch-800 text-slate-300 font-medium">
+                            Cadeira 01 • Lucas
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 3 Colunas Reais do Fluxo Kanban do App -->
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Coluna 1: Pendente -->
+                    <div class="bg-pitch-950/80 border border-pitch-800 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span> Pendente (Agendado)
+                            </span>
+                            <span class="text-xs bg-pitch-800 text-slate-400 px-2 py-0.5 rounded-full">2</span>
+                        </div>
+
+                        <div class="bg-pitch-900 border border-pitch-700/70 p-4 rounded-xl space-y-2">
+                            <div class="flex justify-between items-start">
+                                <p class="font-semibold text-white text-sm">Gabriel Martins</p>
+                                <span class="text-xs font-bold text-electric-400">15:30</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Corte Degradê + Barba Terapia</p>
+                            <div class="pt-2 flex justify-between items-center border-t border-pitch-800">
+                                <span class="text-xs font-semibold text-slate-300">R$ 75,00</span>
+                                <span class="text-[11px] text-electric-400 font-medium">Mover p/ Aguardando →</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-pitch-900 border border-pitch-700/70 p-4 rounded-xl space-y-2 opacity-80">
+                            <div class="flex justify-between items-start">
+                                <p class="font-semibold text-white text-sm">Thiago Souza</p>
+                                <span class="text-xs font-bold text-electric-400">16:15</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Corte Social + Sobrancelha</p>
+                            <div class="pt-2 flex justify-between items-center border-t border-pitch-800">
+                                <span class="text-xs font-semibold text-slate-300">R$ 50,00</span>
+                                <span class="text-[11px] text-slate-500">Confirmado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 2: Aguardando / Na Cadeira -->
+                    <div class="bg-pitch-950/80 border border-electric-500/40 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-electric-400 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-electric-400"></span> Aguardando / Em Atendimento
+                            </span>
+                            <span class="text-xs bg-electric-600/20 text-electric-400 px-2 py-0.5 rounded-full">1</span>
+                        </div>
+
+                        <div class="bg-pitch-900 border border-electric-500/50 p-4 rounded-xl space-y-2 shadow-lg">
+                            <div class="flex justify-between items-start">
+                                <p class="font-semibold text-white text-sm">Rafael Oliveira</p>
+                                <span class="text-xs font-bold text-electric-400">15:00</span>
+                            </div>
+                            <p class="text-xs text-slate-300">Combo Corte + Barba + Hidratação</p>
+                            <div class="pt-2 flex justify-between items-center border-t border-pitch-800">
+                                <span class="text-xs font-bold text-white">R$ 85,00</span>
+                                <span class="px-2 py-1 rounded bg-electric-600 text-white text-[11px] font-semibold">Concluir Serviço ✓</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 3: Concluído -->
+                    <div class="bg-pitch-950/80 border border-pitch-800 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Concluído (No Caixa)
+                            </span>
+                            <span class="text-xs bg-pitch-800 text-slate-400 px-2 py-0.5 rounded-full">11</span>
+                        </div>
+
+                        <div class="bg-pitch-900/70 border border-pitch-800 p-4 rounded-xl space-y-2">
+                            <div class="flex justify-between items-start">
+                                <p class="font-semibold text-slate-300 text-sm line-through">Matheus Lima</p>
+                                <span class="text-xs text-emerald-400 font-semibold">Pago</span>
+                            </div>
+                            <p class="text-xs text-slate-500">Corte Máquina + Navalhado</p>
+                            <div class="pt-2 flex justify-between items-center border-t border-pitch-800/60">
+                                <span class="text-xs font-semibold text-emerald-400">+ R$ 45,00</span>
+                                <span class="text-[11px] text-slate-500">Lançado no financeiro</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. OS 3 PERFIS DO SISTEMA (Arquitetura RBAC explicada para o dono) -->
+    <section id="perfis" class="py-20 lg:py-28 bg-pitch-900 border-t border-pitch-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-bold uppercase tracking-widest text-electric-400">Cada um no seu papel</span>
+                <h2 class="mt-2 font-display text-3xl sm:text-4xl font-bold text-white">Um único sistema, três experiências sob medida</h2>
+                <p class="mt-4 text-slate-400">
+                    Controle de acesso inteligente para que o cliente agende fácil, o barbeiro foque na cadeira e você tenha visão total do negócio.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Perfil 1: Cliente -->
+                <div class="bg-pitch-950 border border-pitch-800 hover:border-electric-500/50 rounded-2xl p-8 transition-all">
+                    <div class="w-12 h-12 rounded-xl bg-electric-600/15 text-electric-400 flex items-center justify-center mb-6">
+                        <i data-lucide="smartphone" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-electric-400">Visão do Cliente</span>
+                    <h3 class="mt-1 font-display text-2xl font-bold text-white mb-4">Agendamento em 30 segundos</h3>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Acesso direto pelo link da bio do Instagram ou WhatsApp.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Escolhe o serviço, o barbeiro de preferência e o horário livre.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Pode reagendar ou cancelar sozinho sem ocupar o telefone da barbearia.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Perfil 2: Profissional -->
+                <div class="bg-pitch-950 border border-electric-500/50 rounded-2xl p-8 relative shadow-xl">
+                    <div class="w-12 h-12 rounded-xl bg-electric-600 text-white flex items-center justify-center mb-6">
+                        <i data-lucide="columns-3" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-electric-400">Visão do Barbeiro</span>
+                    <h3 class="mt-1 font-display text-2xl font-bold text-white mb-4">Quadro Kanban Individual</h3>
+                    <ul class="space-y-3 text-sm text-slate-300">
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Visualiza apenas os seus próprios clientes agendados para o dia.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Move o card entre <strong>Pendente → Aguardando → Concluído</strong> ou Cancelado.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Acompanha sua produção diária sem acessar dados sensíveis do caixa geral.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Perfil 3: Administrador -->
+                <div class="bg-pitch-950 border border-pitch-800 hover:border-electric-500/50 rounded-2xl p-8 transition-all">
+                    <div class="w-12 h-12 rounded-xl bg-electric-600/15 text-electric-400 flex items-center justify-center mb-6">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-electric-400">Visão do Administrador</span>
+                    <h3 class="mt-1 font-display text-2xl font-bold text-white mb-4">Gestão, Equipe &amp; Finanças</h3>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Cadastra novos barbeiros, clientes, serviços, preços e durações.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Enxerga o <strong>Kanban Geral</strong> de todas as cadeiras da barbearia em uma tela.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-electric-400 shrink-0 mt-0.5"></i>
+                            <span>Painel financeiro com faturamento por período, ticket médio e repasses.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. RECURSOS ADICIONAIS -->
+    <section id="recursos" class="py-20 lg:py-24 bg-pitch-950 border-t border-pitch-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-pitch-900/60 border border-pitch-800 p-6 rounded-2xl">
+                    <i data-lucide="users" class="w-7 h-7 text-electric-400 mb-3"></i>
+                    <h3 class="font-display font-bold text-white text-base mb-1">Cadastro de Usuários</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Crie contas e defina permissões específicas para Clientes, Profissionais e Administradores.</p>
+                </div>
+
+                <div class="bg-pitch-900/60 border border-pitch-800 p-6 rounded-2xl">
+                    <i data-lucide="wallet" class="w-7 h-7 text-electric-400 mb-3"></i>
+                    <h3 class="font-display font-bold text-white text-base mb-1">Controle Financeiro</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Cada serviço marcado como concluído no Kanban alimenta automaticamente o relatório de receita.</p>
+                </div>
+
+                <div class="bg-pitch-900/60 border border-pitch-800 p-6 rounded-2xl">
+                    <i data-lucide="calendar-x" class="w-7 h-7 text-electric-400 mb-3"></i>
+                    <h3 class="font-display font-bold text-white text-base mb-1">Zero Conflito de Horário</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">O sistema bloqueia automaticamente horários já reservados para o mesmo barbeiro.</p>
+                </div>
+
+                <div class="bg-pitch-900/60 border border-pitch-800 p-6 rounded-2xl">
+                    <i data-lucide="smartphone-charging" class="w-7 h-7 text-electric-400 mb-3"></i>
+                    <h3 class="font-display font-bold text-white text-base mb-1">100% Responsivo</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Funciona perfeitamente no celular do cliente, no tablet da recepção ou no computador do caixa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. PLANOS -->
+    <section id="planos" class="py-20 lg:py-28 bg-pitch-900 border-t border-pitch-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-xs font-bold uppercase tracking-widest text-electric-400">Investimento Transparente</span>
+                <h2 class="mt-2 font-display text-3xl sm:text-4xl font-bold text-white">Planos que acompanham o tamanho da sua barbearia</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Plano Solo -->
+                <div class="bg-pitch-950 border border-pitch-800 rounded-2xl p-8 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-white">Barbeiro Solo</h3>
+                        <p class="text-xs text-slate-400 mt-1">Ideal para quem trabalha sozinho</p>
+                        <div class="my-6">
+                            <span class="text-3xl font-extrabold text-white">R$ 49</span>
+                            <span class="text-xs text-slate-400">/mês</span>
+                        </div>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> 1 Profissional + Admin</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Agendamento ilimitado</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Quadro Kanban diário</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Relatório financeiro básico</li>
+                        </ul>
+                    </div>
+                    <a href="#demonstracao" class="mt-8 block text-center bg-pitch-800 hover:bg-pitch-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-colors">
+                        Começar Agora
+                    </a>
+                </div>
+
+                <!-- Plano Equipe (Destaque) -->
+                <div class="bg-pitch-950 border-2 border-electric-500 rounded-2xl p-8 flex flex-col justify-between relative blue-shadow">
+                    <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-electric-600 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                        Mais Escolhido
+                    </span>
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-white">Barbearia Pro</h3>
+                        <p class="text-xs text-slate-400 mt-1">Para equipes de 2 a 6 barbeiros</p>
+                        <div class="my-6">
+                            <span class="text-4xl font-extrabold text-white">R$ 89</span>
+                            <span class="text-xs text-slate-400">/mês</span>
+                        </div>
+                        <ul class="space-y-3 text-sm text-slate-200">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Até 6 Profissionais</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Kanban Individual + Kanban Geral</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Financeiro completo por barbeiro</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Suporte prioritário via WhatsApp</li>
+                        </ul>
+                    </div>
+                    <a href="#demonstracao" class="mt-8 block text-center bg-electric-600 hover:bg-electric-500 text-white font-bold text-sm py-3.5 rounded-xl transition-colors">
+                        Testar Plano Pro
+                    </a>
+                </div>
+
+                <!-- Plano Rede -->
+                <div class="bg-pitch-950 border border-pitch-800 rounded-2xl p-8 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-white">Rede &amp; Franquia</h3>
+                        <p class="text-xs text-slate-400 mt-1">Cadeiras ilimitadas e suporte dedicado</p>
+                        <div class="my-6">
+                            <span class="text-3xl font-extrabold text-white">R$ 149</span>
+                            <span class="text-xs text-slate-400">/mês</span>
+                        </div>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Profissionais ilimitados</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Gestão completa de usuários</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Exportação de relatórios</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-electric-400"></i> Implantação assistida</li>
+                        </ul>
+                    </div>
+                    <a href="#demonstracao" class="mt-8 block text-center bg-pitch-800 hover:bg-pitch-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-colors">
+                        Falar com Consultor
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. FORMULÁRIO RAZOR PAGES & FAQ -->
+    <section id="demonstracao" class="py-20 lg:py-28 bg-pitch-950 border-t border-pitch-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-12 items-start">
+                
+                <!-- Coluna FAQ -->
+                <div id="faq" class="lg:col-span-6 space-y-6">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-electric-400">Dúvidas Frequentes</span>
+                        <h2 class="mt-2 font-display text-3xl font-bold text-white">Perguntas sobre o Indie Cortes</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <details class="group bg-pitch-900 border border-pitch-800 rounded-xl p-5 open:border-electric-500/50 transition-colors" open>
+                            <summary class="flex justify-between items-center font-semibold text-white cursor-pointer list-none text-sm">
+                                <span>Meus clientes precisam baixar algum aplicativo pesado?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-electric-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <p class="mt-3 text-sm text-slate-400 leading-relaxed">
+                                Não. O Indie Cortes funciona direto pelo navegador do celular. Você coloca o link na bio do Instagram ou na mensagem automática do WhatsApp e o cliente agenda em segundos.
+                            </p>
+                        </details>
+
+                        <details class="group bg-pitch-900 border border-pitch-800 rounded-xl p-5 open:border-electric-500/50 transition-colors">
+                            <summary class="flex justify-between items-center font-semibold text-white cursor-pointer list-none text-sm">
+                                <span>O barbeiro consegue ver o faturamento total da barbearia?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-electric-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <p class="mt-3 text-sm text-slate-400 leading-relaxed">
+                                Não. O perfil de Profissional dá acesso apenas ao quadro Kanban dos seus próprios atendimentos. O módulo financeiro geral e o cadastro de usuários ficam restritos ao Administrador.
+                            </p>
+                        </details>
+
+                        <details class="group bg-pitch-900 border border-pitch-800 rounded-xl p-5 open:border-electric-500/50 transition-colors">
+                            <summary class="flex justify-between items-center font-semibold text-white cursor-pointer list-none text-sm">
+                                <span>Como funciona o cadastro de novos barbeiros e serviços?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-electric-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <p class="mt-3 text-sm text-slate-400 leading-relaxed">
+                                No painel administrativo você mesmo cria novos usuários (definindo se é Cliente, Profissional ou Admin), além de cadastrar ou editar serviços, valores e tempo de duração a qualquer momento.
+                            </p>
+                        </details>
+                    </div>
+                </div>
+
+                        <!-- Coluna Formulário -->
+                <div class="lg:col-span-6">
+                    <div class="bg-pitch-900 border border-pitch-700 rounded-3xl p-8 shadow-2xl">
+                        <h3 class="font-display text-2xl font-bold text-white">Agende uma demonstração gratuita</h3>
+                        <p class="mt-2 text-sm text-slate-400">
+                            Preencha os dados da sua barbearia e fale diretamente com nossa equipe para liberar seu acesso de teste.
+                        </p>
+
+                        <form method="post" class="mt-6 space-y-4">
+                            @Html.AntiForgeryToken()
+
+                            <div>
+                                <label for="NomeBarbearia" class="block text-xs font-semibold text-slate-300 mb-1.5">Nome da barbearia</label>
+                                <input id="NomeBarbearia" name="NomeBarbearia" type="text" placeholder="Ex: Barbearia Navalha de Ouro"
+                                       class="w-full bg-pitch-950 border border-pitch-700 focus:border-electric-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition-colors" />
+                            </div>
+
+                            <div>
+                                <label for="NomeResponsavel" class="block text-xs font-semibold text-slate-300 mb-1.5">Nome do responsável</label>
+                                <input id="NomeResponsavel" name="NomeResponsavel" type="text" placeholder="Seu nome"
+                                       class="w-full bg-pitch-950 border border-pitch-700 focus:border-electric-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition-colors" />
+                            </div>
+
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="QuantidadeCadeiras" class="block text-xs font-semibold text-slate-300 mb-1.5">Quantidade de cadeiras</label>
+                                    <select id="QuantidadeCadeiras" name="QuantidadeCadeiras"
+                                            class="w-full bg-pitch-950 border border-pitch-700 focus:border-electric-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors">
+                                        <option value="1 cadeira (Solo)">1 cadeira (Solo)</option>
+                                        <option value="2 a 4 cadeiras">2 a 4 cadeiras</option>
+                                        <option value="5 ou mais cadeiras">5 ou mais cadeiras</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="PlanoInteresse" class="block text-xs font-semibold text-slate-300 mb-1.5">Plano de interesse</label>
+                                    <select id="PlanoInteresse" name="PlanoInteresse"
+                                            class="w-full bg-pitch-950 border border-pitch-700 focus:border-electric-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors">
+                                        <option value="Barbeiro Solo (R$ 49/mês)">Barbeiro Solo (R$ 49/mês)</option>
+                                        <option value="Barbearia Pro (R$ 89/mês)" selected>Barbearia Pro (R$ 89/mês)</option>
+                                        <option value="Rede & Franquia (R$ 149/mês)">Rede &amp; Franquia (R$ 149/mês)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit"
+                                    class="w-full inline-flex justify-center items-center gap-2 bg-electric-600 hover:bg-electric-500 text-white font-bold py-4 px-6 rounded-xl transition-all blue-shadow cursor-pointer mt-2">
+                                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                                Liberar Teste no WhatsApp
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-pitch-950 border-t border-pitch-800 py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+                <i data-lucide="scissors" class="w-4 h-4 text-electric-400"></i>
+                <span class="font-display font-bold text-white">INDIE CORTES</span>
+            </div>
+            <p>&copy; @DateTime.Now.Year Indie Cortes • Desenvolvido por Software Base.</p>
+            <a href="https://wa.me/5519987102078" target="_blank" rel="noopener noreferrer" class="hover:text-electric-400 transition-colors">
+                Suporte: (19) 98710-2078
+            </a>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        lucide.createIcons();
+
+        const mobileBtn = document.getElementById('mobile-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

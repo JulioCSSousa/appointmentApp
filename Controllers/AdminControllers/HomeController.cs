@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AppointmentAppMvc.Services.Stores;
 
 namespace AppointmentAppMvc.Controllers.AdminControllers
 {
@@ -17,23 +18,34 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         private readonly UserManager<UserModel> _userManager;
         private readonly IAppointmentService _appointmentService;
         private readonly IServiceManager _serviceManager;
+        private readonly IStoreContext _storeContext;
         private static DateTime _lastKeepAlive = DateTime.MinValue;
 
-        public HomeController(UserManager<UserModel> userManager, IAppointmentService appointmentService, IServiceManager serviceManager)
+        public HomeController(UserManager<UserModel> userManager, IAppointmentService appointmentService, IServiceManager serviceManager, IStoreContext storeContext)
         {
             _userManager = userManager;
             _appointmentService = appointmentService;
             _serviceManager = serviceManager;
+            _storeContext = storeContext;
 
             //Task para impedir do banco desligar
             
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Home()
+        {
+            return View();
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> IndexAdmAsync()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userName = await _userManager.FindByIdAsync(userId);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var userName = store == null ? null : await _userManager.Users
+                .SingleOrDefaultAsync(user => user.Id == userId && user.StoreId == store.Id);
             if (userName == null)
             {
                 return NotFound();
@@ -43,10 +55,13 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             return View();
         }
         [HttpGet]
+        [Authorize(Roles = "Client")]
         public async Task<IActionResult> Index(int page = 1)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userName = await _userManager.FindByIdAsync(userId);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var userName = store == null ? null : await _userManager.Users
+                .SingleOrDefaultAsync(user => user.Id == userId && user.StoreId == store.Id);
             if (userName == null)
             {
                 return NotFound();
@@ -69,12 +84,13 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
                 .Take(pageSize)
                 .ToList();
 
-            var sessionUser = await _userManager.FindByIdAsync(userId);
+            var sessionUser = userName;
 
             foreach (var appointment in pagedAppointments)
             {
                 var findService = await _serviceManager.GetByIdAsync(appointment.ServiceId);
-                var proffissional = await _userManager.FindByIdAsync(appointment.WorkerId);
+                var proffissional = store == null ? null : await _userManager.Users
+                    .SingleOrDefaultAsync(user => user.Id == appointment.WorkerId && user.StoreId == store.Id);
 
                 if(proffissional != null)
                 {
@@ -104,12 +120,15 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             return View(clients);
         }
         [HttpGet]
+        [Authorize(Roles = "Worker")]
         public async Task<IActionResult> IndexWorker(int page = 1)
         {
             int pageSize = 10;
             List<ClientIndexViewModel> clients = new List<ClientIndexViewModel>();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userName = await _userManager.FindByIdAsync(userId);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var userName = store == null ? null : await _userManager.Users
+                .SingleOrDefaultAsync(user => user.Id == userId && user.StoreId == store.Id);
             if (userName == null)
             {
                 return NotFound();
@@ -135,8 +154,12 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             foreach (var appointment in pagedAppointments)
             {
                 var findService = await _serviceManager.GetByIdAsync(appointment.ServiceId);
-                var user = await _userManager.FindByIdAsync(appointment.ClientId);
-                var worker = await _userManager.FindByIdAsync(appointment?.WorkerId);
+                var user = string.IsNullOrEmpty(appointment.ClientId)
+                    ? null
+                    : await _userManager.Users
+                        .SingleOrDefaultAsync(user => user.Id == appointment.ClientId && user.StoreId == store!.Id);
+                var worker = await _userManager.Users
+                    .SingleOrDefaultAsync(user => user.Id == appointment.WorkerId && user.StoreId == store!.Id);
                 clients.Add(new ClientIndexViewModel
                 {
                     Appointment = appointment,

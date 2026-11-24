@@ -1,0 +1,85 @@
+@model AppointmentAppMvc.Models.ViewModels.SuperAdmin.CreateTenantViewModel
+@{
+    ViewData["Title"] = "Novo tenant";
+}
+
+<div class="container py-4" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">Criar novo tenant</h1>
+            <p class="text-muted mb-0">Cadastre a loja e o administrador responsável.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <h5 class="fw-bold mb-3">Tenant e loja</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="TenantName" class="form-label"></label>
+                        <input asp-for="TenantName" class="form-control" />
+                        <span asp-validation-for="TenantName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="StoreName" class="form-label"></label>
+                        <input asp-for="StoreName" class="form-control" />
+                        <span asp-validation-for="StoreName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="StoreSlug" class="form-label"></label>
+                        <input asp-for="StoreSlug" class="form-control" placeholder="minha-loja" />
+                        <div class="form-text">A loja ficará disponível em /loja/{slug}.</div>
+                        <span asp-validation-for="StoreSlug" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Plan" class="form-label"></label>
+                        <select asp-for="Plan" class="form-select">
+                            <option value="Trial">Plano de teste — 14 dias</option>
+                            <option value="Free">Free — sem expiração</option>
+                            <option value="Pro">Pro — sem expiração</option>
+                            <option value="Premium">Premium — sem expiração</option>
+                        </select>
+                        <span asp-validation-for="Plan" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3">Administrador do tenant</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="AdminName" class="form-label"></label>
+                        <input asp-for="AdminName" class="form-control" />
+                        <span asp-validation-for="AdminName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="AdminEmail" class="form-label"></label>
+                        <input asp-for="AdminEmail" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="AdminEmail" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="AdminPhoneNumber" class="form-label"></label>
+                        <input asp-for="AdminPhoneNumber" class="form-control" type="tel" autocomplete="tel" />
+                        <span asp-validation-for="AdminPhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="AdminPassword" class="form-label"></label>
+                        <input asp-for="AdminPassword" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="AdminPassword" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-building-add me-1"></i> Criar tenant
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

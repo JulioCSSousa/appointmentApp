@@ -16,6 +16,28 @@
         <div class="card-body p-4">
             <form asp-action="Create" asp-controller="Appointment" method="post" id="mainForm">
 
+                @if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    <div class="alert alert-info">
+                        Você pode agendar sem criar uma conta. Informe seu nome e telefone.
+                        <a class="alert-link" asp-controller="Account" asp-action="ClientLogin" asp-route-returnUrl="/Appointment/Create">
+                            Já possui conta? Entrar como cliente.
+                        </a>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="GuestName" class="form-label fw-bold">Nome</label>
+                            <input asp-for="GuestName" class="form-control" autocomplete="name" />
+                            <span asp-validation-for="GuestName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="GuestPhone" class="form-label fw-bold">Telefone</label>
+                            <input asp-for="GuestPhone" class="form-control" type="tel" autocomplete="tel" />
+                            <span asp-validation-for="GuestPhone" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
+
                 <div class="row g-4 mb-5">
                     <div class="col-md-6">
                         <label class="form-label fw-bold"><i class="bi bi-tools me-1"></i> Escolha o serviço</label>
@@ -80,7 +102,10 @@
                 <input type="hidden" name="Price" id="hiddenPrice">
                 <input type="hidden" name="Duration" id="hiddenDuration">
                 <input type="hidden" name="SelectedDayAndHour" id="hiddenSelectedDayAndHour">
-                <input type="hidden" name="ClientId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <input type="hidden" name="ClientId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
+                }
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
                     <button type="submit" id="bookButton" class="btn btn-success btn-lg px-5 shadow rounded-pill" disabled>

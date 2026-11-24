@@ -82,7 +82,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-dark">@item.User?.Name</div>
+                                    <div class="fw-bold text-dark">@(item.User?.Name ?? item.Appointment.GuestName ?? "Cliente visitante")</div>
                                     <div class="text-muted small">@item.User?.Email</div>
                                 </td>
                                 <td>

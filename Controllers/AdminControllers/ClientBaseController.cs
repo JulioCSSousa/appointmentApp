@@ -6,6 +6,8 @@ using AppointmentAppMvc.Models.ViewModels.Get;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using AppointmentAppMvc.Services.Stores;
 
 namespace AppointmentAppMvc.Controllers.AdminControllers
 {
@@ -15,13 +17,15 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         private readonly IServiceManager _service;
         private readonly IAppointmentService _appointmentService;
         private readonly UserManager<UserModel> _userManager;
+        private readonly IStoreContext _storeContext;
 
         public ClientBaseController(IServiceManager serviceManager, IAppointmentService appointmentService,
-            UserManager<UserModel> userManager)
+            UserManager<UserModel> userManager, IStoreContext storeContext)
         {
             _service = serviceManager;
             _appointmentService = appointmentService;
             _userManager = userManager;
+            _storeContext = storeContext;
         }
 
 
@@ -48,7 +52,11 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
             foreach (var appointment in pagedAppointments)
             {
                 var findService = await _service.GetByIdAsync(appointment.ServiceId);
-                var user = await _userManager.FindByIdAsync(appointment.ClientId);
+                var store = await _storeContext.GetCurrentStoreAsync();
+                var user = string.IsNullOrEmpty(appointment.ClientId) || store == null
+                    ? null
+                    : await _userManager.Users
+                        .SingleOrDefaultAsync(candidate => candidate.Id == appointment.ClientId && candidate.StoreId == store.Id);
 
                 clients.Add(new ClientIndexViewModel
                 {

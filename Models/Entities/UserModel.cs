@@ -11,6 +11,8 @@ namespace appointmentApp.Models.Entities
 
         [Required]
         public string Name { get; protected set; }
+        public Guid? StoreId { get; private set; }
+        public StoreModel? Store { get; private set; }
         public string? PhoneNumberNormalized { get; private set; }
 
         protected UserModel() { }
@@ -28,6 +30,11 @@ namespace appointmentApp.Models.Entities
         public void SetName(string name)
         {
             Name = name;
+        }
+
+        public void SetStore(Guid storeId)
+        {
+            StoreId = storeId;
         }
 
         public void SetPhoneNumber(string phoneNumber)
