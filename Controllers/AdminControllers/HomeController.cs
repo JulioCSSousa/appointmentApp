@@ -56,7 +56,7 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         }
         [HttpGet]
         [Authorize(Roles = "Client")]
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> IndexClient(int page = 1)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var store = await _storeContext.GetCurrentStoreAsync();

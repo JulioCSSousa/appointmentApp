@@ -37,6 +37,12 @@ namespace AppointmentAppMvc.Controllers.AdminControllers
         {
             if (!ModelState.IsValid)
             {
+                // Temporário para ver no console qual campo deu erro:
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}");
+                Console.WriteLine(string.Join(" | ", errors));
+
                 return View(model);
             }
 

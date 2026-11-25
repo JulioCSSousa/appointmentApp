@@ -51,25 +51,46 @@ namespace AppointmentAppMvc.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register() => View();
+        public async Task<IActionResult> Register()
+        {
+            var store = await GetCurrentStoreAsync();
+            if (store == null)
+            {
+                return NotFound("Loja não encontrada.");
+            }
+
+            ViewData["StoreSlug"] = store.Slug;
+            return View();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            var store = await GetCurrentStoreAsync();
+            if (store == null)
+            {
+                return NotFound("Loja não encontrada.");
+            }
+
+            ViewData["StoreSlug"] = store.Slug;
+
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
             var normalizedPhoneNumber = UserModel.NormalizePhoneNumber(model.PhoneNumber);
-            if (await _userManager.Users.AnyAsync(u => u.PhoneNumberNormalized == normalizedPhoneNumber))
+
+            // 1. Verifica telefone duplicado APENAS na loja atual
+            if (await _userManager.Users.AnyAsync(u => u.StoreId == store.Id && u.PhoneNumberNormalized == normalizedPhoneNumber))
             {
-                ModelState.AddModelError(nameof(model.PhoneNumber), "Este número de telefone já está cadastrado.");
+                ModelState.AddModelError(nameof(model.PhoneNumber), "Este número de telefone já está cadastrado nesta loja.");
                 return View(model);
             }
 
-            var isFirstUser = !await _userManager.Users.AnyAsync();
+            // 2. IgnoreQueryFilters garante que só o primeiro usuário do sistema inteiro vire Admin
+            var isFirstUser = !await _userManager.Users.IgnoreQueryFilters().AnyAsync();
 
             var user = new UserModel(model.Name, model.Email, model.PhoneNumber)
             {
@@ -78,41 +99,37 @@ namespace AppointmentAppMvc.Controllers
                 EmailConfirmed = true
             };
 
-            var store = await _storeContext.GetCurrentStoreAsync();
-            if (store != null)
-            {
-                user.SetStore(store.Id);
-            }
+            user.SetStore(store.Id);
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                if (isFirstUser)
-                {
-                    await _userManager.AddToRoleAsync(user, "Admin");
-                }
-                else
-                {
-                    await _userManager.AddToRoleAsync(user, "Client");
-                }
+                await _userManager.AddToRoleAsync(user, isFirstUser ? "Admin" : "Client");
 
                 string emailBody = $@"
-                <div style='font-family: sans-serif; max-width: 600px; margin: 0 auto;'>
-                    <h1 style='color: #2c3e50;'>Hello, {model.Name}!</h1>
-                    <p>Your registration in our <strong>Appointment App</strong> has been completed successfully.</p>
-                    <p>You can now access your account using your email: <strong>{model.Email}</strong>.</p>
-                    <br>
-                    <p>Welcome aboard!</p>
-                </div>";
+        <div style='font-family: sans-serif; max-width: 600px; margin: 0 auto;'>
+            <h1 style='color: #2c3e50;'>Hello, {model.Name}!</h1>
+            <p>Your registration in our <strong>Appointment App</strong> has been completed successfully.</p>
+            <p>You can now access your account using your email: <strong>{model.Email}</strong>.</p>
+            <br>
+            <p>Welcome aboard!</p>
+        </div>";
 
-                // Envio em background seguro sem travar a Thread principal
                 _ = _emailSender.SendEmailAsync(user.Email, "Welcome to our System!", emailBody);
 
                 TempData["SuccessMessage"] = "Account registered successfully.";
-                return RedirectToAction(isFirstUser ? nameof(AdminLogin) : nameof(ClientLogin));
+
+                // 3. Se for Admin, vai para /Account/AdminLogin (sem slug). Se for Cliente, mantém o slug da loja.
+                return isFirstUser
+                    ? RedirectToAction(nameof(AdminLogin))
+                    : RedirectToAction(nameof(ClientLogin), new { storeSlug = store.Slug });
             }
 
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
 
             return View(model);
         }
@@ -182,10 +199,18 @@ namespace AppointmentAppMvc.Controllers
         }
 
         [HttpGet]
-        public IActionResult ClientLogin(string? returnUrl = null)
+        public async Task<IActionResult> ClientLogin(string? returnUrl = null)
         {
+            var store = await GetCurrentStoreAsync();
+            if (store == null)
+            {
+                return NotFound("Loja não encontrada.");
+            }
+
+            ViewData["StoreSlug"] = store.Slug;
             ViewData["LoginTitle"] = "Login do cliente";
             ViewData["LoginAction"] = nameof(ClientLogin);
+
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
@@ -193,21 +218,31 @@ namespace AppointmentAppMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ClientLogin(LoginViewModel model)
         {
-            return await PhoneLoginAsync(model, "Client", "Index");
+            return await PhoneLoginAsync(model, "Client", "IndexClient");
         }
 
         private async Task<IActionResult> PhoneLoginAsync(LoginViewModel model, string role, string destinationAction)
         {
+            var store = await GetCurrentStoreAsync();
+
             if (!ModelState.IsValid)
             {
+                ViewData["StoreSlug"] = store?.Slug;
                 ViewData["LoginTitle"] = role == "Worker" ? "Login do profissional" : "Login do cliente";
                 ViewData["LoginAction"] = role == "Worker" ? nameof(ProfessionalLogin) : nameof(ClientLogin);
                 return View(role == "Client" ? "ClientLogin" : "PhoneLogin", model);
             }
 
             var normalizedPhoneNumber = UserModel.NormalizePhoneNumber(model.PhoneNumber);
-            var user = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.PhoneNumberNormalized == normalizedPhoneNumber);
+
+            // Garante que está buscando o usuário dentro da loja atual (se houver loja na rota)
+            var userQuery = _userManager.Users.Where(u => u.PhoneNumberNormalized == normalizedPhoneNumber);
+            if (store != null)
+            {
+                userQuery = userQuery.Where(u => u.StoreId == store.Id);
+            }
+
+            var user = await userQuery.FirstOrDefaultAsync();
 
             var result = user == null || !await _userManager.IsInRoleAsync(user, role)
                 ? Microsoft.AspNetCore.Identity.SignInResult.Failed
@@ -216,15 +251,23 @@ namespace AppointmentAppMvc.Controllers
 
             if (result.Succeeded)
             {
-                if (role == "Client" && !string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                if (role == "Client")
                 {
-                    return Redirect(model.ReturnUrl);
+                    if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    {
+                        return Redirect(model.ReturnUrl);
+                    }
+
+                    // Redireciona usando a rota "store": /loja/{storeSlug}/Home/IndexClient
+                    return RedirectToAction(destinationAction, "Home", new { storeSlug = store?.Slug });
                 }
 
+                // Profissional (Worker) vai para a área interna sem slug
                 return RedirectToAction(destinationAction, "Home");
             }
 
             ModelState.AddModelError(string.Empty, "Telefone ou senha inválidos.");
+            ViewData["StoreSlug"] = store?.Slug;
             ViewData["LoginTitle"] = role == "Worker" ? "Login do profissional" : "Login do cliente";
             ViewData["LoginAction"] = role == "Worker" ? nameof(ProfessionalLogin) : nameof(ClientLogin);
             return View(role == "Client" ? "ClientLogin" : "PhoneLogin", model);

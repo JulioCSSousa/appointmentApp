@@ -6,6 +6,7 @@ namespace AppointmentAppMvc.Models.ViewModels.Appointment
 {
     public class AppointmentViewModel
     {
+        public string StoreId { get; set; }
         [Required]
         public List<ServiceModel> Services { get; set; }
         [Required]
